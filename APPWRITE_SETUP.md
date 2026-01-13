@@ -51,8 +51,8 @@ You need to create **4 collections** with the following configurations:
 2. `content` - String, size: 500, required: ✅
 3. `imageUrl` - String, size: 500, required: ❌
 4. `parentThreadId` - String, size: 255, required: ❌
-5. `replyCount` - Integer, required: ✅, default: 0
-6. `likeCount` - Integer, required: ✅, default: 0
+5. `replyCount` - Integer, required: ❌, default: 0
+6. `likeCount` - Integer, required: ❌, default: 0
 7. `createdAt` - String (datetime), size: 255, required: ✅
 
 **Indexes:**
