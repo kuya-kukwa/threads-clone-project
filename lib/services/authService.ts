@@ -3,42 +3,13 @@
  * Handles user registration, login, logout, and session management
  * Follows SOLID principles: Single Responsibility Pattern
  */
-
+import { registerSchema, loginSchema } from '@/schemas/auth.schema';
 import { ID, Models } from 'appwrite';
 import { account } from '../appwriteClient';
 import { serverDatabases } from '../appwriteServer';
-import { APPWRITE_CONFIG, SECURITY_CONFIG } from '../appwriteConfig';
+import { APPWRITE_CONFIG } from '../appwriteConfig';
 import { AuthResponse, LoginInput, RegisterInput, UserProfile } from '@/types/appwrite';
 
-/**
- * Input validation helper
- */
-function validateInput(input: { [key: string]: string }, rules: { [key: string]: { min?: number; max?: number; pattern?: RegExp } }) {
-  const errors: string[] = [];
-  
-  Object.entries(rules).forEach(([field, rule]) => {
-    const value = input[field];
-    
-    if (!value || value.trim().length === 0) {
-      errors.push(`${field} is required`);
-      return;
-    }
-    
-    if (rule.min && value.length < rule.min) {
-      errors.push(`${field} must be at least ${rule.min} characters`);
-    }
-    
-    if (rule.max && value.length > rule.max) {
-      errors.push(`${field} must not exceed ${rule.max} characters`);
-    }
-    
-    if (rule.pattern && !rule.pattern.test(value)) {
-      errors.push(`${field} format is invalid`);
-    }
-  });
-  
-  return errors;
-}
 
 /**
  * Sanitize user input (prevent XSS)
@@ -57,34 +28,27 @@ export class AuthService {
    */
   static async register(input: RegisterInput): Promise<AuthResponse> {
     try {
-      // Validate input
-      const errors = validateInput(input, {
-        email: { pattern: /^[^\s@]+@[^\s@]+\.[^\s@]+$/ },
-        password: { min: SECURITY_CONFIG.MIN_LENGTHS.PASSWORD },
-        username: { 
-          min: SECURITY_CONFIG.MIN_LENGTHS.USERNAME,
-          max: SECURITY_CONFIG.MAX_LENGTHS.USERNAME,
-          pattern: /^[a-z0-9_]+$/,
-        },
-        displayName: {
-          min: SECURITY_CONFIG.MIN_LENGTHS.DISPLAY_NAME,
-          max: SECURITY_CONFIG.MAX_LENGTHS.DISPLAY_NAME,
-        },
-      });
-      
-      if (errors.length > 0) {
-        return { success: false, error: errors.join(', ') };
+      // Validate with Zod schema
+      const validation = registerSchema.safeParse(input);
+
+      if (!validation.success) {
+        // Extract first error message from Zod
+        const firstError = validation.error.issues[0].message;
+        return { success: false, error: firstError };
       }
-      
+
+      // Use validated data (has transforms applied like .toLowerCase())
+      const validatedData = validation.data;
+
       // Sanitize inputs
-      const sanitizedUsername = sanitizeInput(input.username.toLowerCase());
-      const sanitizedDisplayName = sanitizeInput(input.displayName);
+      const sanitizedUsername = sanitizeInput(validatedData.username);
+      const sanitizedDisplayName = sanitizeInput(validatedData.displayName);
       
       // Create Appwrite Auth user
       const user = await account.create(
         ID.unique(),
-        input.email,
-        input.password,
+        validatedData.email,
+        validatedData.password,
         sanitizedDisplayName
       );
       
@@ -104,9 +68,6 @@ export class AuthService {
         }
       );
       
-      // Auto-login after registration
-      await account.createEmailPasswordSession(input.email, input.password);
-      
       return { success: true, user, profile };
     } catch (error: any) {
       console.error('Registration error:', error);
@@ -125,18 +86,19 @@ export class AuthService {
    */
   static async login(input: LoginInput): Promise<AuthResponse> {
     try {
-      // Validate input
-      const errors = validateInput(input, {
-        email: { pattern: /^[^\s@]+@[^\s@]+\.[^\s@]+$/ },
-        password: { min: 1 },
-      });
-      
-      if (errors.length > 0) {
-        return { success: false, error: errors.join(', ') };
+      // Validate with Zod schema
+      const validation = loginSchema.safeParse(input);
+
+      if (!validation.success) {
+        const firstError = validation.error.issues[0].message;
+        return { success: false, error: firstError };
       }
+
+      // Use validated data
+      const validatedData = validation.data;
       
       // Create session
-      await account.createEmailPasswordSession(input.email, input.password);
+      await account.createEmailPasswordSession(validatedData.email, validatedData.password);
       
       // Get current user
       const user = await account.get();

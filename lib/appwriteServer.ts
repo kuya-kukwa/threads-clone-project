@@ -5,16 +5,20 @@
  */
 
 import { Client, Account, Databases, Storage, Users } from 'node-appwrite';
-import { env } from './appwriteConfig';
+
+// Server-only environment variables - accessed directly
+const ENDPOINT = process.env.NEXT_PUBLIC_APPWRITE_ENDPOINT!;
+const PROJECT_ID = process.env.NEXT_PUBLIC_APPWRITE_PROJECT_ID!;
+const API_KEY = process.env.APPWRITE_API_KEY!;
 
 /**
  * Server client with full admin privileges
  * Used for server actions and API routes
  */
 export const serverClient = new Client()
-  .setEndpoint(env.NEXT_PUBLIC_APPWRITE_ENDPOINT)
-  .setProject(env.NEXT_PUBLIC_APPWRITE_PROJECT_ID)
-  .setKey(env.APPWRITE_API_KEY); // Admin API key for server operations
+  .setEndpoint(ENDPOINT)
+  .setProject(PROJECT_ID)
+  .setKey(API_KEY); // Admin API key for server operations
 
 export const serverAccount = new Account(serverClient);
 export const serverDatabases = new Databases(serverClient);
@@ -27,8 +31,8 @@ export const serverUsers = new Users(serverClient);
  */
 export function createSessionClient(session: string) {
   const client = new Client()
-    .setEndpoint(env.NEXT_PUBLIC_APPWRITE_ENDPOINT)
-    .setProject(env.NEXT_PUBLIC_APPWRITE_PROJECT_ID)
+    .setEndpoint(ENDPOINT)
+    .setProject(PROJECT_ID)
     .setSession(session);
   
   return {

@@ -42,7 +42,7 @@ function validateEnv() {
     return schema.parse(envVars);
   } catch (error) {
     if (error instanceof z.ZodError) {
-      const missingVars = error.errors?.map(e => `${e.path.join('.')}: ${e.message}`).join(', ') || 'Unknown validation error';
+      const missingVars = error.issues?.map(e => `${e.path.join('.')}: ${e.message}`).join(', ') || 'Unknown validation error';
       throw new Error(`Environment variable validation failed: ${missingVars}`);
     }
     throw error;
@@ -53,11 +53,24 @@ function validateEnv() {
 export const env = validateEnv();
 
 /**
+ * Get database ID (server-only)
+ * Throws if accessed on client
+ */
+function getDatabaseId(): string {
+  if (!isServer) {
+    throw new Error('DATABASE_ID can only be accessed on the server');
+  }
+  return process.env.APPWRITE_DATABASE_ID || '';
+}
+
+/**
  * Appwrite Database Configuration
  * Collection IDs and attribute names as typed constants
  */
 export const APPWRITE_CONFIG = {
-  DATABASE_ID: (env as any).APPWRITE_DATABASE_ID || '',
+  get DATABASE_ID() {
+    return getDatabaseId();
+  },
   
   COLLECTIONS: {
     USERS: 'users',
@@ -101,7 +114,7 @@ export const APPWRITE_CONFIG = {
     FOLLOWING_ID: 'followingId',
     CREATED_AT: 'createdAt',
   },
-} as const;
+};
 
 /**
  * Security Configuration
