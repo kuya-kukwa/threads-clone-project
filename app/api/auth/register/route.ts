@@ -3,45 +3,47 @@
  * Handles user registration from client components
  */
 
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest } from 'next/server';
 import { ID } from 'node-appwrite';
 import { serverDatabases, serverUsers } from '@/lib/appwriteServer';
 import { APPWRITE_CONFIG } from '@/lib/appwriteConfig';
 import { registerSchema } from '@/schemas/auth.schema';
 import { UserProfile } from '@/types/appwrite';
+import { sanitizeInput } from '@/lib/utils';
+import { asyncHandler, successResponse } from '@/lib/errors/errorHandler';
+import { ValidationError } from '@/lib/errors/ValidationError';
+import { createRequestLogger } from '@/lib/logger/requestLogger';
 
-/**
- * Sanitize user input (prevent XSS)
- */
-function sanitizeInput(input: string): string {
-  return input
-    .trim()
-    .replace(/[<>]/g, '') // Remove angle brackets
-    .slice(0, 500); // Hard limit on input length
-}
-
-export async function POST(request: NextRequest) {
+export const POST = asyncHandler(async (request: NextRequest) => {
+  const logger = createRequestLogger(request);
+  
   try {
+    console.log('[Register API] Starting registration process');
+    
     // Parse and validate request body
     const body = await request.json();
+    console.log('[Register API] Request body received:', { email: body.email, username: body.username });
+    
     const validation = registerSchema.safeParse(body);
     
     if (!validation.success) {
-      return NextResponse.json(
-        { success: false, error: validation.error.issues[0].message },
-        { status: 400 }
-      );
+      console.log('[Register API] Validation failed:', validation.error.issues);
+      logger.warn('Registration validation failed', { errors: validation.error.issues });
+      throw ValidationError.fromZod(validation.error, 'Invalid registration data');
     }
     
     const { email, password, username, displayName } = validation.data;
+    console.log('[Register API] Validation passed');
     
     // Sanitize inputs
-    const sanitizedUsername = sanitizeInput(username.toLowerCase());
-    const sanitizedDisplayName = sanitizeInput(displayName);
+    const sanitizedUsername = sanitizeInput(username.toLowerCase(), 30);
+    const sanitizedDisplayName = sanitizeInput(displayName, 50);
+    console.log('[Register API] Inputs sanitized');
     
-    console.log('Creating Appwrite Auth user with server SDK...');
+    logger.info('Creating new user account', { email, username: sanitizedUsername });
     
     // Create Appwrite Auth user using server Users API
+    console.log('[Register API] Creating Appwrite user...');
     const user = await serverUsers.create(
       ID.unique(),
       email,
@@ -50,10 +52,11 @@ export async function POST(request: NextRequest) {
       sanitizedDisplayName
     );
     
-    console.log('Auth user created:', user.$id);
-    console.log('Creating profile document in database...');
+    console.log('[Register API] User created:', user.$id);
+    logger.info('Auth user created', { userId: user.$id });
     
     // Create user profile document
+    console.log('[Register API] Creating profile document...');
     const profile = await serverDatabases.createDocument<UserProfile>(
       APPWRITE_CONFIG.DATABASE_ID,
       APPWRITE_CONFIG.COLLECTIONS.USERS,
@@ -69,29 +72,12 @@ export async function POST(request: NextRequest) {
       }
     );
     
-    console.log('Profile document created:', profile.$id);
+    console.log('[Register API] Profile created:', profile.$id);
+    logger.info('User registered successfully', { userId: user.$id, profileId: profile.$id });
     
-    return NextResponse.json({ success: true, user, profile });
+    return successResponse({ user, profile }, 201);
   } catch (error: any) {
-    console.error('Registration error:', error);
-    console.error('Error details:', {
-      message: error.message,
-      code: error.code,
-      type: error.type,
-      response: error.response,
-    });
-    
-    // Parse Appwrite error messages
-    if (error.code === 409) {
-      return NextResponse.json(
-        { success: false, error: 'Email or username already exists' },
-        { status: 409 }
-      );
-    }
-    
-    return NextResponse.json(
-      { success: false, error: error.message || 'Registration failed' },
-      { status: 500 }
-    );
+    console.error('[Register API] Error:', error.message, error.type, error.code);
+    throw error;
   }
-}
+});

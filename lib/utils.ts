@@ -121,3 +121,109 @@ export function safeJsonParse<T>(json: string, fallback: T): T {
     return fallback;
   }
 }
+
+/**
+ * Sanitize user input to prevent XSS attacks
+ * Removes potentially dangerous characters and enforces length limits
+ * 
+ * @param input - The string to sanitize
+ * @param maxLength - Maximum allowed length (default: 500)
+ * @returns Sanitized string
+ * 
+ * @example
+ * sanitizeInput('<script>alert("xss")</script>') // 'scriptalert("xss")/script'
+ * sanitizeInput('  hello world  ') // 'hello world'
+ */
+export function sanitizeInput(input: string, maxLength: number = 500): string {
+  return input
+    .trim()
+    .replace(/[<>]/g, '') // Remove angle brackets (basic XSS prevention)
+    .replace(/javascript:/gi, '') // Remove javascript: protocol
+    .replace(/on\w+=/gi, '') // Remove inline event handlers (onclick=, onload=, etc.)
+    .slice(0, maxLength); // Hard limit on input length
+}
+
+/**
+ * Sanitize HTML content (for rich text editors)
+ * More aggressive sanitization for user-generated HTML
+ * 
+ * @param html - The HTML string to sanitize
+ * @param maxLength - Maximum allowed length (default: 2000)
+ * @returns Sanitized HTML string
+ */
+export function sanitizeHtml(html: string, maxLength: number = 2000): string {
+  return html
+    .trim()
+    // Remove script tags and their content
+    .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
+    // Remove inline event handlers
+    .replace(/on\w+\s*=\s*["'][^"']*["']/gi, '')
+    // Remove javascript: protocol
+    .replace(/javascript:/gi, '')
+    // Remove data: URIs (can contain base64 encoded scripts)
+    .replace(/data:text\/html[^"']*/gi, '')
+    .slice(0, maxLength);
+}
+
+/**
+ * Validate and sanitize URL
+ * Ensures URL is safe to use and follows allowed protocols
+ * 
+ * @param url - The URL to validate
+ * @param allowedProtocols - Allowed URL protocols (default: ['http:', 'https:'])
+ * @returns Sanitized URL or null if invalid
+ */
+export function sanitizeUrl(
+  url: string,
+  allowedProtocols: string[] = ['http:', 'https:']
+): string | null {
+  try {
+    const parsed = new URL(url.trim());
+    
+    // Check if protocol is allowed
+    if (!allowedProtocols.includes(parsed.protocol)) {
+      return null;
+    }
+    
+    return parsed.toString();
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Generate a random request ID for tracing
+ * Format: req_<timestamp>_<random>
+ */
+export function generateRequestId(): string {
+  const timestamp = Date.now().toString(36);
+  const random = Math.random().toString(36).substring(2, 9);
+  return `req_${timestamp}_${random}`;
+}
+
+/**
+ * Redact sensitive data from objects for logging
+ * Replaces values for keys matching sensitive patterns
+ * 
+ * @param obj - Object to redact
+ * @param keysToRedact - Array of key names to redact (default: common sensitive keys)
+ * @returns Redacted copy of the object
+ */
+export function redactSensitiveData<T extends Record<string, any>>(
+  obj: T,
+  keysToRedact: string[] = ['password', 'token', 'apiKey', 'secret', 'authorization']
+): T {
+  const redacted = { ...obj };
+  
+  for (const key in redacted) {
+    const lowerKey = key.toLowerCase();
+    
+    if (keysToRedact.some(sensitive => lowerKey.includes(sensitive))) {
+      (redacted as any)[key] = '***REDACTED***';
+    } else if (typeof redacted[key] === 'object' && redacted[key] !== null) {
+      redacted[key] = redactSensitiveData(redacted[key], keysToRedact);
+    }
+  }
+  
+  return redacted;
+}

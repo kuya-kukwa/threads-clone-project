@@ -14,7 +14,7 @@ import { Button } from '@/components/ui/button';
 
 export function NavBar() {
   const [isLoggingOut, setIsLoggingOut] = useState(false);
-  const { user } = useCurrentUser();
+  const { user, isLoading } = useCurrentUser();
   const { logout } = useAuth();
 
   const handleLogout = async () => {
@@ -23,49 +23,94 @@ export function NavBar() {
     setIsLoggingOut(false);
   };
 
+  // Show loading skeleton or nothing during initial load
+  if (isLoading) {
+    return (
+      <nav className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex h-14 sm:h-16 items-center justify-between">
+            <Link
+              href="/"
+              className="text-lg sm:text-xl font-bold hover:opacity-80 transition-opacity min-h-11 flex items-center"
+            >
+              Threads Clone
+            </Link>
+            <div className="flex items-center gap-2 sm:gap-4">
+              <div className="h-10 w-16 bg-muted animate-pulse rounded" />
+              <div className="h-10 w-16 bg-muted animate-pulse rounded" />
+            </div>
+          </div>
+        </div>
+      </nav>
+    );
+  }
+
   return (
-    <nav className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+    <nav className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex h-14 sm:h-16 items-center justify-between">
           {/* Logo/Brand */}
           <Link
-            href="/feed"
-            className="text-lg sm:text-xl font-bold hover:opacity-80 transition-opacity min-h-[44px] flex items-center"
+            href={user ? '/feed' : '/'}
+            className="text-lg sm:text-xl font-bold hover:opacity-80 transition-opacity min-h-11 flex items-center"
           >
             Threads Clone
           </Link>
 
           {/* Navigation Links */}
           <div className="flex items-center gap-2 sm:gap-4">
-            <Link href="/feed">
-              <Button
-                variant="ghost"
-                className="min-h-[44px] text-sm sm:text-base px-2 sm:px-4"
-              >
-                Feed
-              </Button>
-            </Link>
+            {user ? (
+              // Authenticated user navigation
+              <>
+                <Link href="/feed">
+                  <Button
+                    variant="ghost"
+                    className="min-h-11 text-sm sm:text-base px-2 sm:px-4"
+                  >
+                    Feed
+                  </Button>
+                </Link>
 
-            {/* Profile Link - only show if user is logged in */}
-            {user && (
-              <Link href={`/profile/${user.$id}`}>
+                <Link href={`/profile/${user.$id}`}>
+                  <Button
+                    variant="ghost"
+                    className="min-h-11 text-sm sm:text-base px-2 sm:px-4"
+                  >
+                    Profile
+                  </Button>
+                </Link>
+
                 <Button
-                  variant="ghost"
-                  className="min-h-[44px] text-sm sm:text-base px-2 sm:px-4"
+                  variant="outline"
+                  onClick={handleLogout}
+                  disabled={isLoggingOut}
+                  className="min-h-11 text-sm sm:text-base px-2 sm:px-4"
                 >
-                  Profile
+                  {isLoggingOut ? 'Logging out...' : 'Logout'}
                 </Button>
-              </Link>
-            )}
+              </>
+            ) : (
+              // Non-authenticated user navigation
+              <>
+                <Link href="/login">
+                  <Button
+                    variant="ghost"
+                    className="min-h-11 text-sm sm:text-base px-2 sm:px-4"
+                  >
+                    Login
+                  </Button>
+                </Link>
 
-            <Button
-              variant="outline"
-              onClick={handleLogout}
-              disabled={isLoggingOut}
-              className="min-h-[44px] text-sm sm:text-base px-2 sm:px-4"
-            >
-              {isLoggingOut ? 'Logging out...' : 'Logout'}
-            </Button>
+                <Link href="/register">
+                  <Button
+                    variant="outline"
+                    className="min-h-11 text-sm sm:text-base px-2 sm:px-4"
+                  >
+                    Register
+                  </Button>
+                </Link>
+              </>
+            )}
           </div>
         </div>
       </div>

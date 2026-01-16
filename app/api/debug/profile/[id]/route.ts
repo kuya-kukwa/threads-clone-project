@@ -15,30 +15,54 @@ export async function GET(
   try {
     const { id } = await params;
     
+    console.log('[Debug API] Searching for userId:', id);
+    
     // Try to find profile by userId
-    const profilesByUserId = await serverDatabases.listDocuments(
-      APPWRITE_CONFIG.DATABASE_ID,
-      APPWRITE_CONFIG.COLLECTIONS.USERS,
-      [Query.equal('userId', id)]
-    );
+    let profilesByUserId;
+    try {
+      profilesByUserId = await serverDatabases.listDocuments(
+        APPWRITE_CONFIG.DATABASE_ID,
+        APPWRITE_CONFIG.COLLECTIONS.USERS,
+        [Query.equal('userId', id)]
+      );
+      console.log('[Debug API] profilesByUserId result:', profilesByUserId.documents.length, 'documents');
+    } catch (error) {
+      console.error('[Debug API] Error in profilesByUserId query:', error);
+      profilesByUserId = { documents: [] };
+    }
     
     // Also list all profiles to see what's there
-    const allProfiles = await serverDatabases.listDocuments(
-      APPWRITE_CONFIG.DATABASE_ID,
-      APPWRITE_CONFIG.COLLECTIONS.USERS,
-      [Query.limit(10)]
-    );
+    let allProfiles;
+    try {
+      allProfiles = await serverDatabases.listDocuments(
+        APPWRITE_CONFIG.DATABASE_ID,
+        APPWRITE_CONFIG.COLLECTIONS.USERS,
+        [Query.limit(10)]
+      );
+      console.log('[Debug API] allProfiles result:', allProfiles.documents.length, 'documents');
+    } catch (error) {
+      console.error('[Debug API] Error in allProfiles query:', error);
+      allProfiles = { documents: [] };
+    }
     
-    return NextResponse.json({
+    console.log('[Debug API] Preparing response data');
+    
+    const responseData = {
       searchedUserId: id,
       foundByUserId: profilesByUserId.documents,
-      allProfilesInDatabase: allProfiles.documents.map(p => ({
-        documentId: p.$id,
-        userId: (p as any).userId,
-        username: (p as any).username,
-        displayName: (p as any).displayName,
-      })),
-    });
+      allProfilesInDatabase: allProfiles.documents.map(p => {
+        console.log('[Debug API] Mapping profile:', p.$id, (p as any).userId);
+        return {
+          documentId: p.$id,
+          userId: (p as any).userId,
+          username: (p as any).username,
+          displayName: (p as any).displayName,
+        };
+      }),
+    };
+    
+    console.log('[Debug API] Returning response');
+    return NextResponse.json(responseData);
   } catch (error: any) {
     return NextResponse.json(
       { error: error.message },

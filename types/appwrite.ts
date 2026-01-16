@@ -92,3 +92,69 @@ export interface LoginInput {
   email: string;
   password: string;
 }
+
+/**
+ * API Response Types
+ * Standardized response structure for all API endpoints
+ */
+
+/**
+ * Success response wrapper
+ */
+export interface ApiSuccessResponse<T = any> {
+  success: true;
+  data: T;
+  timestamp?: string;
+  requestId?: string;
+}
+
+/**
+ * Error response wrapper
+ */
+export interface ApiErrorResponse {
+  success: false;
+  error: string;
+  code: string;
+  timestamp: string;
+  requestId?: string;
+  errors?: Array<{
+    field: string;
+    message: string;
+    code: string;
+  }>;
+}
+
+/**
+ * Generic API response (success or error)
+ */
+export type ApiResponse<T = any> = ApiSuccessResponse<T> | ApiErrorResponse;
+
+/**
+ * Paginated response wrapper
+ */
+export interface PaginatedResponse<T> {
+  items: T[];
+  total: number;
+  page: number;
+  pageSize: number;
+  hasMore: boolean;
+}
+
+/**
+ * Loading state wrapper for async operations
+ */
+export interface AsyncState<T> {
+  data: T | null;
+  isLoading: boolean;
+  error: string | null;
+}
+
+/**
+ * Form submission result
+ */
+export interface FormResult {
+  success: boolean;
+  error?: string;
+  code?: string;
+}
+

@@ -16,7 +16,6 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import Link from 'next/link';
@@ -44,9 +43,8 @@ import { loginSchema, type LoginInput } from '@/schemas/auth.schema';
 import { useAuth } from '@/hooks';
 
 export function LoginForm() {
-  const router = useRouter();
   const [error, setError] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
+  const { login, isLoading } = useAuth();
 
   // Initialize react-hook-form with Zod validation
   const form = useForm<LoginInput>({
@@ -66,6 +64,8 @@ export function LoginForm() {
     const result = await login(data);
     if (!result.success) {
       setError(result.error || 'Login failed');
+    }
+  }
 
   return (
     <Card>
@@ -109,7 +109,7 @@ export function LoginForm() {
                   <FormControl>
                     <Input
                       type="password"
-                      placeholder="••••••••"
+                      placeholder=""
                       disabled={isLoading}
                       {...field}
                     />

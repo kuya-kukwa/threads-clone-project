@@ -1,31 +1,83 @@
 /**
  * User Profile Page
- * Dynamic route for viewing user profiles
- * Follows mobile-first architecture
+ * Client Component - dynamic route for viewing user profiles
+ * Follows mobile-first architecture with client-side auth
  */
 
-import { notFound } from 'next/navigation';
-import { ProfileService } from '@/lib/services/profileService';
-import { AuthService } from '@/lib/services/authService';
+'use client';
+
+import { useEffect, useState, use } from 'react';
+import { useRouter } from 'next/navigation';
+import { useCurrentUser } from '@/hooks';
 import { ProfileCard } from '@/components/profile/ProfileCard';
+import { AuthGuard } from '@/components/auth/AuthGuard';
+import { UserProfile } from '@/types/appwrite';
 
 interface ProfilePageProps {
   params: Promise<{ id: string }>;
 }
 
-export default async function ProfilePage({ params }: ProfilePageProps) {
-  const { id } = await params;
+function ProfileContent({ userId }: { userId: string }) {
+  const { user } = useCurrentUser();
+  const router = useRouter();
+  const [profile, setProfile] = useState<UserProfile | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  // Fetch profile by user ID
-  const profile = await ProfileService.getProfileByUserId(id);
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        // Fetch profile via API
+        const response = await fetch(`/api/debug/profile/${userId}`);
+        const data = await response.json();
+        console.log('API Response:', data);
+        console.log('User ID:', userId);
 
-  if (!profile) {
-    notFound();
+        // Debug API returns foundByUserId array
+        if (data.foundByUserId && data.foundByUserId.length > 0) {
+          setProfile(data.foundByUserId[0]);
+        } else {
+          setError('Profile not found');
+        }
+      } catch (err) {
+        console.error('Failed to fetch profile:', err);
+        setError('Failed to load profile');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchProfile();
+  }, [userId]);
+
+  if (isLoading) {
+    return (
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 lg:py-12 max-w-2xl">
+        <div className="animate-pulse">
+          <div className="h-32 bg-gray-200 rounded-lg mb-4"></div>
+          <div className="h-8 bg-gray-200 rounded w-1/3 mb-2"></div>
+          <div className="h-4 bg-gray-200 rounded w-1/2"></div>
+        </div>
+      </div>
+    );
   }
 
-  // Check if this is the current user's profile
-  const currentUser = await AuthService.getCurrentUser();
-  const isOwnProfile = currentUser?.$id === profile.userId;
+  if (error || !profile) {
+    return (
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 lg:py-12 max-w-2xl">
+        <div className="text-center py-12">
+          <h1 className="text-2xl font-bold text-gray-900 mb-2">
+            Profile Not Found
+          </h1>
+          <p className="text-gray-600">
+            {error || 'The requested profile does not exist.'}
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  const isOwnProfile = user?.$id === profile.userId;
 
   return (
     <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 lg:py-12 max-w-2xl">
@@ -34,14 +86,12 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
   );
 }
 
-export async function generateMetadata({ params }: ProfilePageProps) {
-  const { id } = await params;
-  const profile = await ProfileService.getProfileByUserId(id);
+export default function ProfilePage({ params }: ProfilePageProps) {
+  const { id } = use(params);
 
-  return {
-    title: profile
-      ? `${profile.displayName} (@${profile.username})`
-      : 'Profile Not Found',
-    description: profile?.bio || 'User profile on Threads Clone',
-  };
+  return (
+    <AuthGuard>
+      <ProfileContent userId={id} />
+    </AuthGuard>
+  );
 }
