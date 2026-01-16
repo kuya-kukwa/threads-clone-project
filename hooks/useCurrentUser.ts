@@ -1,12 +1,13 @@
 /**
  * useCurrentUser Hook
  * Custom hook for managing current authenticated user state
- * Handles loading states and user data fetching
+ * Handles loading states and user data fetching with cleanup to prevent memory leaks
  */
 
 import { useState, useEffect } from 'react';
 import { Models } from 'appwrite';
 import { AuthService } from '@/lib/services/authService';
+import { logger } from '@/lib/logger/logger';
 
 export function useCurrentUser() {
   const [user, setUser] = useState<Models.User<Models.Preferences> | null>(null);
@@ -14,6 +15,7 @@ export function useCurrentUser() {
 
   useEffect(() => {
     let isMounted = true;
+    let timeoutId: NodeJS.Timeout | null = null;
     
     const fetchUser = async (retryCount = 0) => {
       try {
@@ -24,11 +26,15 @@ export function useCurrentUser() {
           setIsLoading(false);
         }
       } catch (error) {
-        console.error('Failed to fetch current user:', error);
+        logger.debug({
+          msg: 'Failed to fetch current user',
+          error: error instanceof Error ? error.message : 'Unknown error',
+          retryCount,
+        });
         
         // Retry once after a short delay in case session is still being set up
         if (retryCount === 0) {
-          setTimeout(() => {
+          timeoutId = setTimeout(() => {
             if (isMounted) {
               fetchUser(1);
             }
@@ -46,6 +52,9 @@ export function useCurrentUser() {
 
     return () => {
       isMounted = false;
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+      }
     };
   }, []);
 

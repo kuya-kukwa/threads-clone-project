@@ -19,7 +19,10 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';import { getSessionToken } from '@/lib/appwriteClient';import { account } from '@/lib/appwriteClient';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { getSessionToken } from '@/lib/appwriteClient';
+import { account } from '@/lib/appwriteClient';
+import { getErrorMessage } from '@/lib/errors';
 
 interface EditProfileFormProps {
   profile: UserProfile;
@@ -59,15 +62,13 @@ export function EditProfileForm({
     try {
       // Use the utility function to get the session token
       const sessionId = getSessionToken();
-      
+
       if (!sessionId) {
         setError('Session not found. Please log in again.');
         setIsLoading(false);
         return;
       }
-      
-      console.log('[EditProfileForm] Session token retrieved successfully');
-      
+
       const response = await fetch(`/api/profile/${profile.$id}`, {
         method: 'PATCH',
         headers: {
@@ -79,9 +80,7 @@ export function EditProfileForm({
         body: JSON.stringify(data),
       });
 
-      console.log('[EditProfileForm] Sending sessionId:', sessionId ? sessionId.substring(0, 50) + '...' : 'undefined');
       const result = await response.json();
-      console.log('[EditProfileForm] Response data:', result);
 
       if (result.success && result.profile) {
         onSuccess(result.profile);
@@ -90,14 +89,14 @@ export function EditProfileForm({
         const errorMsg = result.error || 'Failed to update profile';
         const detailsMsg = result.details ? `\n${result.details}` : '';
         setError(errorMsg + detailsMsg);
-        
+
         // If it's a session error, suggest re-login
         if (response.status === 401 || response.status === 403) {
-          console.error('[EditProfileForm] Authentication error - user may need to log in again');
+          setError('Session expired. Please log in again.');
         }
       }
-    } catch (error: any) {
-      setError(error.message || 'Failed to update profile');
+    } catch (error: unknown) {
+      setError(getErrorMessage(error));
     }
 
     setIsLoading(false);

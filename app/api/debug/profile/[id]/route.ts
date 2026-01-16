@@ -1,17 +1,32 @@
 /**
  * Debug API Route - Check User Profile
  * Helps debug profile lookup issues
+ * 
+ * SECURITY: Only available in development mode
  */
 
 import { NextRequest, NextResponse } from 'next/server';
 import { serverDatabases } from '@/lib/appwriteServer';
 import { APPWRITE_CONFIG } from '@/lib/appwriteConfig';
 import { Query } from 'appwrite';
+import { logger } from '@/lib/logger/logger';
 
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  // Block in production
+  if (process.env.NODE_ENV === 'production') {
+    logger.warn({
+      msg: 'Attempt to access debug endpoint in production',
+      endpoint: '/api/debug/profile',
+    });
+    return NextResponse.json(
+      { error: 'Debug endpoints are not available in production' },
+      { status: 404 }
+    );
+  }
+
   try {
     const { id } = await params;
     

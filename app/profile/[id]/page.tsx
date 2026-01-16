@@ -30,8 +30,6 @@ function ProfileContent({ userId }: { userId: string }) {
         // Fetch profile via API
         const response = await fetch(`/api/debug/profile/${userId}`);
         const data = await response.json();
-        console.log('API Response:', data);
-        console.log('User ID:', userId);
 
         // Debug API returns foundByUserId array
         if (data.foundByUserId && data.foundByUserId.length > 0) {
@@ -51,15 +49,7 @@ function ProfileContent({ userId }: { userId: string }) {
   }, [userId]);
 
   if (isLoading) {
-    return (
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 lg:py-12 max-w-2xl">
-        <div className="animate-pulse">
-          <div className="h-32 bg-gray-200 rounded-lg mb-4"></div>
-          <div className="h-8 bg-gray-200 rounded w-1/3 mb-2"></div>
-          <div className="h-4 bg-gray-200 rounded w-1/2"></div>
-        </div>
-      </div>
-    );
+    return null;
   }
 
   if (error || !profile) {

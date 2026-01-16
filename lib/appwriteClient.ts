@@ -6,6 +6,7 @@
 
 import { Client, Account, Databases, Storage } from 'appwrite';
 import { env } from './appwriteConfig';
+import { logger } from './logger/logger';
 
 const client = new Client()
   .setEndpoint(env.NEXT_PUBLIC_APPWRITE_ENDPOINT)
@@ -26,7 +27,7 @@ export function clearAppwriteSession() {
   localStorage.removeItem('cookieFallback');
   // Remove legacy auth token if exists
   localStorage.removeItem('auth_token');
-  console.log('[Appwrite] Session data cleared from localStorage');
+  logger.debug({ msg: 'Session data cleared from localStorage' });
 }
 
 /**

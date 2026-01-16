@@ -9,6 +9,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { AuthService } from '@/lib/services/authService';
 import { LoginInput, RegisterInput } from '@/schemas/auth.schema';
 import { clearAppwriteSession } from '@/lib/appwriteClient';
+import { getErrorMessage } from '@/lib/errors';
 
 export function useAuth() {
   const [isLoading, setIsLoading] = useState(false);
@@ -47,8 +48,8 @@ export function useAuth() {
         window.location.href = redirectTo;
       }
       return result;
-    } catch (error: any) {
-      return { success: false, error: error.message || 'Login failed' };
+    } catch (error: unknown) {
+      return { success: false, error: getErrorMessage(error) };
     } finally {
       setIsLoading(false);
     }
@@ -80,8 +81,8 @@ export function useAuth() {
       // Note: login() redirects on success, so we only reach here if it failed
       // But we already returned the error from login, so this won't execute
       return { success: true };
-    } catch (error: any) {
-      return { success: false, error: error.message || 'Registration failed' };
+    } catch (error: unknown) {
+      return { success: false, error: getErrorMessage(error) };
     } finally {
       setIsLoading(false);
     }
@@ -101,8 +102,8 @@ export function useAuth() {
         window.location.href = '/login';
       }
       return result;
-    } catch (error: any) {
-      return { success: false, error: error.message || 'Logout failed' };
+    } catch (error: unknown) {
+      return { success: false, error: getErrorMessage(error) };
     } finally {
       setIsLoading(false);
     }

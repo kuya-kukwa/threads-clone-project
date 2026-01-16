@@ -13,37 +13,39 @@ import { sanitizeInput } from '@/lib/utils';
 import { asyncHandler, successResponse } from '@/lib/errors/errorHandler';
 import { ValidationError } from '@/lib/errors/ValidationError';
 import { createRequestLogger } from '@/lib/logger/requestLogger';
+import { rateLimit, RateLimitType } from '@/lib/middleware/rateLimit';
 
 export const POST = asyncHandler(async (request: NextRequest) => {
+  // Apply rate limiting (5 requests per minute for auth)
+  const rateLimitResult = await rateLimit(RateLimitType.AUTH)(request);
+  if (rateLimitResult) {
+    return rateLimitResult; // Return rate limit error response
+  }
+
   const logger = createRequestLogger(request);
   
   try {
-    console.log('[Register API] Starting registration process');
+    logger.debug({ msg: 'Starting registration process' });
     
     // Parse and validate request body
     const body = await request.json();
-    console.log('[Register API] Request body received:', { email: body.email, username: body.username });
     
     const validation = registerSchema.safeParse(body);
     
     if (!validation.success) {
-      console.log('[Register API] Validation failed:', validation.error.issues);
-      logger.warn('Registration validation failed', { errors: validation.error.issues });
+      logger.warn({ msg: 'Registration validation failed', errors: validation.error.issues });
       throw ValidationError.fromZod(validation.error, 'Invalid registration data');
     }
     
     const { email, password, username, displayName } = validation.data;
-    console.log('[Register API] Validation passed');
     
     // Sanitize inputs
     const sanitizedUsername = sanitizeInput(username.toLowerCase(), 30);
     const sanitizedDisplayName = sanitizeInput(displayName, 50);
-    console.log('[Register API] Inputs sanitized');
     
-    logger.info('Creating new user account', { email, username: sanitizedUsername });
+    logger.info({ msg: 'Creating new user account', email, username: sanitizedUsername });
     
     // Create Appwrite Auth user using server Users API
-    console.log('[Register API] Creating Appwrite user...');
     const user = await serverUsers.create(
       ID.unique(),
       email,
@@ -52,11 +54,9 @@ export const POST = asyncHandler(async (request: NextRequest) => {
       sanitizedDisplayName
     );
     
-    console.log('[Register API] User created:', user.$id);
-    logger.info('Auth user created', { userId: user.$id });
+    logger.info({ msg: 'Auth user created', userId: user.$id });
     
     // Create user profile document
-    console.log('[Register API] Creating profile document...');
     const profile = await serverDatabases.createDocument<UserProfile>(
       APPWRITE_CONFIG.DATABASE_ID,
       APPWRITE_CONFIG.COLLECTIONS.USERS,
@@ -72,12 +72,11 @@ export const POST = asyncHandler(async (request: NextRequest) => {
       }
     );
     
-    console.log('[Register API] Profile created:', profile.$id);
-    logger.info('User registered successfully', { userId: user.$id, profileId: profile.$id });
+    logger.info({ msg: 'User registered successfully', userId: user.$id, profileId: profile.$id });
     
     return successResponse({ user, profile }, 201);
   } catch (error: any) {
-    console.error('[Register API] Error:', error.message, error.type, error.code);
+    logger.error({ msg: 'Registration failed', error: error.message, type: error.type, code: error.code });
     throw error;
   }
 });

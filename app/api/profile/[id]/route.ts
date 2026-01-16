@@ -9,6 +9,7 @@ import { APPWRITE_CONFIG } from '@/lib/appwriteConfig';
 import { profileUpdateSchema } from '@/schemas/profile.schema';
 import { UserProfile } from '@/types/appwrite';
 import { cookies } from 'next/headers';
+import { logger } from '@/lib/logger/logger';
 
 /**
  * Sanitize user input (prevent XSS)
@@ -31,14 +32,12 @@ export async function PATCH(
     const sessionId = request.headers.get('x-session-id');
     
     if (!sessionId) {
-      console.log('[Profile API] No session ID found in x-session-id header');
+      logger.warn({ msg: 'No session ID found in request header', profileId });
       return NextResponse.json(
         { success: false, error: 'Unauthorized - No session found' },
         { status: 401 }
       );
     }
-
-    console.log('[Profile API] Received session ID:', sessionId.substring(0, 50) + '...');
     
     // Create session-specific client with the session ID
     const { account, databases } = createSessionClient(sessionId);
@@ -47,9 +46,9 @@ export async function PATCH(
     let currentUser;
     try {
       currentUser = await account.get();
-      console.log('[Profile API] Current user:', currentUser.$id);
+      logger.debug({ msg: 'User authenticated', userId: currentUser.$id, profileId });
     } catch (sessionError: any) {
-      console.error('[Profile API] Session validation failed:', sessionError.message);
+      logger.warn({ msg: 'Session validation failed', error: sessionError.message, profileId });
       return NextResponse.json(
         { 
           success: false, 
@@ -67,7 +66,12 @@ export async function PATCH(
       profileId
     );
     
-    console.log('[Profile API] Profile owner:', existingProfile.userId, 'Current user:', currentUser.$id);
+    logger.debug({
+      msg: 'Checking profile ownership',
+      profileOwner: existingProfile.userId,
+      currentUser: currentUser.$id,
+      profileId,
+    });
     
     // Verify user owns this profile
     if (existingProfile.userId !== currentUser.$id) {
@@ -111,10 +115,10 @@ export async function PATCH(
       }
     );
     
-    console.log('[Profile API] Profile updated successfully');
+    logger.info({ msg: 'Profile updated successfully', profileId, userId: currentUser.$id });
     return NextResponse.json({ success: true, profile: updatedProfile });
   } catch (error: any) {
-    console.error('Update profile error:', error);
+    logger.error({ msg: 'Profile update failed', error: error.message, stack: error.stack });
     return NextResponse.json(
       { success: false, error: error.message || 'Profile update failed' },
       { status: 500 }

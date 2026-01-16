@@ -37,3 +37,15 @@ export {
   successResponse,
 } from './errorHandler';
 export type { ErrorResponse } from './errorHandler';
+
+// Type guards
+export {
+  isAppwriteError,
+  isError,
+  hasMessage,
+  getErrorMessage,
+  isNetworkError,
+  isRetryableError,
+  isAuthError,
+  isValidationError,
+} from './typeGuards';

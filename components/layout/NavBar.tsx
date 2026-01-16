@@ -23,28 +23,6 @@ export function NavBar() {
     setIsLoggingOut(false);
   };
 
-  // Show loading skeleton or nothing during initial load
-  if (isLoading) {
-    return (
-      <nav className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex h-14 sm:h-16 items-center justify-between">
-            <Link
-              href="/"
-              className="text-lg sm:text-xl font-bold hover:opacity-80 transition-opacity min-h-11 flex items-center"
-            >
-              Threads Clone
-            </Link>
-            <div className="flex items-center gap-2 sm:gap-4">
-              <div className="h-10 w-16 bg-muted animate-pulse rounded" />
-              <div className="h-10 w-16 bg-muted animate-pulse rounded" />
-            </div>
-          </div>
-        </div>
-      </nav>
-    );
-  }
-
   return (
     <nav className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">

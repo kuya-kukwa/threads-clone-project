@@ -1,11 +1,26 @@
 /**
  * Debug API Route - Check Appwrite Connection
  * Tests if server can connect to Appwrite
+ * 
+ * SECURITY: Only available in development mode
  */
 
 import { NextResponse } from 'next/server';
+import { logger } from '@/lib/logger/logger';
 
 export async function GET() {
+  // Block in production
+  if (process.env.NODE_ENV === 'production') {
+    logger.warn({
+      msg: 'Attempt to access debug endpoint in production',
+      endpoint: '/api/debug/connection',
+    });
+    return NextResponse.json(
+      { error: 'Debug endpoints are not available in production' },
+      { status: 404 }
+    );
+  }
+
   try {
     // Check environment variables
     const envCheck = {

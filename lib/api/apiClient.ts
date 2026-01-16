@@ -13,6 +13,7 @@
 import { NetworkError, TimeoutError } from '../errors/AppError';
 import { handleClientError } from '../errors/errorHandler';
 import { ApiResponse, ApiErrorResponse } from '@/types/appwrite';
+import { isRetryableError as checkRetryable, getErrorMessage } from '../errors';
 
 /**
  * API client configuration
@@ -66,10 +67,10 @@ async function fetchWithTimeout(
     
     clearTimeout(timeoutId);
     return response;
-  } catch (error: any) {
+  } catch (error: unknown) {
     clearTimeout(timeoutId);
     
-    if (error.name === 'AbortError') {
+    if (error instanceof Error && error.name === 'AbortError') {
       throw new TimeoutError(`Request timeout after ${timeout}ms`);
     }
     
@@ -85,19 +86,11 @@ function sleep(ms: number): Promise<void> {
 }
 
 /**
- * Check if error is retryable
+ * Check if error is retryable (uses centralized type guard)
  */
-function isRetryableError(error: any): boolean {
-  // Network errors are retryable
-  if (error instanceof NetworkError || error instanceof TimeoutError) {
-    return true;
-  }
-  
-  // Server errors (5xx) are retryable
-  if (error.statusCode >= 500) {
-    return true;
-  }
-  
+function isRetryableError(error: unknown): boolean {
+  return checkRetryable(error);
+}
   return false;
 }
 
