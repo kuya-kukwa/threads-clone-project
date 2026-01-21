@@ -91,8 +91,6 @@ function sleep(ms: number): Promise<void> {
 function isRetryableError(error: unknown): boolean {
   return checkRetryable(error);
 }
-  return false;
-}
 
 /**
  * API Client class

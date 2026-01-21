@@ -79,6 +79,11 @@ export const APPWRITE_CONFIG = {
     FOLLOWS: 'follows',
   },
   
+  // Storage buckets
+  BUCKETS: {
+    THREAD_IMAGES: 'thread-images',
+  },
+  
   // User profile attributes
   USER_ATTRIBUTES: {
     USER_ID: 'userId',
@@ -94,11 +99,14 @@ export const APPWRITE_CONFIG = {
   THREAD_ATTRIBUTES: {
     AUTHOR_ID: 'authorId',
     CONTENT: 'content',
+    IMAGE_ID: 'imageId',
     IMAGE_URL: 'imageUrl',
+    ALT_TEXT: 'altText',
     PARENT_THREAD_ID: 'parentThreadId',
     REPLY_COUNT: 'replyCount',
     LIKE_COUNT: 'likeCount',
     CREATED_AT: 'createdAt',
+    UPDATED_AT: 'updatedAt',
   },
   
   // Like attributes

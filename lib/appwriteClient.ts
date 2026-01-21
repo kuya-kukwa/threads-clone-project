@@ -33,19 +33,35 @@ export function clearAppwriteSession() {
 /**
  * Get the current session JWT from localStorage
  * @returns JWT token string or null if not found
+ * 
+ * Cross-device notes:
+ * - Appwrite stores session in 'cookieFallback' localStorage key
+ * - Session key format: a_session_<projectId>
  */
 export function getSessionToken(): string | null {
   try {
+    // Check if we're in a browser environment
+    if (typeof window === 'undefined') {
+      console.warn('[Appwrite] getSessionToken called on server');
+      return null;
+    }
+    
     const cookieFallback = localStorage.getItem('cookieFallback');
-    if (!cookieFallback) return null;
+    if (!cookieFallback) {
+      logger.debug({ msg: 'No cookieFallback in localStorage' });
+      return null;
+    }
     
     const sessionData = JSON.parse(cookieFallback);
     // Find any key that starts with "a_session_"
     const sessionKey = Object.keys(sessionData).find(key => key.startsWith('a_session_'));
     
     if (sessionKey && sessionData[sessionKey]) {
+      logger.debug({ msg: 'Session token found', sessionKey });
       return sessionData[sessionKey];
     }
+    
+    logger.debug({ msg: 'No session key found in cookieFallback', keys: Object.keys(sessionData) });
     return null;
   } catch (error) {
     console.error('[Appwrite] Failed to get session token:', error);

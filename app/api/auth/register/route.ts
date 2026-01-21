@@ -14,6 +14,20 @@ import { asyncHandler, successResponse } from '@/lib/errors/errorHandler';
 import { ValidationError } from '@/lib/errors/ValidationError';
 import { createRequestLogger } from '@/lib/logger/requestLogger';
 import { rateLimit, RateLimitType } from '@/lib/middleware/rateLimit';
+import { NextResponse } from 'next/server';
+
+export async function OPTIONS() {
+  return NextResponse.json(
+    {},
+    {
+      headers: {
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Methods': 'POST, OPTIONS',
+        'Access-Control-Allow-Headers': 'Content-Type',
+      },
+    }
+  );
+}
 
 export const POST = asyncHandler(async (request: NextRequest) => {
   // Apply rate limiting (5 requests per minute for auth)
@@ -25,7 +39,7 @@ export const POST = asyncHandler(async (request: NextRequest) => {
   const logger = createRequestLogger(request);
   
   try {
-    logger.debug({ msg: 'Starting registration process' });
+    logger.debug('Starting registration process');
     
     // Parse and validate request body
     const body = await request.json();
@@ -33,7 +47,7 @@ export const POST = asyncHandler(async (request: NextRequest) => {
     const validation = registerSchema.safeParse(body);
     
     if (!validation.success) {
-      logger.warn({ msg: 'Registration validation failed', errors: validation.error.issues });
+      logger.warn('Registration validation failed', { errors: validation.error.issues });
       throw ValidationError.fromZod(validation.error, 'Invalid registration data');
     }
     
@@ -43,7 +57,7 @@ export const POST = asyncHandler(async (request: NextRequest) => {
     const sanitizedUsername = sanitizeInput(username.toLowerCase(), 30);
     const sanitizedDisplayName = sanitizeInput(displayName, 50);
     
-    logger.info({ msg: 'Creating new user account', email, username: sanitizedUsername });
+    logger.info('Creating new user account', { email, username: sanitizedUsername });
     
     // Create Appwrite Auth user using server Users API
     const user = await serverUsers.create(
@@ -54,7 +68,7 @@ export const POST = asyncHandler(async (request: NextRequest) => {
       sanitizedDisplayName
     );
     
-    logger.info({ msg: 'Auth user created', userId: user.$id });
+    logger.info('Auth user created', { userId: user.$id });
     
     // Create user profile document
     const profile = await serverDatabases.createDocument<UserProfile>(
@@ -72,11 +86,11 @@ export const POST = asyncHandler(async (request: NextRequest) => {
       }
     );
     
-    logger.info({ msg: 'User registered successfully', userId: user.$id, profileId: profile.$id });
+    logger.info('User registered successfully', { userId: user.$id, profileId: profile.$id });
     
     return successResponse({ user, profile }, 201);
   } catch (error: any) {
-    logger.error({ msg: 'Registration failed', error: error.message, type: error.type, code: error.code });
+    logger.error('Registration failed', error, { type: error.type, code: error.code });
     throw error;
   }
 });

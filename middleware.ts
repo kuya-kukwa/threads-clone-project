@@ -90,6 +90,20 @@ function checkCsrfProtection(request: NextRequest): boolean {
   const csrfHeader = request.headers.get('x-csrf-token');
   const isFormSubmission = request.headers.get('content-type')?.includes('multipart/form-data');
   
+  // Debug logging for cross-device troubleshooting
+  if (process.env.NODE_ENV === 'development') {
+    const hasToken = Boolean(csrfHeader);
+    const isForm = Boolean(isFormSubmission);
+    if (!hasToken && !isForm) {
+      console.log('[CSRF] Missing token for:', request.nextUrl.pathname, {
+        method: request.method,
+        hasCSRFHeader: hasToken,
+        isFormSubmission: isForm,
+        contentType: request.headers.get('content-type'),
+      });
+    }
+  }
+  
   // Allow requests with CSRF token or form submissions (from same origin)
   return Boolean(csrfHeader || isFormSubmission);
 }

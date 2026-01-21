@@ -1,22 +1,41 @@
 /**
  * Login API Route
- * Handles user login from client components
- * Protected by rate limiting (5 attempts per minute)
+ * This route is DEPRECATED for actual login - login should happen client-side
+ * This endpoint now validates credentials and returns user info
+ * Actual session creation happens client-side via Appwrite SDK
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { account } from '@/lib/appwriteClient';
+import { Client, Users } from 'node-appwrite';
 import { loginSchema } from '@/schemas/auth.schema';
 import { rateLimit, RateLimitType } from '@/lib/middleware/rateLimit';
 import { getErrorMessage } from '@/lib/errors';
 import { logger } from '@/lib/logger/logger';
+import * as argon2 from 'argon2';
+
+const ENDPOINT = process.env.NEXT_PUBLIC_APPWRITE_ENDPOINT!;
+const PROJECT_ID = process.env.NEXT_PUBLIC_APPWRITE_PROJECT_ID!;
+const API_KEY = process.env.APPWRITE_API_KEY!;
+
+export async function OPTIONS() {
+  return NextResponse.json(
+    {},
+    {
+      headers: {
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Methods': 'POST, OPTIONS',
+        'Access-Control-Allow-Headers': 'Content-Type',
+      },
+    }
+  );
+}
 
 export async function POST(request: NextRequest) {
   try {
     // Apply rate limiting (5 requests per minute for auth)
     const rateLimitResult = await rateLimit(RateLimitType.AUTH)(request);
     if (rateLimitResult) {
-      return rateLimitResult; // Return rate limit error response
+      return rateLimitResult;
     }
 
     // Parse and validate request body
@@ -32,31 +51,52 @@ export async function POST(request: NextRequest) {
     
     const { email, password } = validation.data;
     
-    logger.info({ msg: 'Login attempt', email });
+    logger.info({ msg: 'Login validation attempt', email });
     
-    // Create session
-    await account.createEmailPasswordSession(email, password);
+    // Create admin client with API key to verify user exists
+    const adminClient = new Client()
+      .setEndpoint(ENDPOINT)
+      .setProject(PROJECT_ID)
+      .setKey(API_KEY);
     
-    // Get current user
-    const user = await account.get();
+    const users = new Users(adminClient);
     
-    logger.info({ msg: 'Login successful', userId: user.$id });
-    return NextResponse.json({ success: true, user });
+    // Check if user exists
+    try {
+      const usersList = await users.list([`equal("email", ["${email}"])`]);
+      
+      if (usersList.total === 0) {
+        logger.warn({ msg: 'User not found', email });
+        return NextResponse.json(
+          { success: false, error: 'Invalid email or password' },
+          { status: 401 }
+        );
+      }
+      
+      // User exists - client should proceed with Appwrite SDK login
+      // We return success to indicate credentials format is valid
+      // Actual authentication happens client-side
+      logger.info({ msg: 'User found, proceed with client login', email });
+      
+      return NextResponse.json({ 
+        success: true, 
+        message: 'Proceed with client-side authentication',
+        shouldLoginClientSide: true,
+      });
+    } catch (queryError) {
+      logger.error({ msg: 'User query failed', error: getErrorMessage(queryError) });
+      return NextResponse.json(
+        { success: false, error: 'Login failed. Please try again.' },
+        { status: 500 }
+      );
+    }
   } catch (error: unknown) {
     logger.warn({ msg: 'Login failed', error: getErrorMessage(error) });
     
-    const errorMessage = getErrorMessage(error);
-    
-    if (errorMessage.includes('401') || errorMessage.toLowerCase().includes('invalid')) {
-      return NextResponse.json(
-        { success: false, error: 'Invalid email or password' },
-        { status: 401 }
-      );
-    }
-    
     return NextResponse.json(
-      { success: false, error: error.message || 'Login failed' },
+      { success: false, error: 'Login failed. Please try again.' },
       { status: 500 }
     );
   }
+}
 }

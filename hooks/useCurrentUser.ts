@@ -2,61 +2,75 @@
  * useCurrentUser Hook
  * Custom hook for managing current authenticated user state
  * Handles loading states and user data fetching with cleanup to prevent memory leaks
+ * 
+ * Cross-device compatibility:
+ * - Retry logic for session hydration on mobile
+ * - Better error handling for network delays
  */
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Models } from 'appwrite';
 import { AuthService } from '@/lib/services/authService';
 import { logger } from '@/lib/logger/logger';
+
+// Max retries for session check (helps with mobile network delays)
+const MAX_RETRIES = 2;
+const RETRY_DELAY_MS = 500;
 
 export function useCurrentUser() {
   const [user, setUser] = useState<Models.User<Models.Preferences> | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  useEffect(() => {
-    let isMounted = true;
-    let timeoutId: NodeJS.Timeout | null = null;
-    
-    const fetchUser = async (retryCount = 0) => {
-      try {
-        const currentUser = await AuthService.getCurrentUser();
-        
-        if (isMounted) {
-          setUser(currentUser);
+  const fetchUser = useCallback(async (retryCount: number, isMounted: { current: boolean }) => {
+    try {
+      logger.debug({ msg: 'useCurrentUser: Fetching user', retryCount });
+      const currentUser = await AuthService.getCurrentUser();
+      
+      if (isMounted.current) {
+        logger.debug({ 
+          msg: 'useCurrentUser: User fetched', 
+          userId: currentUser?.$id,
+          hasUser: !!currentUser,
+        });
+        setUser(currentUser);
+        setIsLoading(false);
+      }
+    } catch (error) {
+      logger.debug({
+        msg: 'useCurrentUser: Failed to fetch user',
+        error: error instanceof Error ? error.message : 'Unknown error',
+        retryCount,
+      });
+      
+      // Retry on failure (helps with cross-device session hydration)
+      if (retryCount < MAX_RETRIES) {
+        return new Promise<void>((resolve) => {
+          setTimeout(async () => {
+            if (isMounted.current) {
+              await fetchUser(retryCount + 1, isMounted);
+            }
+            resolve();
+          }, RETRY_DELAY_MS);
+        });
+      } else {
+        if (isMounted.current) {
+          logger.debug({ msg: 'useCurrentUser: All retries exhausted, no user found' });
+          setUser(null);
           setIsLoading(false);
         }
-      } catch (error) {
-        logger.debug({
-          msg: 'Failed to fetch current user',
-          error: error instanceof Error ? error.message : 'Unknown error',
-          retryCount,
-        });
-        
-        // Retry once after a short delay in case session is still being set up
-        if (retryCount === 0) {
-          timeoutId = setTimeout(() => {
-            if (isMounted) {
-              fetchUser(1);
-            }
-          }, 500);
-        } else {
-          if (isMounted) {
-            setUser(null);
-            setIsLoading(false);
-          }
-        }
       }
-    };
+    }
+  }, []);
 
-    fetchUser();
+  useEffect(() => {
+    const isMounted = { current: true };
+    
+    fetchUser(0, isMounted);
 
     return () => {
-      isMounted = false;
-      if (timeoutId) {
-        clearTimeout(timeoutId);
-      }
+      isMounted.current = false;
     };
-  }, []);
+  }, [fetchUser]);
 
   return { user, isLoading };
 }

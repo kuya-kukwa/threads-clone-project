@@ -22,15 +22,21 @@ export interface UserProfile extends Models.Document {
 /**
  * Thread Post Document
  * Represents a post or reply
+ * 
+ * Storage: Appwrite Database (threads collection)
+ * Images: Stored in Appwrite Storage, referenced by imageId
  */
 export interface Thread extends Models.Document {
-  authorId: string; // References UserProfile.$id
-  content: string; // Post text content
-  imageUrl?: string; // Optional image URL
-  parentThreadId?: string; // If reply, references parent Thread.$id
-  replyCount: number; // Denormalized count of direct replies
-  likeCount: number; // Denormalized count of likes
+  authorId: string; // References UserProfile.userId (Appwrite Auth user ID)
+  content: string; // Post text content (max 500 chars)
+  imageId?: string; // Optional Appwrite Storage file ID
+  imageUrl?: string; // Optional generated image URL (from Storage)
+  altText?: string; // Optional accessibility alt text for image
+  parentThreadId?: string; // If reply, references parent Thread.$id (future feature)
+  replyCount: number; // Denormalized count of direct replies (default: 0)
+  likeCount: number; // Denormalized count of likes (default: 0)
   createdAt: string; // ISO timestamp
+  updatedAt: string; // ISO timestamp
 }
 
 /**
@@ -141,6 +147,17 @@ export interface PaginatedResponse<T> {
 }
 
 /**
+ * Cursor-based pagination response
+ * Used for feed pagination with better performance
+ */
+export interface CursorPaginatedResponse<T> {
+  items: T[];
+  nextCursor: string | null;
+  hasMore: boolean;
+  total?: number; // Optional total count
+}
+
+/**
  * Loading state wrapper for async operations
  */
 export interface AsyncState<T> {
@@ -156,5 +173,48 @@ export interface FormResult {
   success: boolean;
   error?: string;
   code?: string;
+}
+
+/**
+ * Thread-specific types
+ */
+
+/**
+ * Thread creation response
+ */
+export interface ThreadCreateResponse {
+  success: boolean;
+  thread?: Thread;
+  error?: string;
+}
+
+/**
+ * Feed response with cursor pagination
+ */
+export interface FeedResponse {
+  success: boolean;
+  threads?: ThreadWithAuthor[];
+  nextCursor?: string | null;
+  hasMore?: boolean;
+  error?: string;
+}
+
+/**
+ * Image upload response
+ */
+export interface ImageUploadResponse {
+  success: boolean;
+  imageId?: string;
+  imageUrl?: string;
+  error?: string;
+}
+
+/**
+ * Image upload progress callback
+ */
+export interface UploadProgress {
+  loaded: number; // Bytes uploaded
+  total: number; // Total bytes
+  percentage: number; // 0-100
 }
 
