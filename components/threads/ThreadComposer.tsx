@@ -63,7 +63,8 @@ export function ThreadComposer({ onSuccess }: ThreadComposerProps) {
     }
 
     // Validate file type
-    const allowedTypes = SECURITY_CONFIG.IMAGE.ALLOWED_TYPES as readonly string[];
+    const allowedTypes = SECURITY_CONFIG.IMAGE
+      .ALLOWED_TYPES as readonly string[];
     if (!allowedTypes.includes(file.type)) {
       setError('Only JPG, PNG, WebP, and GIF images are allowed');
       return;
