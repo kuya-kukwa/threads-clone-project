@@ -10,7 +10,7 @@
  */
 
 import { useState } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import { AuthService } from '@/lib/services/authService';
 import { LoginInput, RegisterInput } from '@/schemas/auth.schema';
 import { account, clearAppwriteSession } from '@/lib/appwriteClient';
@@ -20,9 +20,8 @@ import { logger } from '@/lib/logger/logger';
 export function useAuth() {
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
-  const searchParams = useSearchParams();
 
-  const login = async (data: LoginInput) => {
+  const login = async (data: LoginInput, redirectTo?: string) => {
     setIsLoading(true);
     logger.debug({ msg: 'useAuth: Starting login', email: data.email });
     
@@ -51,26 +50,25 @@ export function useAuth() {
       // Extended delay to ensure session is stored (important for mobile)
       await new Promise(resolve => setTimeout(resolve, 200));
       
-      // Check for redirect parameter, default to /feed
-      const redirectParam = searchParams.get('redirect');
-      let redirectTo = '/feed';
+      // Determine redirect URL
+      let redirectUrl = '/feed';
       
-      if (redirectParam) {
+      if (redirectTo) {
         try {
-          const redirectUrl = new URL(redirectParam, window.location.origin);
+          const redirectUrlObj = new URL(redirectTo, window.location.origin);
           // Security check: only allow redirects to the same origin
-          if (redirectUrl.origin === window.location.origin) {
-            redirectTo = redirectUrl.pathname + redirectUrl.search;
+          if (redirectUrlObj.origin === window.location.origin) {
+            redirectUrl = redirectUrlObj.pathname + redirectUrlObj.search;
           }
         } catch {
           // Invalid URL, use default
-          redirectTo = '/feed';
+          redirectUrl = '/feed';
         }
       }
       
       logger.debug({ msg: 'useAuth: Redirecting', redirectTo });
       // Force a hard navigation to ensure session is recognized
-      window.location.href = redirectTo;
+      window.location.href = redirectUrl;
       return { success: true, user };
     } catch (error: unknown) {
       const errorMsg = getErrorMessage(error);

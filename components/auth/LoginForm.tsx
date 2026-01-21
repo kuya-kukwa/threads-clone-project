@@ -18,6 +18,7 @@
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 
 import { Button } from '@/components/ui/button';
@@ -45,6 +46,7 @@ import { useAuth } from '@/hooks';
 export function LoginForm() {
   const [error, setError] = useState<string | null>(null);
   const { login, isLoading } = useAuth();
+  const searchParams = useSearchParams();
 
   // Initialize react-hook-form with Zod validation
   const form = useForm<LoginInput>({
@@ -61,7 +63,8 @@ export function LoginForm() {
    */
   async function onSubmit(data: LoginInput) {
     setError(null);
-    const result = await login(data);
+    const redirectParam = searchParams.get('redirect');
+    const result = await login(data, redirectParam || undefined);
     if (!result.success) {
       setError(result.error || 'Login failed');
     }

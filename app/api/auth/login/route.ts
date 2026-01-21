@@ -11,7 +11,6 @@ import { loginSchema } from '@/schemas/auth.schema';
 import { rateLimit, RateLimitType } from '@/lib/middleware/rateLimit';
 import { getErrorMessage } from '@/lib/errors';
 import { logger } from '@/lib/logger/logger';
-import * as argon2 from 'argon2';
 
 const ENDPOINT = process.env.NEXT_PUBLIC_APPWRITE_ENDPOINT!;
 const PROJECT_ID = process.env.NEXT_PUBLIC_APPWRITE_PROJECT_ID!;
@@ -99,4 +98,4 @@ export async function POST(request: NextRequest) {
     );
   }
 }
-}
+
