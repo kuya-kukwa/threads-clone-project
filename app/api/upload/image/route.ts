@@ -87,9 +87,23 @@ export async function POST(request: NextRequest) {
     const result = await uploadThreadImage(file);
 
     if (!result.success) {
-      logger.error('Image upload failed', new Error(result.error || 'Unknown error'), { error: result.error });
+      logger.error('Image upload failed', new Error(result.error || 'Unknown error'), { 
+        error: result.error,
+        fileName: file.name,
+        fileSize: file.size,
+        fileType: file.type,
+      });
       return NextResponse.json(
-        { success: false, error: result.error || 'Upload failed' },
+        { 
+          success: false, 
+          error: result.error || 'Upload failed',
+          // Include debug info for troubleshooting (safe since it's not exposing secrets)
+          debug: {
+            fileName: file.name,
+            fileSize: file.size,
+            fileType: file.type,
+          }
+        },
         { status: 500 }
       );
     }

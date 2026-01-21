@@ -78,6 +78,23 @@ export async function uploadThreadImage(
       };
     }
 
+    // Verify the bucket exists before uploading
+    try {
+      const bucket = await serverStorage.getBucket(APPWRITE_CONFIG.BUCKETS.THREAD_IMAGES);
+      logger.debug({ msg: 'Bucket verified', bucketId: bucket.$id, bucketName: bucket.name });
+    } catch (bucketError) {
+      const bucketErrorMsg = bucketError instanceof Error ? bucketError.message : 'Unknown bucket error';
+      logger.error({ 
+        msg: 'Storage bucket not found or inaccessible', 
+        bucketId: APPWRITE_CONFIG.BUCKETS.THREAD_IMAGES,
+        error: bucketErrorMsg
+      });
+      return {
+        success: false,
+        error: `Storage bucket "${APPWRITE_CONFIG.BUCKETS.THREAD_IMAGES}" not found. Please create it in Appwrite Console.`,
+      };
+    }
+
     // Generate unique file ID
     const fileId = ID.unique();
     logger.debug({ msg: 'Generated file ID', fileId });
