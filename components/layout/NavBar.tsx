@@ -14,7 +14,7 @@ import { Button } from '@/components/ui/button';
 
 export function NavBar() {
   const [isLoggingOut, setIsLoggingOut] = useState(false);
-  const { user, isLoading } = useCurrentUser();
+  const { user } = useCurrentUser();
   const { logout } = useAuth();
 
   const handleLogout = async () => {

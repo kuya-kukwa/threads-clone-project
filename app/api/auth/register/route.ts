@@ -89,8 +89,8 @@ export const POST = asyncHandler(async (request: NextRequest) => {
     logger.info('User registered successfully', { userId: user.$id, profileId: profile.$id });
     
     return successResponse({ user, profile }, 201);
-  } catch (error: any) {
-    logger.error('Registration failed', error, { type: error.type, code: error.code });
+  } catch (error: unknown) {
+    logger.error('Registration failed', error, { type: (error as { type?: string }).type, code: (error as { code?: number }).code });
     throw error;
   }
 });

@@ -48,7 +48,7 @@ export async function POST(request: NextRequest) {
       );
     }
     
-    const { email, password } = validation.data;
+    const { email } = validation.data;
     
     logger.info({ msg: 'Login validation attempt', email });
     

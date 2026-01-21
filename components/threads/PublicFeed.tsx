@@ -184,7 +184,7 @@ export function PublicFeed({
       {/* End of feed message */}
       {!error && !hasMore && threads.length > 0 && (
         <div className="p-4 text-center text-sm text-muted-foreground border-t">
-          You've reached the end
+          You&apos;ve reached the end
         </div>
       )}
     </div>

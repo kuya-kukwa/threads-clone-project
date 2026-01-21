@@ -11,14 +11,12 @@
 
 'use client';
 
-import { useCurrentUser } from '@/hooks';
 import { AuthGuard } from '@/components/auth/AuthGuard';
 import { ThreadComposer } from '@/components/threads/ThreadComposer';
 import { PublicFeed } from '@/components/threads/PublicFeed';
 import { useState } from 'react';
 
 function FeedContent() {
-  const { user } = useCurrentUser();
   const [refreshKey, setRefreshKey] = useState(0);
 
   const handleThreadCreated = () => {

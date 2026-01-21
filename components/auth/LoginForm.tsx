@@ -139,7 +139,7 @@ export function LoginForm() {
 
       <CardFooter className="flex flex-col space-y-2">
         <div className="text-sm text-gray-600">
-          Don't have an account?{' '}
+          Don&apos;t have an account?{' '}
           <Link
             href="/register"
             className="text-primary hover:underline font-medium"

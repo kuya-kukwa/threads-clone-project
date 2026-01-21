@@ -21,7 +21,6 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { getSessionToken } from '@/lib/appwriteClient';
-import { account } from '@/lib/appwriteClient';
 import { getErrorMessage } from '@/lib/errors';
 
 interface EditProfileFormProps {

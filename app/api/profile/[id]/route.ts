@@ -4,11 +4,10 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { serverDatabases, createSessionClient } from '@/lib/appwriteServer';
+import { createSessionClient } from '@/lib/appwriteServer';
 import { APPWRITE_CONFIG } from '@/lib/appwriteConfig';
 import { profileUpdateSchema } from '@/schemas/profile.schema';
 import { UserProfile } from '@/types/appwrite';
-import { cookies } from 'next/headers';
 import { logger } from '@/lib/logger/logger';
 
 /**
@@ -47,13 +46,14 @@ export async function PATCH(
     try {
       currentUser = await account.get();
       logger.debug({ msg: 'User authenticated', userId: currentUser.$id, profileId });
-    } catch (sessionError: any) {
-      logger.warn({ msg: 'Session validation failed', error: sessionError.message, profileId });
+    } catch (sessionError: unknown) {
+      const errorMessage = sessionError instanceof Error ? sessionError.message : 'Unknown error';
+      logger.warn({ msg: 'Session validation failed', error: errorMessage, profileId });
       return NextResponse.json(
         { 
           success: false, 
           error: 'Invalid or expired session. Please log in again.',
-          details: sessionError.message 
+          details: errorMessage 
         },
         { status: 401 }
       );
@@ -117,10 +117,12 @@ export async function PATCH(
     
     logger.info({ msg: 'Profile updated successfully', profileId, userId: currentUser.$id });
     return NextResponse.json({ success: true, profile: updatedProfile });
-  } catch (error: any) {
-    logger.error({ msg: 'Profile update failed', error: error.message, stack: error.stack });
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    const errorStack = error instanceof Error ? error.stack : undefined;
+    logger.error({ msg: 'Profile update failed', error: errorMessage, stack: errorStack });
     return NextResponse.json(
-      { success: false, error: error.message || 'Profile update failed' },
+      { success: false, error: errorMessage || 'Profile update failed' },
       { status: 500 }
     );
   }

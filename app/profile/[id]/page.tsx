@@ -7,7 +7,6 @@
 'use client';
 
 import { useEffect, useState, use } from 'react';
-import { useRouter } from 'next/navigation';
 import { useCurrentUser } from '@/hooks';
 import { ProfileCard } from '@/components/profile/ProfileCard';
 import { AuthGuard } from '@/components/auth/AuthGuard';
@@ -19,7 +18,6 @@ interface ProfilePageProps {
 
 function ProfileContent({ userId }: { userId: string }) {
   const { user } = useCurrentUser();
-  const router = useRouter();
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);

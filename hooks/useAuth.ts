@@ -10,7 +10,6 @@
  */
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
 import { AuthService } from '@/lib/services/authService';
 import { LoginInput, RegisterInput } from '@/schemas/auth.schema';
 import { account, clearAppwriteSession } from '@/lib/appwriteClient';
@@ -19,7 +18,6 @@ import { logger } from '@/lib/logger/logger';
 
 export function useAuth() {
   const [isLoading, setIsLoading] = useState(false);
-  const router = useRouter();
 
   const login = async (data: LoginInput, redirectTo?: string) => {
     setIsLoading(true);

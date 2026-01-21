@@ -57,14 +57,6 @@ function addSecurityHeaders(response: NextResponse): void {
 }
 
 /**
- * Check if route requires authentication
- */
-function requiresAuth(pathname: string): boolean {
-  const protectedRoutes = ['/feed', '/profile'];
-  return protectedRoutes.some(route => pathname.startsWith(route));
-}
-
-/**
  * Check if route is auth page (login/register)
  */
 function isAuthPage(pathname: string): boolean {
@@ -162,7 +154,7 @@ export async function middleware(request: NextRequest) {
   }
   
   // Create response
-  let response = NextResponse.next();
+  const response = NextResponse.next();
   
   // Add request ID header
   response.headers.set('X-Request-ID', requestId);
