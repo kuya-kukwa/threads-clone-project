@@ -299,14 +299,14 @@ export function ThreadComposer({ onSuccess }: ThreadComposerProps) {
   ].join(',');
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4 p-4 border-b">
+    <form onSubmit={handleSubmit} className="space-y-4 p-4 border-b border-border/50 bg-card/30">
       {/* Textarea */}
       <div>
         <Textarea
           value={content}
           onChange={(e) => setContent(e.target.value)}
           placeholder="What's on your mind?"
-          className="min-h-[100px] resize-none text-base"
+          className="min-h-[100px] resize-none text-base bg-secondary/50 border-border/50 focus:border-primary/50 focus:ring-primary/20"
           disabled={isSubmitting}
           aria-label="Thread content"
           maxLength={maxLength + 50}
@@ -315,9 +315,9 @@ export function ThreadComposer({ onSuccess }: ThreadComposerProps) {
           <span
             className={`text-sm ${
               remainingChars < 0
-                ? 'text-red-600'
+                ? 'text-destructive'
                 : remainingChars < 20
-                  ? 'text-orange-600'
+                  ? 'text-orange-500'
                   : 'text-muted-foreground'
             }`}
           >
@@ -342,19 +342,19 @@ export function ThreadComposer({ onSuccess }: ThreadComposerProps) {
                     alt={media.altText || `Preview ${index + 1}`}
                     width={300}
                     height={200}
-                    className="w-full h-auto max-h-[200px] object-cover rounded-lg border"
+                    className="w-full h-auto max-h-[200px] object-cover rounded-xl bg-card border border-border/50"
                   />
                 ) : (
                   <video
                     src={media.preview}
-                    className="w-full h-auto max-h-[200px] object-cover rounded-lg border"
+                    className="w-full h-auto max-h-[200px] object-cover rounded-xl bg-card border border-border/50"
                     controls
                     muted
                   />
                 )}
 
                 {/* Media type badge */}
-                <span className="absolute top-2 left-2 bg-black/60 text-white text-xs px-2 py-1 rounded">
+                <span className="absolute top-2 left-2 bg-background/80 backdrop-blur-sm text-foreground text-xs px-2 py-1 rounded-full">
                   {media.type === 'video' ? '🎬 Video' : '🖼️ Image'}
                 </span>
 
@@ -396,7 +396,8 @@ export function ThreadComposer({ onSuccess }: ThreadComposerProps) {
 
       {/* Upload progress */}
       {uploadProgress && (
-        <div className="text-sm text-blue-600 bg-blue-50 p-3 rounded-md">
+        <div className="text-sm text-primary bg-primary/10 p-3 rounded-lg border border-primary/20 flex items-center gap-2">
+          <div className="animate-spin w-4 h-4 border-2 border-primary border-t-transparent rounded-full" />
           {uploadProgress}
         </div>
       )}
@@ -404,7 +405,7 @@ export function ThreadComposer({ onSuccess }: ThreadComposerProps) {
       {/* Error message */}
       {error && (
         <div
-          className="text-sm text-red-600 bg-red-50 p-3 rounded-md"
+          className="text-sm text-destructive bg-destructive/10 p-3 rounded-lg border border-destructive/20"
           role="alert"
         >
           {error}
@@ -431,6 +432,7 @@ export function ThreadComposer({ onSuccess }: ThreadComposerProps) {
             onClick={() => fileInputRef.current?.click()}
             disabled={isSubmitting || !canAddMore}
             aria-label="Add media"
+            className="border-border/50 hover:bg-secondary"
           >
             📎 Add Media
           </Button>
@@ -442,7 +444,7 @@ export function ThreadComposer({ onSuccess }: ThreadComposerProps) {
           )}
         </div>
 
-        <Button type="submit" disabled={!canSubmit} className="min-w-[80px]">
+        <Button type="submit" disabled={!canSubmit} className="min-w-[80px] btn-gradient text-white">
           {isSubmitting ? 'Posting...' : 'Post'}
         </Button>
       </div>

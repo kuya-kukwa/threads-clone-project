@@ -5,7 +5,7 @@
  * Features:
  * - Thread composer at top
  * - Public feed with pagination
- * - Mobile-first layout
+ * - Mobile-first layout with dark theme
  * - Authentication required
  */
 
@@ -26,10 +26,10 @@ function FeedContent() {
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="max-w-2xl mx-auto border-x min-h-screen">
+      <div className="max-w-2xl mx-auto border-x border-border/50 min-h-screen">
         {/* Header */}
-        <div className="sticky top-0 z-10 bg-background border-b p-4">
-          <h1 className="text-xl font-bold">Home</h1>
+        <div className="sticky top-14 md:top-16 z-10 glass border-b border-border/50 p-4">
+          <h1 className="text-xl font-bold gradient-text">Home</h1>
         </div>
 
         {/* Thread Composer */}
