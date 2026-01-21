@@ -1,0 +1,281 @@
+'use client';
+
+/**
+ * Create Post Page
+ * Dedicated page for creating new threads
+ * Mobile-optimized with full-screen composer
+ */
+
+import { useState, useRef } from 'react';
+import { useRouter } from 'next/navigation';
+import Link from 'next/link';
+import { AuthGuard } from '@/components/auth/AuthGuard';
+import { useCurrentUser } from '@/hooks';
+import { apiClient } from '@/lib/api/apiClient';
+
+const MAX_CHARS = 500;
+const MAX_FILES = 10;
+const MAX_FILE_SIZE = 50 * 1024 * 1024; // 50MB
+
+export default function CreatePage() {
+  const router = useRouter();
+  const { user } = useCurrentUser();
+  const [content, setContent] = useState('');
+  const [mediaFiles, setMediaFiles] = useState<File[]>([]);
+  const [mediaPreviews, setMediaPreviews] = useState<{ url: string; type: 'image' | 'video' }[]>([]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const charsRemaining = MAX_CHARS - content.length;
+  const canPost = content.trim().length > 0 || mediaFiles.length > 0;
+
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    if (files.length === 0) return;
+
+    // Validate file count
+    if (mediaFiles.length + files.length > MAX_FILES) {
+      setError(`Maximum ${MAX_FILES} files allowed`);
+      return;
+    }
+
+    // Validate each file
+    for (const file of files) {
+      if (file.size > MAX_FILE_SIZE) {
+        setError(`File ${file.name} exceeds 50MB limit`);
+        return;
+      }
+      if (!file.type.startsWith('image/') && !file.type.startsWith('video/')) {
+        setError(`File ${file.name} is not a supported format`);
+        return;
+      }
+    }
+
+    setError(null);
+
+    // Add files and generate previews
+    const newFiles = [...mediaFiles, ...files];
+    setMediaFiles(newFiles);
+
+    const newPreviews = files.map((file) => ({
+      url: URL.createObjectURL(file),
+      type: (file.type.startsWith('video/') ? 'video' : 'image') as 'image' | 'video',
+    }));
+    setMediaPreviews([...mediaPreviews, ...newPreviews]);
+
+    // Reset input
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
+
+  const removeMedia = (index: number) => {
+    URL.revokeObjectURL(mediaPreviews[index].url);
+    setMediaFiles(mediaFiles.filter((_, i) => i !== index));
+    setMediaPreviews(mediaPreviews.filter((_, i) => i !== index));
+  };
+
+  const handleSubmit = async () => {
+    if (!canPost || isSubmitting) return;
+
+    setIsSubmitting(true);
+    setError(null);
+
+    try {
+      // Upload media files first
+      const mediaUrls: string[] = [];
+      for (const file of mediaFiles) {
+        const formData = new FormData();
+        formData.append('file', file);
+
+        const response = await fetch('/api/upload/image', {
+          method: 'POST',
+          body: formData,
+          credentials: 'include',
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.message || 'Failed to upload file');
+        }
+
+        const { url } = await response.json();
+        mediaUrls.push(url);
+      }
+
+      // Create thread
+      await apiClient.post('/api/threads', {
+        content: content.trim(),
+        mediaUrls: mediaUrls.length > 0 ? mediaUrls : undefined,
+      });
+
+      // Clean up previews
+      mediaPreviews.forEach((preview) => URL.revokeObjectURL(preview.url));
+
+      // Navigate to feed
+      router.push('/feed');
+      router.refresh();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to create post');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  return (
+    <AuthGuard>
+      <div className="min-h-screen bg-background flex flex-col">
+        {/* Header */}
+        <div className="sticky top-0 z-50 glass border-b border-border/50">
+          <div className="max-w-2xl mx-auto px-4">
+            <div className="flex items-center justify-between h-12">
+              <Link
+                href="/feed"
+                className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+              >
+                Cancel
+              </Link>
+              <h1 className="text-sm font-semibold">New Thread</h1>
+              <button
+                onClick={handleSubmit}
+                disabled={!canPost || isSubmitting}
+                className={`text-sm font-semibold transition-colors ${
+                  canPost && !isSubmitting
+                    ? 'text-primary hover:text-primary/80'
+                    : 'text-muted-foreground'
+                }`}
+              >
+                {isSubmitting ? 'Posting...' : 'Post'}
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Composer */}
+        <div className="flex-1 max-w-2xl mx-auto w-full px-4 py-4">
+          <div className="flex gap-3">
+            {/* User avatar */}
+            <div className="flex-shrink-0">
+              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center text-white font-medium">
+                {user?.name?.[0] || 'U'}
+              </div>
+            </div>
+
+            {/* Content area */}
+            <div className="flex-1">
+              <p className="text-sm font-semibold mb-1">{user?.name || 'User'}</p>
+              <textarea
+                value={content}
+                onChange={(e) => setContent(e.target.value)}
+                placeholder="Start a thread..."
+                maxLength={MAX_CHARS}
+                className="w-full bg-transparent border-0 resize-none text-foreground placeholder:text-muted-foreground focus:outline-none text-base min-h-[120px]"
+                autoFocus
+              />
+
+              {/* Media previews */}
+              {mediaPreviews.length > 0 && (
+                <div className={`grid gap-2 mt-3 ${
+                  mediaPreviews.length === 1 ? 'grid-cols-1' : 'grid-cols-2'
+                }`}>
+                  {mediaPreviews.map((preview, index) => (
+                    <div key={index} className="relative rounded-xl overflow-hidden bg-secondary aspect-square">
+                      {preview.type === 'video' ? (
+                        <video
+                          src={preview.url}
+                          className="w-full h-full object-cover"
+                          muted
+                        />
+                      ) : (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img
+                          src={preview.url}
+                          alt=""
+                          className="w-full h-full object-cover"
+                        />
+                      )}
+                      <button
+                        onClick={() => removeMedia(index)}
+                        className="absolute top-2 right-2 w-7 h-7 rounded-full bg-background/80 backdrop-blur-sm flex items-center justify-center hover:bg-background transition-colors"
+                      >
+                        <XIcon className="w-4 h-4" />
+                      </button>
+                      {preview.type === 'video' && (
+                        <div className="absolute bottom-2 left-2 px-2 py-1 rounded bg-background/80 backdrop-blur-sm text-xs">
+                          Video
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {/* Error message */}
+              {error && (
+                <p className="text-sm text-red-500 mt-2">{error}</p>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Bottom toolbar */}
+        <div className="sticky bottom-0 glass border-t border-border/50 pb-safe">
+          <div className="max-w-2xl mx-auto px-4">
+            <div className="flex items-center justify-between h-12">
+              {/* Media button */}
+              <div className="flex items-center gap-2">
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*,video/*"
+                  multiple
+                  onChange={handleFileSelect}
+                  className="hidden"
+                />
+                <button
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={mediaFiles.length >= MAX_FILES}
+                  className="p-2 rounded-lg hover:bg-secondary transition-colors disabled:opacity-50"
+                >
+                  <ImageIcon className="w-5 h-5 text-muted-foreground" />
+                </button>
+                {mediaFiles.length > 0 && (
+                  <span className="text-xs text-muted-foreground">
+                    {mediaFiles.length}/{MAX_FILES}
+                  </span>
+                )}
+              </div>
+
+              {/* Character count */}
+              <span className={`text-xs ${
+                charsRemaining < 0 ? 'text-red-500' :
+                charsRemaining < 50 ? 'text-amber-500' :
+                'text-muted-foreground'
+              }`}>
+                {charsRemaining}
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </AuthGuard>
+  );
+}
+
+// Icons
+function XIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+    </svg>
+  );
+}
+
+function ImageIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
+    </svg>
+  );
+}

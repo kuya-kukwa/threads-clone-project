@@ -23,7 +23,6 @@ import {
   useState,
   useRef,
   useCallback,
-  useEffect,
   TouchEvent,
 } from 'react';
 
@@ -163,8 +162,9 @@ export function ThreadCard({ thread }: ThreadCardProps) {
         </div>
       </article>
 
-      {/* Lightbox Modal */}
+      {/* Lightbox Modal - key forces re-mount when opened to reset index */}
       <MediaLightbox
+        key={lightboxOpen ? `lightbox-${lightboxIndex}` : 'closed'}
         items={mediaItems}
         isOpen={lightboxOpen}
         onClose={() => setLightboxOpen(false)}
@@ -456,12 +456,8 @@ function MediaLightbox({
   const touchStartX = useRef(0);
   const touchEndX = useRef(0);
 
-  // Reset index when opening
-  useEffect(() => {
-    if (isOpen) {
-      setCurrentIndex(initialIndex);
-    }
-  }, [isOpen, initialIndex]);
+  // Reset index when dialog opens - use key prop on Dialog instead of useEffect
+  // The parent should pass key={isOpen ? 'open' : 'closed'} to reset state
 
   const currentItem = items[currentIndex];
   const hasMultiple = items.length > 1;
