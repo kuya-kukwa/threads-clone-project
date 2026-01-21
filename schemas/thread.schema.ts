@@ -90,6 +90,54 @@ export const imageUploadSchema = z.object({
 });
 
 /**
+ * Video metadata schema
+ * Validates video file before upload
+ */
+export const videoUploadSchema = z.object({
+  file: z.instanceof(File, { message: 'Invalid file' }),
+  size: z
+    .number()
+    .max(
+      SECURITY_CONFIG.VIDEO.MAX_SIZE_MB * 1024 * 1024,
+      `Video size cannot exceed ${SECURITY_CONFIG.VIDEO.MAX_SIZE_MB}MB`
+    ),
+  type: z
+    .string()
+    .refine(
+      (type) => (SECURITY_CONFIG.VIDEO.ALLOWED_TYPES as readonly string[]).includes(type),
+      {
+        message: `Only ${SECURITY_CONFIG.VIDEO.ALLOWED_TYPES.join(', ')} videos are allowed`,
+      }
+    ),
+});
+
+/**
+ * Combined media upload schema
+ * Validates any media file (image or video)
+ */
+export const mediaUploadSchema = z.object({
+  file: z.instanceof(File, { message: 'Invalid file' }),
+  size: z.number(),
+  type: z.string(),
+}).refine(
+  (data) => {
+    const isImage = (SECURITY_CONFIG.MEDIA.ALLOWED_IMAGE_TYPES as readonly string[]).includes(data.type);
+    const isVideo = (SECURITY_CONFIG.MEDIA.ALLOWED_VIDEO_TYPES as readonly string[]).includes(data.type);
+    
+    if (isImage) {
+      return data.size <= SECURITY_CONFIG.MEDIA.MAX_IMAGE_SIZE_MB * 1024 * 1024;
+    }
+    if (isVideo) {
+      return data.size <= SECURITY_CONFIG.MEDIA.MAX_VIDEO_SIZE_MB * 1024 * 1024;
+    }
+    return false;
+  },
+  {
+    message: `Invalid file type or size. Images: max ${SECURITY_CONFIG.MEDIA.MAX_IMAGE_SIZE_MB}MB (${SECURITY_CONFIG.MEDIA.ALLOWED_IMAGE_TYPES.join(', ')}). Videos: max ${SECURITY_CONFIG.MEDIA.MAX_VIDEO_SIZE_MB}MB (${SECURITY_CONFIG.MEDIA.ALLOWED_VIDEO_TYPES.join(', ')})`,
+  }
+);
+
+/**
  * Feed pagination parameters schema
  */
 export const feedPaginationSchema = z.object({
@@ -107,4 +155,6 @@ export const feedPaginationSchema = z.object({
 export type ThreadCreateInput = z.infer<typeof threadCreateSchema>;
 export type ThreadUpdateInput = z.infer<typeof threadUpdateSchema>;
 export type ImageUploadInput = z.infer<typeof imageUploadSchema>;
+export type VideoUploadInput = z.infer<typeof videoUploadSchema>;
+export type MediaUploadInput = z.infer<typeof mediaUploadSchema>;
 export type FeedPaginationInput = z.infer<typeof feedPaginationSchema>;

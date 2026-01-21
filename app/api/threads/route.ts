@@ -17,11 +17,12 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { createSessionClient } from '@/lib/appwriteServer';
-import { createThread } from '@/lib/services/threadService';
+import { createThread, createThreadWithMedia } from '@/lib/services/threadService';
 import { rateLimit, RateLimitType } from '@/lib/middleware/rateLimit';
 import { threadCreateSchema } from '@/schemas/thread.schema';
 import { createRequestLogger } from '@/lib/logger/requestLogger';
 import { getErrorMessage } from '@/lib/errors';
+import { MediaItem } from '@/types/appwrite';
 
 export async function OPTIONS() {
   return NextResponse.json(
@@ -102,20 +103,35 @@ export async function POST(request: NextRequest) {
     }
 
     const { content, imageId, altText } = validation.data;
+    
+    // Check if we have new multi-media format
+    const media = body.media as MediaItem[] | undefined;
 
     logger.info('Creating thread', {
       userId: currentUser.$id,
       hasImage: !!imageId,
+      hasMedia: !!(media && media.length > 0),
+      mediaCount: media?.length || 0,
       contentLength: content.length,
     });
 
-    // Create thread
-    const thread = await createThread(
-      currentUser.$id,
-      content,
-      imageId,
-      altText
-    );
+    // Use new multi-media function if media array is provided
+    let thread;
+    if (media && media.length > 0) {
+      thread = await createThreadWithMedia(
+        currentUser.$id,
+        content,
+        media
+      );
+    } else {
+      // Fall back to legacy single image function
+      thread = await createThread(
+        currentUser.$id,
+        content,
+        imageId,
+        altText
+      );
+    }
 
     logger.info('Thread created successfully', {
       threadId: thread.$id,

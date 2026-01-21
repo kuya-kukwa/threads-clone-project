@@ -176,4 +176,20 @@ export const SECURITY_CONFIG = {
     MAX_SIZE_MB: 5,
     ALLOWED_TYPES: ['image/jpeg', 'image/png', 'image/webp', 'image/gif'],
   },
+  
+  // Video upload limits
+  VIDEO: {
+    MAX_SIZE_MB: 50,
+    ALLOWED_TYPES: ['video/mp4', 'video/webm', 'video/quicktime'],
+    MAX_DURATION_SECONDS: 60, // 1 minute max
+  },
+  
+  // Combined media limits
+  MEDIA: {
+    MAX_FILES_PER_POST: 4, // Maximum media items per thread
+    ALLOWED_IMAGE_TYPES: ['image/jpeg', 'image/png', 'image/webp', 'image/gif'],
+    ALLOWED_VIDEO_TYPES: ['video/mp4', 'video/webm', 'video/quicktime'],
+    MAX_IMAGE_SIZE_MB: 5,
+    MAX_VIDEO_SIZE_MB: 50,
+  },
 } as const;

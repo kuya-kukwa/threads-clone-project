@@ -12,11 +12,12 @@
 import { ID, Query } from 'node-appwrite';
 import { serverDatabases } from '@/lib/appwriteServer';
 import { APPWRITE_CONFIG } from '@/lib/appwriteConfig';
-import { Thread, ThreadWithAuthor, UserProfile } from '@/types/appwrite';
+import { Thread, ThreadWithAuthor, UserProfile, MediaItem } from '@/types/appwrite';
 import { threadCreateSchema } from '@/schemas/thread.schema';
 import { sanitizeInput } from '@/lib/utils';
 import { logger } from '@/lib/logger/logger';
 import { getImagePreviewUrl } from './imageService';
+import { getMediaUrl } from './mediaService';
 
 /**
  * Sanitize thread content
@@ -121,6 +122,167 @@ export async function createThread(
 
     throw error;
   }
+}
+
+/**
+ * Create a new thread with multiple media items
+ * @param authorId - User ID of the author
+ * @param content - Thread text content (optional if media provided)
+ * @param media - Array of MediaItem objects
+ * @returns Created thread document
+ * 
+ * VALID STATES:
+ * - Text only (content required)
+ * - Media only (at least one media item)
+ * - Text + Media (both provided)
+ */
+export async function createThreadWithMedia(
+  authorId: string,
+  content: string,
+  media?: MediaItem[]
+): Promise<Thread> {
+  try {
+    // Determine if we have content or media
+    const hasContent = content && content.trim().length > 0;
+    const hasMedia = media && media.length > 0;
+
+    if (!hasContent && !hasMedia) {
+      throw new Error('Thread must have either text content or media');
+    }
+
+    // Sanitize content (handle empty string gracefully)
+    const sanitizedContent = hasContent ? sanitizeThreadContent(content) : '';
+
+    logger.info({
+      msg: 'Creating thread with media',
+      authorId,
+      hasMedia,
+      mediaCount: media?.length || 0,
+      hasContent,
+      contentLength: sanitizedContent.length,
+    });
+
+    // Prepare media arrays (JSON stringified for Appwrite storage)
+    let mediaIds = '';
+    let mediaUrls = '';
+    let mediaTypes = '';
+    let mediaAltTexts = '';
+    
+    // For backward compatibility, also set single image fields if first item is an image
+    let imageId = '';
+    let imageUrl = '';
+    let altText = '';
+
+    if (hasMedia && media) {
+      mediaIds = JSON.stringify(media.map(m => m.id));
+      mediaUrls = JSON.stringify(media.map(m => m.url));
+      mediaTypes = JSON.stringify(media.map(m => m.type));
+      mediaAltTexts = JSON.stringify(media.map(m => m.altText || ''));
+
+      // Set legacy single image fields for backward compatibility
+      const firstImage = media.find(m => m.type === 'image');
+      if (firstImage) {
+        imageId = firstImage.id;
+        imageUrl = firstImage.url;
+        altText = firstImage.altText || '';
+      } else if (media.length > 0) {
+        // If no images, use first media item for legacy fields
+        imageId = media[0].id;
+        imageUrl = media[0].url;
+        altText = media[0].altText || '';
+      }
+    }
+
+    // Create thread document
+    const thread = await serverDatabases.createDocument<Thread>(
+      APPWRITE_CONFIG.DATABASE_ID,
+      APPWRITE_CONFIG.COLLECTIONS.THREADS,
+      ID.unique(),
+      {
+        authorId,
+        content: sanitizedContent,
+        // Legacy single image fields (backward compatibility)
+        imageId,
+        imageUrl,
+        altText,
+        // New multi-media fields (JSON strings)
+        mediaIds,
+        mediaUrls,
+        mediaTypes,
+        mediaAltTexts,
+        // Other fields
+        parentThreadId: '',
+        replyCount: 0,
+        likeCount: 0,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      }
+    );
+
+    logger.info({
+      msg: 'Thread with media created successfully',
+      threadId: thread.$id,
+      authorId,
+      mediaCount: media?.length || 0,
+    });
+
+    return thread;
+  } catch (error) {
+    logger.error({
+      msg: 'Thread creation with media failed',
+      authorId,
+      error: error instanceof Error ? error.message : 'Unknown error',
+    });
+
+    throw error;
+  }
+}
+
+/**
+ * Parse media from thread document
+ * Handles both new multi-media format and legacy single image format
+ */
+export function parseThreadMedia(thread: Thread): MediaItem[] {
+  const media: MediaItem[] = [];
+
+  // Try to parse new multi-media format first
+  if (thread.mediaIds && thread.mediaIds.length > 0) {
+    try {
+      const ids = JSON.parse(thread.mediaIds) as string[];
+      const urls = thread.mediaUrls ? JSON.parse(thread.mediaUrls) as string[] : [];
+      const types = thread.mediaTypes ? JSON.parse(thread.mediaTypes) as string[] : [];
+      const altTexts = thread.mediaAltTexts ? JSON.parse(thread.mediaAltTexts) as string[] : [];
+
+      for (let i = 0; i < ids.length; i++) {
+        media.push({
+          id: ids[i],
+          url: urls[i] || getMediaUrl(ids[i], (types[i] as 'image' | 'video') || 'image'),
+          type: (types[i] as 'image' | 'video') || 'image',
+          altText: altTexts[i] || undefined,
+        });
+      }
+
+      return media;
+    } catch (parseError) {
+      logger.warn({
+        msg: 'Failed to parse media JSON',
+        threadId: thread.$id,
+        error: parseError instanceof Error ? parseError.message : 'Unknown error',
+      });
+    }
+  }
+
+  // Fall back to legacy single image format
+  if (thread.imageId && thread.imageId.trim().length > 0) {
+    media.push({
+      id: thread.imageId,
+      url: thread.imageUrl || getImagePreviewUrl(thread.imageId),
+      type: 'image',
+      altText: thread.altText || undefined,
+    });
+  }
+
+  return media;
 }
 
 /**

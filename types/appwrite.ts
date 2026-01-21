@@ -20,18 +20,48 @@ export interface UserProfile extends Models.Document {
 }
 
 /**
+ * Media type enum for distinguishing images from videos
+ */
+export type MediaType = 'image' | 'video';
+
+/**
+ * Individual media item (image or video)
+ */
+export interface MediaItem {
+  id: string; // Appwrite Storage file ID
+  url: string; // Generated URL from Storage
+  type: MediaType; // 'image' or 'video'
+  altText?: string; // Accessibility alt text
+  thumbnailUrl?: string; // For videos, thumbnail image URL
+  mimeType?: string; // Original MIME type (e.g., 'image/jpeg', 'video/mp4')
+}
+
+/**
  * Thread Post Document
  * Represents a post or reply
  * 
  * Storage: Appwrite Database (threads collection)
- * Images: Stored in Appwrite Storage, referenced by imageId
+ * Media: Stored in Appwrite Storage, referenced by mediaIds
+ * 
+ * Backward compatibility:
+ * - imageId/imageUrl still supported for old posts
+ * - New posts use media array
  */
 export interface Thread extends Models.Document {
   authorId: string; // References UserProfile.userId (Appwrite Auth user ID)
   content: string; // Post text content (max 500 chars)
+  
+  // Legacy single image fields (backward compatibility)
   imageId?: string; // Optional Appwrite Storage file ID
   imageUrl?: string; // Optional generated image URL (from Storage)
   altText?: string; // Optional accessibility alt text for image
+  
+  // New multi-media support (JSON stringified array)
+  mediaIds?: string; // JSON array of file IDs: '["id1", "id2"]'
+  mediaUrls?: string; // JSON array of URLs: '["url1", "url2"]'
+  mediaTypes?: string; // JSON array of types: '["image", "video"]'
+  mediaAltTexts?: string; // JSON array of alt texts: '["alt1", "alt2"]'
+  
   parentThreadId?: string; // If reply, references parent Thread.$id (future feature)
   replyCount: number; // Denormalized count of direct replies (default: 0)
   likeCount: number; // Denormalized count of likes (default: 0)
@@ -200,12 +230,30 @@ export interface FeedResponse {
 }
 
 /**
- * Image upload response
+ * Image upload response (legacy, single file)
  */
 export interface ImageUploadResponse {
   success: boolean;
   imageId?: string;
   imageUrl?: string;
+  error?: string;
+}
+
+/**
+ * Media upload response (multi-file support)
+ */
+export interface MediaUploadResponse {
+  success: boolean;
+  media?: MediaItem[];
+  error?: string;
+}
+
+/**
+ * Single media upload result
+ */
+export interface SingleMediaUploadResult {
+  success: boolean;
+  item?: MediaItem;
   error?: string;
 }
 

@@ -2,11 +2,11 @@
 
 /**
  * ThreadComposer Component
- * Mobile-first thread creation interface
+ * Mobile-first thread creation interface with multi-media support
  *
  * Features:
  * - Auto-growing textarea
- * - Image upload with preview
+ * - Multiple image/video upload with previews
  * - Character counter
  * - Keyboard-safe layout
  * - Submit disabled during posting
@@ -17,17 +17,24 @@
  * - Clear validation feedback
  */
 
-import { useState, useRef, FormEvent } from 'react';
+import { useState, useRef, FormEvent, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { getSessionToken } from '@/lib/appwriteClient';
 import { SECURITY_CONFIG } from '@/lib/appwriteConfig';
 import { getErrorMessage } from '@/lib/errors';
 import { logger } from '@/lib/logger/logger';
+import { MediaItem, MediaType } from '@/types/appwrite';
 import Image from 'next/image';
+
+interface MediaPreview {
+  file: File;
+  preview: string;
+  type: MediaType;
+  altText: string;
+}
 
 interface ThreadComposerProps {
   onSuccess?: () => void;
@@ -37,58 +44,139 @@ export function ThreadComposer({ onSuccess }: ThreadComposerProps) {
   const [content, setContent] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [imageFile, setImageFile] = useState<File | null>(null);
-  const [imagePreview, setImagePreview] = useState<string | null>(null);
-  const [altText, setAltText] = useState('');
+  const [mediaPreviews, setMediaPreviews] = useState<MediaPreview[]>([]);
+  const [uploadProgress, setUploadProgress] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
 
   const maxLength = SECURITY_CONFIG.MAX_LENGTHS.THREAD_CONTENT;
   const remainingChars = maxLength - content.length;
   const isOverLimit = remainingChars < 0;
-  // Allow submit if: (has text content OR has image) AND not over limit AND not submitting
+
+  // Allow submit if: (has text content OR has media) AND not over limit AND not submitting
   const hasContent = content.trim().length > 0;
-  const hasImage = imageFile !== null;
-  const canSubmit = (hasContent || hasImage) && !isOverLimit && !isSubmitting;
+  const hasMedia = mediaPreviews.length > 0;
+  const canSubmit = (hasContent || hasMedia) && !isOverLimit && !isSubmitting;
+  const canAddMore =
+    mediaPreviews.length < SECURITY_CONFIG.MEDIA.MAX_FILES_PER_POST;
 
-  const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    // Validate file size
-    if (file.size > SECURITY_CONFIG.IMAGE.MAX_SIZE_MB * 1024 * 1024) {
-      setError(
-        `Image must be smaller than ${SECURITY_CONFIG.IMAGE.MAX_SIZE_MB}MB`,
-      );
-      return;
+  // Determine media type from MIME type
+  const getMediaTypeFromMime = (mimeType: string): MediaType | null => {
+    if (
+      (SECURITY_CONFIG.MEDIA.ALLOWED_IMAGE_TYPES as readonly string[]).includes(
+        mimeType,
+      )
+    ) {
+      return 'image';
     }
-
-    // Validate file type
-    const allowedTypes = SECURITY_CONFIG.IMAGE
-      .ALLOWED_TYPES as readonly string[];
-    if (!allowedTypes.includes(file.type)) {
-      setError('Only JPG, PNG, WebP, and GIF images are allowed');
-      return;
+    if (
+      (SECURITY_CONFIG.MEDIA.ALLOWED_VIDEO_TYPES as readonly string[]).includes(
+        mimeType,
+      )
+    ) {
+      return 'video';
     }
-
-    setImageFile(file);
-    setError(null);
-
-    // Create preview
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      setImagePreview(reader.result as string);
-    };
-    reader.readAsDataURL(file);
+    return null;
   };
 
-  const handleRemoveImage = () => {
-    setImageFile(null);
-    setImagePreview(null);
-    setAltText('');
-    if (fileInputRef.current) {
-      fileInputRef.current.value = '';
-    }
+  // Handle file selection
+  const handleFileSelect = useCallback(
+    (files: FileList | null) => {
+      if (!files || files.length === 0) return;
+
+      // Validate single file (defined inside callback to avoid dependency issues)
+      const validateFile = (
+        file: File,
+      ): { valid: boolean; error?: string; type?: MediaType } => {
+        const mediaType = getMediaTypeFromMime(file.type);
+
+        if (!mediaType) {
+          return {
+            valid: false,
+            error:
+              'File type not allowed. Use JPG, PNG, WebP, GIF images or MP4, WebM videos.',
+          };
+        }
+
+        if (
+          mediaType === 'image' &&
+          file.size > SECURITY_CONFIG.MEDIA.MAX_IMAGE_SIZE_MB * 1024 * 1024
+        ) {
+          return {
+            valid: false,
+            error: `Image must be smaller than ${SECURITY_CONFIG.MEDIA.MAX_IMAGE_SIZE_MB}MB`,
+          };
+        }
+
+        if (
+          mediaType === 'video' &&
+          file.size > SECURITY_CONFIG.MEDIA.MAX_VIDEO_SIZE_MB * 1024 * 1024
+        ) {
+          return {
+            valid: false,
+            error: `Video must be smaller than ${SECURITY_CONFIG.MEDIA.MAX_VIDEO_SIZE_MB}MB`,
+          };
+        }
+
+        return { valid: true, type: mediaType };
+      };
+
+      const remainingSlots =
+        SECURITY_CONFIG.MEDIA.MAX_FILES_PER_POST - mediaPreviews.length;
+      if (remainingSlots <= 0) {
+        setError(
+          `Maximum ${SECURITY_CONFIG.MEDIA.MAX_FILES_PER_POST} files allowed`,
+        );
+        return;
+      }
+
+      const filesToAdd = Array.from(files).slice(0, remainingSlots);
+
+      for (const file of filesToAdd) {
+        const validation = validateFile(file);
+        if (!validation.valid || !validation.type) {
+          setError(validation.error || 'Invalid file');
+          return;
+        }
+
+        // Create preview
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          setMediaPreviews((prev) => [
+            ...prev,
+            {
+              file,
+              preview: reader.result as string,
+              type: validation.type!,
+              altText: '',
+            },
+          ]);
+        };
+        reader.readAsDataURL(file);
+      }
+
+      setError(null);
+
+      // Clear file input
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+    },
+    [mediaPreviews.length],
+  );
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    handleFileSelect(e.target.files);
+  };
+
+  const handleRemoveMedia = (index: number) => {
+    setMediaPreviews((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  const handleAltTextChange = (index: number, altText: string) => {
+    setMediaPreviews((prev) =>
+      prev.map((item, i) => (i === index ? { ...item, altText } : item)),
+    );
   };
 
   const handleSubmit = async (e: FormEvent) => {
@@ -98,6 +186,7 @@ export function ThreadComposer({ onSuccess }: ThreadComposerProps) {
 
     setIsSubmitting(true);
     setError(null);
+    setUploadProgress(null);
 
     try {
       // Get session token
@@ -108,39 +197,47 @@ export function ThreadComposer({ onSuccess }: ThreadComposerProps) {
         return;
       }
 
-      let imageId: string | undefined;
+      let uploadedMedia: MediaItem[] = [];
 
-      // Upload image if present
-      if (imageFile) {
+      // Upload media if present
+      if (mediaPreviews.length > 0) {
+        setUploadProgress(`Uploading ${mediaPreviews.length} file(s)...`);
+
         logger.info({
-          msg: 'Uploading thread image',
-          fileName: imageFile.name,
+          msg: 'Uploading thread media',
+          count: mediaPreviews.length,
+          fileNames: mediaPreviews.map((m) => m.file.name),
         });
 
-        // Upload via API endpoint
+        // Upload via multi-media API endpoint
         const formData = new FormData();
-        formData.append('file', imageFile);
+        mediaPreviews.forEach((media, index) => {
+          formData.append(`file${index}`, media.file);
+          formData.append(`altText${index}`, media.altText);
+        });
 
-        const uploadResponse = await fetch('/api/upload/image', {
+        const uploadResponse = await fetch('/api/upload/media', {
           method: 'POST',
           headers: {
-            'x-session-id': sessionId, // Send session in header
-            'X-CSRF-Token': 'true', // Required by middleware for POST requests
+            'x-session-id': sessionId,
+            'X-CSRF-Token': 'true',
           },
-          credentials: 'include', // Ensure cookies are sent for cross-device requests
+          credentials: 'include',
           body: formData,
         });
 
         const uploadResult = await uploadResponse.json();
 
         if (!uploadResult.success) {
-          setError(uploadResult.error || 'Failed to upload image');
+          setError(uploadResult.error || 'Failed to upload media');
           setIsSubmitting(false);
+          setUploadProgress(null);
           return;
         }
 
-        imageId = uploadResult.imageId;
-        logger.info({ msg: 'Image uploaded', imageId });
+        uploadedMedia = uploadResult.media;
+        logger.info({ msg: 'Media uploaded', count: uploadedMedia.length });
+        setUploadProgress('Creating post...');
       }
 
       // Create thread
@@ -149,13 +246,12 @@ export function ThreadComposer({ onSuccess }: ThreadComposerProps) {
         headers: {
           'Content-Type': 'application/json',
           'x-session-id': sessionId,
-          'X-CSRF-Token': 'true', // Required by middleware for POST requests
+          'X-CSRF-Token': 'true',
         },
-        credentials: 'include', // Ensure cookies are sent for cross-device requests
+        credentials: 'include',
         body: JSON.stringify({
           content: content.trim(),
-          imageId,
-          altText: altText.trim() || undefined,
+          media: uploadedMedia.length > 0 ? uploadedMedia : undefined,
         }),
       });
 
@@ -164,6 +260,7 @@ export function ThreadComposer({ onSuccess }: ThreadComposerProps) {
       if (!result.success) {
         setError(result.error || 'Failed to create thread');
         setIsSubmitting(false);
+        setUploadProgress(null);
         return;
       }
 
@@ -171,9 +268,8 @@ export function ThreadComposer({ onSuccess }: ThreadComposerProps) {
 
       // Reset form
       setContent('');
-      setImageFile(null);
-      setImagePreview(null);
-      setAltText('');
+      setMediaPreviews([]);
+      setUploadProgress(null);
       if (fileInputRef.current) {
         fileInputRef.current.value = '';
       }
@@ -190,10 +286,17 @@ export function ThreadComposer({ onSuccess }: ThreadComposerProps) {
         error: getErrorMessage(err),
       });
       setError('Failed to create thread. Please try again.');
+      setUploadProgress(null);
     } finally {
       setIsSubmitting(false);
     }
   };
+
+  // Allowed file types for input
+  const acceptedTypes = [
+    ...SECURITY_CONFIG.MEDIA.ALLOWED_IMAGE_TYPES,
+    ...SECURITY_CONFIG.MEDIA.ALLOWED_VIDEO_TYPES,
+  ].join(',');
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4 p-4 border-b">
@@ -206,7 +309,7 @@ export function ThreadComposer({ onSuccess }: ThreadComposerProps) {
           className="min-h-[100px] resize-none text-base"
           disabled={isSubmitting}
           aria-label="Thread content"
-          maxLength={maxLength + 50} // Allow typing past limit for better UX
+          maxLength={maxLength + 50}
         />
         <div className="flex justify-between items-center mt-1">
           <span
@@ -223,42 +326,78 @@ export function ThreadComposer({ onSuccess }: ThreadComposerProps) {
         </div>
       </div>
 
-      {/* Image Preview */}
-      {imagePreview && (
-        <div className="space-y-2">
-          <div className="relative inline-block">
-            <Image
-              src={imagePreview}
-              alt="Preview"
-              className="max-w-full max-h-[300px] rounded-lg border"
-            />
-            <Button
-              type="button"
-              variant="destructive"
-              size="sm"
-              onClick={handleRemoveImage}
-              className="absolute top-2 right-2"
-              disabled={isSubmitting}
-            >
-              Remove
-            </Button>
+      {/* Media Previews Grid */}
+      {mediaPreviews.length > 0 && (
+        <div className="space-y-3">
+          <div
+            className={`grid gap-2 ${
+              mediaPreviews.length === 1 ? 'grid-cols-1' : 'grid-cols-2'
+            }`}
+          >
+            {mediaPreviews.map((media, index) => (
+              <div key={index} className="relative group">
+                {media.type === 'image' ? (
+                  <Image
+                    src={media.preview}
+                    alt={media.altText || `Preview ${index + 1}`}
+                    width={300}
+                    height={200}
+                    className="w-full h-auto max-h-[200px] object-cover rounded-lg border"
+                  />
+                ) : (
+                  <video
+                    src={media.preview}
+                    className="w-full h-auto max-h-[200px] object-cover rounded-lg border"
+                    controls
+                    muted
+                  />
+                )}
+
+                {/* Media type badge */}
+                <span className="absolute top-2 left-2 bg-black/60 text-white text-xs px-2 py-1 rounded">
+                  {media.type === 'video' ? '🎬 Video' : '🖼️ Image'}
+                </span>
+
+                {/* Remove button */}
+                <Button
+                  type="button"
+                  variant="destructive"
+                  size="sm"
+                  onClick={() => handleRemoveMedia(index)}
+                  className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity"
+                  disabled={isSubmitting}
+                >
+                  ✕
+                </Button>
+              </div>
+            ))}
           </div>
 
-          {/* Alt text input */}
-          <div>
-            <Label htmlFor="alt-text" className="text-sm">
-              Alt text (optional, for accessibility)
-            </Label>
-            <Input
-              id="alt-text"
-              value={altText}
-              onChange={(e) => setAltText(e.target.value)}
-              placeholder="Describe this image..."
-              maxLength={200}
-              disabled={isSubmitting}
-              className="mt-1"
-            />
+          {/* Alt text inputs */}
+          <div className="space-y-2">
+            {mediaPreviews.map((media, index) => (
+              <div key={index} className="flex items-center gap-2">
+                <span className="text-xs text-muted-foreground w-16">
+                  {media.type === 'video' ? 'Video' : 'Image'} {index + 1}:
+                </span>
+                <Input
+                  value={media.altText}
+                  onChange={(e) => handleAltTextChange(index, e.target.value)}
+                  placeholder="Add alt text for accessibility..."
+                  maxLength={200}
+                  disabled={isSubmitting}
+                  className="flex-1 text-sm"
+                />
+              </div>
+            ))}
           </div>
+        </div>
+      )}
+
+      {/* Upload progress */}
+      {uploadProgress && (
+        <div className="text-sm text-blue-600 bg-blue-50 p-3 rounded-md">
+          {uploadProgress}
         </div>
       )}
 
@@ -274,32 +413,47 @@ export function ThreadComposer({ onSuccess }: ThreadComposerProps) {
 
       {/* Actions */}
       <div className="flex items-center justify-between gap-2">
-        <div>
+        <div className="flex items-center gap-2">
           <input
             ref={fileInputRef}
             type="file"
-            accept={SECURITY_CONFIG.IMAGE.ALLOWED_TYPES.join(',')}
-            onChange={handleImageSelect}
+            accept={acceptedTypes}
+            onChange={handleInputChange}
             className="hidden"
-            id="thread-image-upload"
-            disabled={isSubmitting}
+            id="thread-media-upload"
+            disabled={isSubmitting || !canAddMore}
+            multiple
           />
           <Button
             type="button"
             variant="outline"
             size="sm"
             onClick={() => fileInputRef.current?.click()}
-            disabled={isSubmitting || !!imageFile}
-            aria-label="Add image"
+            disabled={isSubmitting || !canAddMore}
+            aria-label="Add media"
           >
-            {imageFile ? 'Image Added' : 'Add Image'}
+            📎 Add Media
           </Button>
+
+          {mediaPreviews.length > 0 && (
+            <span className="text-xs text-muted-foreground">
+              {mediaPreviews.length}/{SECURITY_CONFIG.MEDIA.MAX_FILES_PER_POST}
+            </span>
+          )}
         </div>
 
         <Button type="submit" disabled={!canSubmit} className="min-w-[80px]">
           {isSubmitting ? 'Posting...' : 'Post'}
         </Button>
       </div>
+
+      {/* Help text */}
+      <p className="text-xs text-muted-foreground">
+        Images: JPG, PNG, WebP, GIF (max{' '}
+        {SECURITY_CONFIG.MEDIA.MAX_IMAGE_SIZE_MB}MB) • Videos: MP4, WebM (max{' '}
+        {SECURITY_CONFIG.MEDIA.MAX_VIDEO_SIZE_MB}MB) • Up to{' '}
+        {SECURITY_CONFIG.MEDIA.MAX_FILES_PER_POST} files
+      </p>
     </form>
   );
 }
