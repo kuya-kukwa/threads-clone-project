@@ -7,7 +7,9 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "setup:db": "node scripts/setupDatabase.mjs"
+    "setup:db": "node scripts/setupDatabase.mjs",
+    "validate:prod": "node scripts/validateProduction.mjs",
+    "build:prod": "npm run validate:prod && npm run build"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",

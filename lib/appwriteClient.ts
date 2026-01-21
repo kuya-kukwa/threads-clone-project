@@ -68,3 +68,26 @@ export function getSessionToken(): string | null {
     return null;
   }
 }
+
+/**
+ * Debug session state in production
+ * Logs current session info to help troubleshoot auth issues
+ */
+export function debugSessionState(): void {
+  if (typeof window === 'undefined') return;
+  
+  console.log('[Appwrite Debug] Session state:', {
+    hasCookieFallback: !!localStorage.getItem('cookieFallback'),
+    cookieKeys: (() => {
+      try {
+        const fallback = localStorage.getItem('cookieFallback');
+        return fallback ? Object.keys(JSON.parse(fallback)) : [];
+      } catch {
+        return [];
+      }
+    })(),
+    sessionToken: getSessionToken()?.substring(0, 20) + '...',
+    endpoint: env.NEXT_PUBLIC_APPWRITE_ENDPOINT,
+    projectId: env.NEXT_PUBLIC_APPWRITE_PROJECT_ID,
+  });
+}

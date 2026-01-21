@@ -12,8 +12,6 @@
 
 import { NetworkError, TimeoutError } from '../errors/AppError';
 import { handleClientError } from '../errors/errorHandler';
-import { ApiResponse, ApiErrorResponse } from '@/types/appwrite';
-import { isRetryableError as checkRetryable, getErrorMessage } from '../errors';
 
 /**
  * API client configuration
@@ -86,10 +84,20 @@ function sleep(ms: number): Promise<void> {
 }
 
 /**
- * Check if error is retryable (uses centralized type guard)
+ * Check if error is retryable
  */
 function isRetryableError(error: unknown): boolean {
-  return checkRetryable(error);
+  // Network errors are retryable
+  if (error instanceof TypeError && error.message === 'Failed to fetch') {
+    return true;
+  }
+  
+  // Check if it's a NetworkError or TimeoutError
+  if (error instanceof NetworkError || error instanceof TimeoutError) {
+    return true;
+  }
+  
+  return false;
 }
 
 /**
@@ -163,13 +171,13 @@ export class ApiClient {
         
         // Handle error responses
         if (!response.ok) {
-          const error = new Error((data as ApiErrorResponse).error || 'Request failed') as Error & {
+          const error = new Error((data as { error?: string }).error || 'Request failed') as Error & {
             statusCode?: number;
             code?: string;
             response?: unknown;
           };
           error.statusCode = response.status;
-          error.code = (data as ApiErrorResponse).code;
+          error.code = (data as { code?: string }).code;
           error.response = data;
           throw error;
         }

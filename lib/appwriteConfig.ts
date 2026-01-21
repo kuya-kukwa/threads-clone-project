@@ -39,11 +39,32 @@ function validateEnv() {
       }),
     };
     
+    // Log environment state in production for debugging
+    if (!isServer && typeof window !== 'undefined') {
+      console.log('[Environment Check] Appwrite config:', {
+        hasEndpoint: !!envVars.NEXT_PUBLIC_APPWRITE_ENDPOINT,
+        hasProjectId: !!envVars.NEXT_PUBLIC_APPWRITE_PROJECT_ID,
+        endpoint: envVars.NEXT_PUBLIC_APPWRITE_ENDPOINT,
+        projectId: envVars.NEXT_PUBLIC_APPWRITE_PROJECT_ID,
+        environment: process.env.NODE_ENV,
+      });
+    }
+    
     return schema.parse(envVars);
   } catch (error) {
     if (error instanceof z.ZodError) {
       const missingVars = error.issues?.map(e => `${e.path.join('.')}: ${e.message}`).join(', ') || 'Unknown validation error';
-      throw new Error(`Environment variable validation failed: ${missingVars}`);
+      const errorMsg = `Environment variable validation failed: ${missingVars}`;
+      
+      // In production, log more details for debugging
+      if (process.env.NODE_ENV === 'production') {
+        console.error('[Critical] ' + errorMsg, {
+          serverSide: isServer,
+          availableEnvKeys: Object.keys(process.env).filter(k => k.includes('APPWRITE')),
+        });
+      }
+      
+      throw new Error(errorMsg);
     }
     throw error;
   }

@@ -107,7 +107,7 @@ export class AuthService {
           logger.debug('Existing session found, deleting before creating new session');
           await account.deleteSession('current');
         }
-      } catch (error) {
+      } catch {
         // No existing session, this is fine
         logger.debug('No existing session found');
       }
@@ -152,7 +152,7 @@ export class AuthService {
     try {
       const user = await account.get();
       return user;
-    } catch (error) {
+    } catch {
       // Don't log this as error - unauthenticated state is normal
       return null;
     }

@@ -12,7 +12,7 @@ import { Models } from 'appwrite';
  * Check if user is authenticated
  * Throws UnauthorizedError if not authenticated
  */
-export async function requireAuth(request: NextRequest): Promise<Models.User<Models.Preferences>> {
+export async function requireAuth(): Promise<Models.User<Models.Preferences>> {
   const user = await AuthService.getCurrentUser();
   
   if (!user) {
@@ -26,7 +26,7 @@ export async function requireAuth(request: NextRequest): Promise<Models.User<Mod
  * Optional authentication - returns user if authenticated, null otherwise
  * Does not throw error
  */
-export async function optionalAuth(request: NextRequest): Promise<Models.User<Models.Preferences> | null> {
+export async function optionalAuth(): Promise<Models.User<Models.Preferences> | null> {
   return await AuthService.getCurrentUser();
 }
 
@@ -35,10 +35,10 @@ export async function optionalAuth(request: NextRequest): Promise<Models.User<Mo
  * Throws ForbiddenError if user doesn't own the resource
  */
 export async function requireResourceOwnership(
-  request: NextRequest,
+  _request: NextRequest,
   resourceUserId: string
 ): Promise<Models.User<Models.Preferences>> {
-  const user = await requireAuth(request);
+  const user = await requireAuth();
   
   if (user.$id !== resourceUserId) {
     const { ForbiddenError } = await import('../errors/AppError');

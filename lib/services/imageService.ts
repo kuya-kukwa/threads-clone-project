@@ -10,9 +10,9 @@
 
 import { ID } from 'node-appwrite';
 import { serverStorage } from '@/lib/appwriteServer';
-import { APPWRITE_CONFIG, SECURITY_CONFIG } from '@/lib/appwriteConfig';
+import { APPWRITE_CONFIG } from '@/lib/appwriteConfig';
 import { imageUploadSchema } from '@/schemas/thread.schema';
-import { ImageUploadResponse, UploadProgress } from '@/types/appwrite';
+import { ImageUploadResponse } from '@/types/appwrite';
 import { logger } from '@/lib/logger/logger';
 
 /**
@@ -40,7 +40,6 @@ export function validateImageFile(file: File): { valid: boolean; error?: string 
 /**
  * Upload image to Appwrite Storage
  * @param file - Image file to upload
- * @param onProgress - Optional progress callback
  * @returns Upload result with imageId and URL
  * 
  * Error handling:
@@ -49,8 +48,7 @@ export function validateImageFile(file: File): { valid: boolean; error?: string 
  * - Returns structured error response (never throws)
  */
 export async function uploadThreadImage(
-  file: File,
-  onProgress?: (progress: UploadProgress) => void
+  file: File
 ): Promise<ImageUploadResponse> {
   try {
     // Validate file

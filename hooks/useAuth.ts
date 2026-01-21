@@ -7,13 +7,15 @@
  * - Proper session cleanup before login
  * - Extended delay for session storage
  * - Hard navigation for reliable redirect
+ * - Enhanced error handling for production
  */
 
 import { useState } from 'react';
 import { AuthService } from '@/lib/services/authService';
 import { LoginInput, RegisterInput } from '@/schemas/auth.schema';
-import { account, clearAppwriteSession } from '@/lib/appwriteClient';
+import { account, clearAppwriteSession, debugSessionState } from '@/lib/appwriteClient';
 import { getErrorMessage } from '@/lib/errors';
+import { safeFetch, handleApiResponse, isNetworkError, isAuthError } from '@/lib/api/errorHandler';
 import { logger } from '@/lib/logger/logger';
 
 export function useAuth() {
@@ -92,19 +94,22 @@ export function useAuth() {
       // Clear any existing session data before registering
       clearAppwriteSession();
       
+      // Delete any existing session first
+      try {
+        await account.deleteSession('current');
+        logger.debug({ msg: 'useAuth: Cleared existing session' });
+      } catch {
+        // No existing session, continue
+      }
+      
       // Call API route to create auth user + profile (requires admin key)
       logger.debug({ msg: 'useAuth: Calling register API' });
-      const response = await fetch('/api/auth/register', {
+      const response = await safeFetch('/api/auth/register', {
         method: 'POST',
-        headers: { 
-          'Content-Type': 'application/json',
-          'X-CSRF-Token': 'true', // Required by middleware for POST requests
-        },
-        credentials: 'include', // Ensure cookies are sent for cross-device requests
         body: JSON.stringify(data),
       });
 
-      const result = await response.json();
+      const result = await handleApiResponse<{ success: boolean; error?: string; user?: unknown; profile?: unknown }>(response);
       logger.debug({ msg: 'useAuth: Register API response', success: result.success });
 
       if (!result.success) {
@@ -112,16 +117,51 @@ export function useAuth() {
         return { success: false, error: result.error || 'Registration failed' };
       }
 
-      // Now login client-side so Appwrite can set session cookies in browser
-      // The login function handles redirect to /feed on success
-      logger.debug({ msg: 'useAuth: Registration successful, logging in' });
-      await login({ email: data.email, password: data.password });
+      // Wait for user propagation before creating session
+      logger.debug({ msg: 'useAuth: User created, waiting for propagation' });
+      await new Promise(resolve => setTimeout(resolve, 500));
       
-      // Note: login() redirects on success, so we only reach here if it failed
-      // But we already returned the error from login, so this won't execute
-      return { success: true };
+      // Create session directly client-side (no separate API call needed)
+      logger.debug({ msg: 'useAuth: Creating client session' });
+      const session = await account.createEmailPasswordSession(data.email, data.password);
+      logger.debug({ msg: 'useAuth: Session created', sessionId: session.$id });
+      
+      // Get current user to ensure session is valid
+      const user = await account.get();
+      logger.debug({ msg: 'useAuth: User retrieved', userId: user.$id });
+      
+      // Extended delay to ensure session is stored (important for mobile)
+      await new Promise(resolve => setTimeout(resolve, 300));
+      
+      logger.debug({ msg: 'useAuth: Registration complete, redirecting to /feed' });
+      // Force a hard navigation to ensure session is recognized
+      window.location.href = '/feed';
+      return { success: true, user };
     } catch (error: unknown) {
-      return { success: false, error: getErrorMessage(error) };
+      const errorMsg = getErrorMessage(error);
+      logger.warn({ msg: 'useAuth: Registration failed', error: errorMsg });
+      
+      // Enhanced error handling for production
+      if (process.env.NODE_ENV === 'production') {
+        debugSessionState();
+        console.error('[Registration Error]', {
+          error: errorMsg,
+          isNetwork: isNetworkError(error),
+          isAuth: isAuthError(error),
+        });
+      }
+      
+      // Check for common registration errors
+      if (errorMsg.includes('409') || (errorMsg.toLowerCase().includes('user') && errorMsg.toLowerCase().includes('exists'))) {
+        return { success: false, error: 'User already exists with this email' };
+      }
+      
+      // Network errors - suggest retry
+      if (isNetworkError(error)) {
+        return { success: false, error: 'Network error. Please check your connection and try again.' };
+      }
+      
+      return { success: false, error: errorMsg };
     } finally {
       setIsLoading(false);
     }

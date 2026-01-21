@@ -211,7 +211,7 @@ async function setupDatabase() {
   console.log(`🌐 Endpoint: ${ENDPOINT}\n`);
   
   try {
-    for (const [key, config] of Object.entries(COLLECTIONS)) {
+    for (const [, config] of Object.entries(COLLECTIONS)) {
       await createCollection(config);
     }
     

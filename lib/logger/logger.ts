@@ -11,7 +11,6 @@
  */
 
 import pino from 'pino';
-import { redactSensitiveData } from '../utils';
 
 /**
  * Logger configuration based on environment

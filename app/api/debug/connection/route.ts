@@ -36,7 +36,7 @@ export async function GET() {
     let databasesApiStatus = 'NOT TESTED';
     
     try {
-      const { serverClient, serverUsers, serverDatabases } = await import('@/lib/appwriteServer');
+      const { serverUsers, serverDatabases } = await import('@/lib/appwriteServer');
       serverClientStatus = 'IMPORTED OK';
       
       // Test Users API - list users (should return empty or list)
