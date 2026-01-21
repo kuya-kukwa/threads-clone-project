@@ -71,7 +71,7 @@ export class AuthService {
       
       logger.info('User registered successfully', { userId: user.$id, profileId: profile.$id });
       return { success: true, user, profile };
-    } catch (error: any) {
+    } catch (error: unknown) {
       const appError = parseAppwriteError(error);
       logger.error('Registration failed', error, { email: input.email });
       
@@ -120,7 +120,7 @@ export class AuthService {
       
       logger.info('User logged in successfully', { userId: user.$id });
       return { success: true, user };
-    } catch (error: any) {
+    } catch (error: unknown) {
       const appError = parseAppwriteError(error);
       logger.error('Login failed', error, { email: input.email });
       
@@ -138,7 +138,7 @@ export class AuthService {
       await account.deleteSession('current');
       logger.info('User logged out successfully');
       return { success: true };
-    } catch (error: any) {
+    } catch (error: unknown) {
       const appError = parseAppwriteError(error);
       logger.error('Logout failed', error);
       return { success: false, error: appError.message };

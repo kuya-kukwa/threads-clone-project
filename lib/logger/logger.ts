@@ -92,7 +92,7 @@ export interface LogContext {
   url?: string;
   statusCode?: number;
   duration?: number;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 /**
@@ -115,28 +115,28 @@ export class Logger {
   /**
    * Debug level logging
    */
-  debug(message: string, meta?: Record<string, any>) {
+  debug(message: string, meta?: Record<string, unknown>) {
     logger.debug({ ...this.context, ...meta }, message);
   }
 
   /**
    * Info level logging
    */
-  info(message: string, meta?: Record<string, any>) {
+  info(message: string, meta?: Record<string, unknown>) {
     logger.info({ ...this.context, ...meta }, message);
   }
 
   /**
    * Warning level logging
    */
-  warn(message: string, meta?: Record<string, any>) {
+  warn(message: string, meta?: Record<string, unknown>) {
     logger.warn({ ...this.context, ...meta }, message);
   }
 
   /**
    * Error level logging
    */
-  error(message: string, error?: Error | unknown, meta?: Record<string, any>) {
+  error(message: string, error?: Error | unknown, meta?: Record<string, unknown>) {
     const errorMeta = error instanceof Error
       ? { error: { message: error.message, stack: error.stack, name: error.name } }
       : { error };
@@ -147,7 +147,7 @@ export class Logger {
   /**
    * Fatal level logging (will exit process)
    */
-  fatal(message: string, error?: Error | unknown, meta?: Record<string, any>) {
+  fatal(message: string, error?: Error | unknown, meta?: Record<string, unknown>) {
     const errorMeta = error instanceof Error
       ? { error: { message: error.message, stack: error.stack, name: error.name } }
       : { error };
@@ -158,7 +158,7 @@ export class Logger {
   /**
    * Log HTTP request
    */
-  logRequest(method: string, url: string, meta?: Record<string, any>) {
+  logRequest(method: string, url: string, meta?: Record<string, unknown>) {
     this.info(`${method} ${url}`, { method, url, ...meta });
   }
 
@@ -170,7 +170,7 @@ export class Logger {
     url: string,
     statusCode: number,
     duration: number,
-    meta?: Record<string, any>
+    meta?: Record<string, unknown>
   ) {
     const level = statusCode >= 500 ? 'error' : statusCode >= 400 ? 'warn' : 'info';
     
@@ -183,21 +183,21 @@ export class Logger {
   /**
    * Log authentication events
    */
-  logAuth(event: 'login' | 'logout' | 'register', userId?: string, meta?: Record<string, any>) {
+  logAuth(event: 'login' | 'logout' | 'register', userId?: string, meta?: Record<string, unknown>) {
     this.info(`Authentication: ${event}`, { event, userId, ...meta });
   }
 
   /**
    * Log database operations
    */
-  logDatabase(operation: string, collection: string, meta?: Record<string, any>) {
+  logDatabase(operation: string, collection: string, meta?: Record<string, unknown>) {
     this.debug(`Database: ${operation} on ${collection}`, { operation, collection, ...meta });
   }
 
   /**
    * Log with custom level
    */
-  log(level: LogLevel, message: string, meta?: Record<string, any>) {
+  log(level: LogLevel, message: string, meta?: Record<string, unknown>) {
     logger[level]({ ...this.context, ...meta }, message);
   }
 }

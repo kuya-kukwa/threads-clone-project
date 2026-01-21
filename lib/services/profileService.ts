@@ -33,7 +33,7 @@ export class ProfileService {
       );
       
       return response.documents[0] || null;
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Get profile error:', error);
       return null;
     }
@@ -51,7 +51,7 @@ export class ProfileService {
       );
       
       return response.documents[0] || null;
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Get profile error:', error);
       return null;
     }
@@ -83,9 +83,10 @@ export class ProfileService {
       );
       
       return { success: true, profile };
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Profile update failed';
       console.error('Update profile error:', error);
-      return { success: false, error: error.message || 'Profile update failed' };
+      return { success: false, error: errorMessage };
     }
   }
 }

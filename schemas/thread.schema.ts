@@ -82,7 +82,7 @@ export const imageUploadSchema = z.object({
   type: z
     .string()
     .refine(
-      (type) => SECURITY_CONFIG.IMAGE.ALLOWED_TYPES.includes(type as any),
+      (type) => (SECURITY_CONFIG.IMAGE.ALLOWED_TYPES as readonly string[]).includes(type),
       {
         message: `Only ${SECURITY_CONFIG.IMAGE.ALLOWED_TYPES.join(', ')} images are allowed`,
       }

@@ -74,7 +74,7 @@ export function validateImageFile(file: File): { valid: boolean; error?: string 
 /**
  * Debounce function for search inputs
  */
-export function debounce<T extends (...args: any[]) => any>(
+export function debounce<T extends (...args: never[]) => unknown>(
   func: T,
   wait: number
 ): (...args: Parameters<T>) => void {
@@ -209,7 +209,7 @@ export function generateRequestId(): string {
  * @param keysToRedact - Array of key names to redact (default: common sensitive keys)
  * @returns Redacted copy of the object
  */
-export function redactSensitiveData<T extends Record<string, any>>(
+export function redactSensitiveData<T extends Record<string, unknown>>(
   obj: T,
   keysToRedact: string[] = ['password', 'token', 'apiKey', 'secret', 'authorization']
 ): T {
@@ -219,9 +219,9 @@ export function redactSensitiveData<T extends Record<string, any>>(
     const lowerKey = key.toLowerCase();
     
     if (keysToRedact.some(sensitive => lowerKey.includes(sensitive))) {
-      (redacted as any)[key] = '***REDACTED***';
+      (redacted as Record<string, unknown>)[key] = '***REDACTED***';
     } else if (typeof redacted[key] === 'object' && redacted[key] !== null) {
-      redacted[key] = redactSensitiveData(redacted[key], keysToRedact);
+      redacted[key] = redactSensitiveData(redacted[key] as Record<string, unknown>, keysToRedact) as T[Extract<keyof T, string>];
     }
   }
   

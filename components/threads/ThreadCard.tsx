@@ -21,6 +21,7 @@
 import { ThreadWithAuthor } from '@/types/appwrite';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { formatDistanceToNow } from 'date-fns';
+import Image from 'next/image';
 
 interface ThreadCardProps {
   thread: ThreadWithAuthor;
@@ -77,7 +78,7 @@ export function ThreadCard({ thread }: ThreadCardProps) {
           {/* Image */}
           {imageUrl && imageUrl.trim().length > 0 && (
             <div className={content && content.trim().length > 0 ? 'mt-2' : ''}>
-              <img
+              <Image
                 src={imageUrl}
                 alt={altText || 'Thread image'}
                 className="max-w-full h-auto rounded-lg border"

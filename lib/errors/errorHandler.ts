@@ -3,7 +3,7 @@
  * Converts errors to appropriate responses and logs them
  */
 
-import { NextResponse } from 'next/server';
+import { NextResponse, NextRequest } from 'next/server';
 import { ZodError } from 'zod';
 import {
   AppError,
@@ -31,9 +31,9 @@ export interface ErrorResponse {
 /**
  * Parse Appwrite SDK errors to typed errors
  */
-export function parseAppwriteError(error: any): AppError {
-  const code = error.code;
-  const message = error.message || 'Operation failed';
+export function parseAppwriteError(error: unknown): AppError {
+  const code = (error as { code?: number }).code;
+  const message = (error as { message?: string }).message || 'Operation failed';
 
   switch (code) {
     case 401:
@@ -171,9 +171,9 @@ export function handleClientError(error: unknown): {
  * Automatically catches and handles errors
  */
 export function asyncHandler(
-  handler: (request: any, context?: any) => Promise<NextResponse>
+  handler: (request: NextRequest, context?: Record<string, unknown>) => Promise<NextResponse>
 ) {
-  return async (request: any, context?: any): Promise<NextResponse> => {
+  return async (request: NextRequest, context?: Record<string, unknown>): Promise<NextResponse> => {
     try {
       return await handler(request, context);
     } catch (error) {

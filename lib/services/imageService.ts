@@ -123,7 +123,9 @@ export async function uploadThreadImage(
   } catch (error) {
     // Detailed error logging for debugging
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-    const errorCode = (error as any)?.code || (error as any)?.type || 'UNKNOWN';
+    const errorCode = (error && typeof error === 'object' && ('code' in error || 'type' in error)) 
+      ? (error as { code?: string; type?: string }).code || (error as { code?: string; type?: string }).type || 'UNKNOWN'
+      : 'UNKNOWN';
     
     logger.error({
       msg: 'Image upload failed',

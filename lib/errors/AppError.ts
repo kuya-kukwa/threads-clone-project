@@ -47,14 +47,14 @@ export class AppError extends Error {
   public readonly code: ErrorCode;
   public readonly isOperational: boolean;
   public readonly timestamp: Date;
-  public readonly context?: Record<string, any>;
+  public readonly context?: Record<string, unknown>;
 
   constructor(
     message: string,
     statusCode: number = 500,
     code: ErrorCode = ErrorCode.INTERNAL_ERROR,
     isOperational: boolean = true,
-    context?: Record<string, any>
+    context?: Record<string, unknown>
   ) {
     super(message);
     
@@ -102,7 +102,7 @@ export class AppError extends Error {
  * 400 Bad Request - Invalid input
  */
 export class BadRequestError extends AppError {
-  constructor(message: string = 'Bad request', context?: Record<string, any>) {
+  constructor(message: string = 'Bad request', context?: Record<string, unknown>) {
     super(message, 400, ErrorCode.INVALID_INPUT, true, context);
   }
 }
@@ -111,7 +111,7 @@ export class BadRequestError extends AppError {
  * 401 Unauthorized - Authentication required
  */
 export class UnauthorizedError extends AppError {
-  constructor(message: string = 'Authentication required', context?: Record<string, any>) {
+  constructor(message: string = 'Authentication required', context?: Record<string, unknown>) {
     super(message, 401, ErrorCode.UNAUTHORIZED, true, context);
   }
 }
@@ -120,7 +120,7 @@ export class UnauthorizedError extends AppError {
  * 403 Forbidden - Insufficient permissions
  */
 export class ForbiddenError extends AppError {
-  constructor(message: string = 'Access denied', context?: Record<string, any>) {
+  constructor(message: string = 'Access denied', context?: Record<string, unknown>) {
     super(message, 403, ErrorCode.FORBIDDEN, true, context);
   }
 }
@@ -129,7 +129,7 @@ export class ForbiddenError extends AppError {
  * 404 Not Found - Resource doesn't exist
  */
 export class NotFoundError extends AppError {
-  constructor(message: string = 'Resource not found', context?: Record<string, any>) {
+  constructor(message: string = 'Resource not found', context?: Record<string, unknown>) {
     super(message, 404, ErrorCode.NOT_FOUND, true, context);
   }
 }
@@ -138,7 +138,7 @@ export class NotFoundError extends AppError {
  * 409 Conflict - Resource already exists
  */
 export class ConflictError extends AppError {
-  constructor(message: string = 'Resource already exists', context?: Record<string, any>) {
+  constructor(message: string = 'Resource already exists', context?: Record<string, unknown>) {
     super(message, 409, ErrorCode.ALREADY_EXISTS, true, context);
   }
 }
@@ -156,7 +156,7 @@ export class RateLimitError extends AppError {
  * 500 Internal Server Error
  */
 export class InternalServerError extends AppError {
-  constructor(message: string = 'Internal server error', context?: Record<string, any>) {
+  constructor(message: string = 'Internal server error', context?: Record<string, unknown>) {
     super(message, 500, ErrorCode.INTERNAL_ERROR, true, context);
   }
 }
@@ -165,7 +165,7 @@ export class InternalServerError extends AppError {
  * 503 Service Unavailable - External service down
  */
 export class ServiceUnavailableError extends AppError {
-  constructor(message: string = 'Service temporarily unavailable', context?: Record<string, any>) {
+  constructor(message: string = 'Service temporarily unavailable', context?: Record<string, unknown>) {
     super(message, 503, ErrorCode.SERVICE_UNAVAILABLE, true, context);
   }
 }
@@ -174,7 +174,7 @@ export class ServiceUnavailableError extends AppError {
  * Database operation errors
  */
 export class DatabaseError extends AppError {
-  constructor(message: string = 'Database operation failed', context?: Record<string, any>) {
+  constructor(message: string = 'Database operation failed', context?: Record<string, unknown>) {
     super(message, 500, ErrorCode.DATABASE_ERROR, true, context);
   }
 }
@@ -183,7 +183,7 @@ export class DatabaseError extends AppError {
  * Network/fetch errors
  */
 export class NetworkError extends AppError {
-  constructor(message: string = 'Network request failed', context?: Record<string, any>) {
+  constructor(message: string = 'Network request failed', context?: Record<string, unknown>) {
     super(message, 0, ErrorCode.NETWORK_ERROR, true, context);
   }
 }
@@ -192,7 +192,7 @@ export class NetworkError extends AppError {
  * Timeout errors
  */
 export class TimeoutError extends AppError {
-  constructor(message: string = 'Request timeout', context?: Record<string, any>) {
+  constructor(message: string = 'Request timeout', context?: Record<string, unknown>) {
     super(message, 408, ErrorCode.TIMEOUT, true, context);
   }
 }

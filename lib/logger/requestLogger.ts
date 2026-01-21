@@ -40,7 +40,7 @@ export function logHttpRequest(
 /**
  * Wrapper for API routes to automatically log requests
  */
-export function withRequestLogging<T extends any[]>(
+export function withRequestLogging<T extends unknown[]>(
   handler: (...args: T) => Promise<NextResponse>
 ) {
   return async (...args: T): Promise<NextResponse> => {

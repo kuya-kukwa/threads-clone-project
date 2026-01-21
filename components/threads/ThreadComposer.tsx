@@ -27,6 +27,7 @@ import { getSessionToken } from '@/lib/appwriteClient';
 import { SECURITY_CONFIG } from '@/lib/appwriteConfig';
 import { getErrorMessage } from '@/lib/errors';
 import { logger } from '@/lib/logger/logger';
+import Image from 'next/image';
 
 interface ThreadComposerProps {
   onSuccess?: () => void;
@@ -226,7 +227,7 @@ export function ThreadComposer({ onSuccess }: ThreadComposerProps) {
       {imagePreview && (
         <div className="space-y-2">
           <div className="relative inline-block">
-            <img
+            <Image
               src={imagePreview}
               alt="Preview"
               className="max-w-full max-h-[300px] rounded-lg border"

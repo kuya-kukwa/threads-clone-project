@@ -90,7 +90,7 @@ export function createPaginatedResponse<T>(
 /**
  * Response builder for fluent API
  */
-export class ResponseBuilder<T = any> {
+export class ResponseBuilder<T = unknown> {
   private data?: T;
   private error?: string;
   private code?: string;
@@ -160,6 +160,6 @@ export class ResponseBuilder<T = any> {
 /**
  * Create a response builder
  */
-export function response<T = any>(): ResponseBuilder<T> {
+export function response<T = unknown>(): ResponseBuilder<T> {
   return new ResponseBuilder<T>();
 }

@@ -66,21 +66,23 @@ export async function GET(
       searchedUserId: id,
       foundByUserId: profilesByUserId.documents,
       allProfilesInDatabase: allProfiles.documents.map(p => {
-        console.log('[Debug API] Mapping profile:', p.$id, (p as any).userId);
+        const profile = p as unknown as { userId?: string; username?: string; displayName?: string };
+        console.log('[Debug API] Mapping profile:', p.$id, profile.userId);
         return {
           documentId: p.$id,
-          userId: (p as any).userId,
-          username: (p as any).username,
-          displayName: (p as any).displayName,
+          userId: profile.userId,
+          username: profile.username,
+          displayName: profile.displayName,
         };
       }),
     };
     
     console.log('[Debug API] Returning response');
     return NextResponse.json(responseData);
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     return NextResponse.json(
-      { error: error.message },
+      { error: errorMessage },
       { status: 500 }
     );
   }

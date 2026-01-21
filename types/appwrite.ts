@@ -107,7 +107,7 @@ export interface LoginInput {
 /**
  * Success response wrapper
  */
-export interface ApiSuccessResponse<T = any> {
+export interface ApiSuccessResponse<T = unknown> {
   success: true;
   data: T;
   timestamp?: string;
@@ -133,7 +133,7 @@ export interface ApiErrorResponse {
 /**
  * Generic API response (success or error)
  */
-export type ApiResponse<T = any> = ApiSuccessResponse<T> | ApiErrorResponse;
+export type ApiResponse<T = unknown> = ApiSuccessResponse<T> | ApiErrorResponse;
 
 /**
  * Paginated response wrapper

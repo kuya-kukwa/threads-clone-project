@@ -145,7 +145,7 @@ export class ApiClient {
       (requestHeaders as Record<string, string>)['X-CSRF-Token'] = 'true'; // Simple token - middleware validates presence
     }
     
-    let lastError: any;
+    let lastError: unknown;
     
     for (let attempt = 0; attempt <= retries; attempt++) {
       try {
@@ -163,10 +163,14 @@ export class ApiClient {
         
         // Handle error responses
         if (!response.ok) {
-          const error = new Error((data as ApiErrorResponse).error || 'Request failed');
-          (error as any).statusCode = response.status;
-          (error as any).code = (data as ApiErrorResponse).code;
-          (error as any).response = data;
+          const error = new Error((data as ApiErrorResponse).error || 'Request failed') as Error & {
+            statusCode?: number;
+            code?: string;
+            response?: unknown;
+          };
+          error.statusCode = response.status;
+          error.code = (data as ApiErrorResponse).code;
+          error.response = data;
           throw error;
         }
         
@@ -176,7 +180,7 @@ export class ApiClient {
         }
         throw new Error('Invalid response format');
         
-      } catch (error: any) {
+      } catch (error: unknown) {
         lastError = error;
         
         // Don't retry if not retryable or last attempt
@@ -191,11 +195,12 @@ export class ApiClient {
     }
     
     // All retries failed
-    if (lastError.name === 'TypeError' && lastError.message === 'Failed to fetch') {
+    const error = lastError as Error;
+    if (error.name === 'TypeError' && error.message === 'Failed to fetch') {
       throw new NetworkError('Network request failed. Please check your connection.');
     }
     
-    throw handleClientError(lastError);
+    throw handleClientError(error);
   }
 
   /**
@@ -211,7 +216,7 @@ export class ApiClient {
   /**
    * POST request
    */
-  async post<T>(endpoint: string, body?: any, options?: RequestOptions): Promise<T> {
+  async post<T>(endpoint: string, body?: unknown, options?: RequestOptions): Promise<T> {
     return this.request<T>(endpoint, {
       ...options,
       method: 'POST',
@@ -222,7 +227,7 @@ export class ApiClient {
   /**
    * PUT request
    */
-  async put<T>(endpoint: string, body?: any, options?: RequestOptions): Promise<T> {
+  async put<T>(endpoint: string, body?: unknown, options?: RequestOptions): Promise<T> {
     return this.request<T>(endpoint, {
       ...options,
       method: 'PUT',
@@ -233,7 +238,7 @@ export class ApiClient {
   /**
    * PATCH request
    */
-  async patch<T>(endpoint: string, body?: any, options?: RequestOptions): Promise<T> {
+  async patch<T>(endpoint: string, body?: unknown, options?: RequestOptions): Promise<T> {
     return this.request<T>(endpoint, {
       ...options,
       method: 'PATCH',

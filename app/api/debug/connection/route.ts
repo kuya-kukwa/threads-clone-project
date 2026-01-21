@@ -43,8 +43,9 @@ export async function GET() {
       try {
         const users = await serverUsers.list();
         usersApiStatus = `OK - Found ${users.total} users in Auth`;
-      } catch (e: any) {
-        usersApiStatus = `ERROR: ${e.message}`;
+      } catch (e: unknown) {
+        const errorMsg = e instanceof Error ? e.message : 'Unknown error';
+        usersApiStatus = `ERROR: ${errorMsg}`;
       }
       
       // Test Databases API - list documents
@@ -55,12 +56,14 @@ export async function GET() {
           APPWRITE_CONFIG.COLLECTIONS.USERS
         );
         databasesApiStatus = `OK - Found ${docs.total} profiles in database`;
-      } catch (e: any) {
-        databasesApiStatus = `ERROR: ${e.message}`;
+      } catch (e: unknown) {
+        const errorMsg = e instanceof Error ? e.message : 'Unknown error';
+        databasesApiStatus = `ERROR: ${errorMsg}`;
       }
       
-    } catch (e: any) {
-      serverClientStatus = `IMPORT ERROR: ${e.message}`;
+    } catch (e: unknown) {
+      const errorMsg = e instanceof Error ? e.message : 'Unknown error';
+      serverClientStatus = `IMPORT ERROR: ${errorMsg}`;
     }
     
     return NextResponse.json({
@@ -70,9 +73,11 @@ export async function GET() {
       usersApi: usersApiStatus,
       databasesApi: databasesApiStatus,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    const errorStack = error instanceof Error ? error.stack : undefined;
     return NextResponse.json(
-      { error: error.message, stack: error.stack },
+      { error: errorMessage, stack: errorStack },
       { status: 500 }
     );
   }
