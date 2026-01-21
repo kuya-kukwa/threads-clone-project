@@ -104,9 +104,21 @@ export async function uploadThreadImage(
     const arrayBuffer = await file.arrayBuffer();
     const buffer = Buffer.from(arrayBuffer);
     
-    // Create InputFile from buffer
+    // Normalize file extension (ensure lowercase and handle jpeg vs jpg)
+    const fileExtension = file.name.split('.').pop()?.toLowerCase() || '';
+    const normalizedName = file.name.replace(/\.[^.]+$/, `.${fileExtension}`);
+    
+    logger.debug({ 
+      msg: 'File details for upload', 
+      originalName: file.name, 
+      normalizedName,
+      fileExtension,
+      mimeType: file.type 
+    });
+    
+    // Create InputFile from buffer with explicit filename
     const { InputFile } = await import('node-appwrite/file');
-    const inputFile = InputFile.fromBuffer(buffer, file.name);
+    const inputFile = InputFile.fromBuffer(buffer, normalizedName);
 
     // Upload to Appwrite Storage (server-side for security)
     logger.debug({ msg: 'Uploading to Appwrite Storage', bucketId: APPWRITE_CONFIG.BUCKETS.THREAD_IMAGES });
