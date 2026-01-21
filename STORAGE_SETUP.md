@@ -14,6 +14,7 @@ node scripts/setupStorage.mjs
 ```
 
 This script will:
+
 - Check if the `thread-images` bucket exists
 - Create it with proper permissions if it doesn't
 
@@ -51,12 +52,14 @@ APPWRITE_API_KEY=<your-api-key>
 ## API Key Permissions
 
 Your Appwrite API key must have these scopes:
+
 - `buckets.read`
-- `buckets.write` 
+- `buckets.write`
 - `files.read`
 - `files.write`
 
 To check/update API key permissions:
+
 1. Go to Appwrite Console → Your Project → Settings → API Keys
 2. Click on your API key
 3. Verify the Storage permissions are enabled
@@ -66,7 +69,7 @@ To check/update API key permissions:
 After creating the bucket:
 
 1. **Check in Console**: Go to Storage → You should see `thread-images` bucket
-2. **Test Upload**: 
+2. **Test Upload**:
    - Log into your app
    - Try creating a thread with an image
    - It should upload successfully
@@ -74,19 +77,23 @@ After creating the bucket:
 ## Troubleshooting
 
 ### Error: "Storage bucket not found"
+
 - The bucket `thread-images` doesn't exist. Create it following the steps above.
 
 ### Error: "The current user is not authorized"
+
 - Check bucket permissions - `create` should allow users
 - Verify your API key has storage permissions
 
 ### Error: "Invalid file type" or "File too large"
+
 - Bucket is configured to only accept certain file types
 - Check the allowed extensions and max file size in bucket settings
 
 ## Technical Details
 
 The image upload flow:
+
 1. Client sends image to `/api/upload/image`
 2. Server validates session (user must be logged in)
 3. Server validates file (size, type)
@@ -94,6 +101,7 @@ The image upload flow:
 5. Returns `imageId` and `imageUrl` to client
 
 The bucket ID is configured in [lib/appwriteConfig.ts](lib/appwriteConfig.ts):
+
 ```typescript
 BUCKETS: {
   THREAD_IMAGES: 'thread-images',
