@@ -63,9 +63,7 @@ function ProfileContent({ userId }: { userId: string }) {
           <p className="text-gray-600 mb-4">
             {error || 'The requested profile does not exist.'}
           </p>
-          <p className="text-sm text-gray-400">
-            User ID: {userId}
-          </p>
+          <p className="text-sm text-gray-400">User ID: {userId}</p>
         </div>
       </div>
     );

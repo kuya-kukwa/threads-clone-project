@@ -4,11 +4,11 @@
 
 ### Console Errors Detected:
 
-| Error | Type | Severity | Status |
-|-------|------|----------|--------|
-| CORS policy blocking Appwrite requests | **CRITICAL** | 🔴 High | Needs Appwrite Console fix |
-| Input autocomplete attribute missing | Minor | 🟡 Low | Code fix available |
-| `Failed to fetch` on login | Cascading from CORS | 🔴 High | Fixed by CORS resolution |
+| Error                                  | Type                | Severity | Status                     |
+| -------------------------------------- | ------------------- | -------- | -------------------------- |
+| CORS policy blocking Appwrite requests | **CRITICAL**        | 🔴 High  | Needs Appwrite Console fix |
+| Input autocomplete attribute missing   | Minor               | 🟡 Low   | Code fix available         |
+| `Failed to fetch` on login             | Cascading from CORS | 🔴 High  | Fixed by CORS resolution   |
 
 ---
 
@@ -17,8 +17,8 @@
 ### What's Happening:
 
 ```
-Access to fetch at 'https://fra.cloud.appwrite.io/v1/account' 
-from origin 'https://threads-clone-project-sigma.vercel.app' 
+Access to fetch at 'https://fra.cloud.appwrite.io/v1/account'
+from origin 'https://threads-clone-project-sigma.vercel.app'
 has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header
 ```
 
@@ -51,22 +51,22 @@ Appwrite uses a whitelist approach for security - only domains explicitly added 
    - Select **"Web"**
    - Enter the following details:
 
-   | Field | Value |
-   |-------|-------|
-   | **Name** | `Threads Clone Production` |
+   | Field        | Value                                    |
+   | ------------ | ---------------------------------------- |
+   | **Name**     | `Threads Clone Production`               |
    | **Hostname** | `threads-clone-project-sigma.vercel.app` |
 
 5. **Save Changes**
    - Click **"Save"** or **"Create"**
 
 6. **Add Additional Domains (Recommended)**
-   
+
    If you use Vercel preview deployments, add these too:
-   
-   | Name | Hostname |
-   |------|----------|
+
+   | Name             | Hostname       |
+   | ---------------- | -------------- |
    | `Vercel Preview` | `*.vercel.app` |
-   | `Localhost Dev` | `localhost` |
+   | `Localhost Dev`  | `localhost`    |
 
 ---
 
@@ -75,6 +75,7 @@ Appwrite uses a whitelist approach for security - only domains explicitly added 
 For a production-ready setup, add ALL these platforms:
 
 ### Web Platforms:
+
 ```
 ┌─────────────────────────────────────────────────────────────┐
 │ Name                    │ Hostname                          │
@@ -88,12 +89,12 @@ For a production-ready setup, add ALL these platforms:
 
 ### Why Multiple Platforms?
 
-| Platform | Purpose |
-|----------|---------|
-| **Production** | Your main deployed app |
-| **Vercel Preview** | Preview deployments for PRs |
-| **Localhost** | Local development |
-| **Local Network** | Testing on mobile devices on same WiFi |
+| Platform           | Purpose                                |
+| ------------------ | -------------------------------------- |
+| **Production**     | Your main deployed app                 |
+| **Vercel Preview** | Preview deployments for PRs            |
+| **Localhost**      | Local development                      |
+| **Local Network**  | Testing on mobile devices on same WiFi |
 
 ---
 
@@ -113,10 +114,10 @@ After adding the platform:
 3. **Expected Console Output (Success)**:
    ```javascript
    [Environment Check] Appwrite config: {
-     hasEndpoint: true, 
-     hasProjectId: true, 
-     endpoint: 'https://fra.cloud.appwrite.io/v1', 
-     projectId: '696517c8000167cf1b8a', 
+     hasEndpoint: true,
+     hasProjectId: true,
+     endpoint: 'https://fra.cloud.appwrite.io/v1',
+     projectId: '696517c8000167cf1b8a',
      environment: 'production'
    }
    // No CORS errors!
@@ -127,12 +128,14 @@ After adding the platform:
 ## 🟡 MINOR: Autocomplete Attribute Warning
 
 ### Warning:
+
 ```
-[DOM] Input elements should have autocomplete attributes 
+[DOM] Input elements should have autocomplete attributes
 (suggested: "current-password")
 ```
 
 ### Fix Applied:
+
 See the code changes in `LoginForm.tsx` and `RegisterForm.tsx` below.
 
 ---
@@ -183,7 +186,7 @@ See the code changes in `LoginForm.tsx` and `RegisterForm.tsx` below.
 
 ```
 □ Added production domain to Appwrite Console
-□ Added Vercel preview domain (*.vercel.app)  
+□ Added Vercel preview domain (*.vercel.app)
 □ Added localhost for development
 □ Cleared browser cache after changes
 □ Tested login on production
@@ -196,22 +199,24 @@ See the code changes in `LoginForm.tsx` and `RegisterForm.tsx` below.
 
 ### Common Problems:
 
-| Issue | Solution |
-|-------|----------|
-| Changes not taking effect | Wait 1-2 minutes, clear cache |
-| Wildcard not working | Use exact domain instead |
-| Different project ID | Verify you're editing the correct project |
-| API key issues | Platforms are for client SDK, not API keys |
+| Issue                     | Solution                                   |
+| ------------------------- | ------------------------------------------ |
+| Changes not taking effect | Wait 1-2 minutes, clear cache              |
+| Wildcard not working      | Use exact domain instead                   |
+| Different project ID      | Verify you're editing the correct project  |
+| API key issues            | Platforms are for client SDK, not API keys |
 
 ### Debug Checklist:
 
 1. **Verify Project ID matches**
+
    ```
    Console shows: 696517c8000167cf1b8a
    Appwrite Console should show same ID
    ```
 
 2. **Check endpoint region**
+
    ```
    Your endpoint: https://fra.cloud.appwrite.io/v1
    This is Frankfurt region - make sure you're in the right project
