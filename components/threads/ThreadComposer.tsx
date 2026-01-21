@@ -3,14 +3,14 @@
 /**
  * ThreadComposer Component
  * Mobile-first thread creation interface
- * 
+ *
  * Features:
  * - Auto-growing textarea
  * - Image upload with preview
  * - Character counter
  * - Keyboard-safe layout
  * - Submit disabled during posting
- * 
+ *
  * UX Principles:
  * - Thumb-friendly interactions
  * - No hidden actions when keyboard is open
@@ -56,7 +56,9 @@ export function ThreadComposer({ onSuccess }: ThreadComposerProps) {
 
     // Validate file size
     if (file.size > SECURITY_CONFIG.IMAGE.MAX_SIZE_MB * 1024 * 1024) {
-      setError(`Image must be smaller than ${SECURITY_CONFIG.IMAGE.MAX_SIZE_MB}MB`);
+      setError(
+        `Image must be smaller than ${SECURITY_CONFIG.IMAGE.MAX_SIZE_MB}MB`,
+      );
       return;
     }
 
@@ -88,7 +90,7 @@ export function ThreadComposer({ onSuccess }: ThreadComposerProps) {
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    
+
     if (!canSubmit) return;
 
     setIsSubmitting(true);
@@ -107,8 +109,11 @@ export function ThreadComposer({ onSuccess }: ThreadComposerProps) {
 
       // Upload image if present
       if (imageFile) {
-        logger.info({ msg: 'Uploading thread image', fileName: imageFile.name });
-        
+        logger.info({
+          msg: 'Uploading thread image',
+          fileName: imageFile.name,
+        });
+
         // Upload via API endpoint
         const formData = new FormData();
         formData.append('file', imageFile);
@@ -124,7 +129,7 @@ export function ThreadComposer({ onSuccess }: ThreadComposerProps) {
         });
 
         const uploadResult = await uploadResponse.json();
-        
+
         if (!uploadResult.success) {
           setError(uploadResult.error || 'Failed to upload image');
           setIsSubmitting(false);
@@ -177,7 +182,10 @@ export function ThreadComposer({ onSuccess }: ThreadComposerProps) {
         router.refresh();
       }
     } catch (err) {
-      logger.error({ msg: 'Thread creation failed', error: getErrorMessage(err) });
+      logger.error({
+        msg: 'Thread creation failed',
+        error: getErrorMessage(err),
+      });
       setError('Failed to create thread. Please try again.');
     } finally {
       setIsSubmitting(false);
@@ -203,8 +211,8 @@ export function ThreadComposer({ onSuccess }: ThreadComposerProps) {
               remainingChars < 0
                 ? 'text-red-600'
                 : remainingChars < 20
-                ? 'text-orange-600'
-                : 'text-muted-foreground'
+                  ? 'text-orange-600'
+                  : 'text-muted-foreground'
             }`}
           >
             {remainingChars} characters remaining
@@ -253,7 +261,10 @@ export function ThreadComposer({ onSuccess }: ThreadComposerProps) {
 
       {/* Error message */}
       {error && (
-        <div className="text-sm text-red-600 bg-red-50 p-3 rounded-md" role="alert">
+        <div
+          className="text-sm text-red-600 bg-red-50 p-3 rounded-md"
+          role="alert"
+        >
           {error}
         </div>
       )}
@@ -282,11 +293,7 @@ export function ThreadComposer({ onSuccess }: ThreadComposerProps) {
           </Button>
         </div>
 
-        <Button
-          type="submit"
-          disabled={!canSubmit}
-          className="min-w-[80px]"
-        >
+        <Button type="submit" disabled={!canSubmit} className="min-w-[80px]">
           {isSubmitting ? 'Posting...' : 'Post'}
         </Button>
       </div>

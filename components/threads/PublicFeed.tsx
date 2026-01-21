@@ -3,14 +3,14 @@
 /**
  * PublicFeed Component
  * Displays paginated list of threads
- * 
+ *
  * Features:
  * - Cursor-based pagination
  * - "Load More" button (mobile-friendly)
  * - Loading states
  * - Empty state
  * - Error handling
- * 
+ *
  * Performance:
  * - No refetch loops
  * - Predictable loading
@@ -37,10 +37,14 @@ export function PublicFeed({
   initialHasMore = false,
 }: PublicFeedProps) {
   const [threads, setThreads] = useState<ThreadWithAuthor[]>(initialThreads);
-  const [nextCursor, setNextCursor] = useState<string | null>(initialNextCursor);
+  const [nextCursor, setNextCursor] = useState<string | null>(
+    initialNextCursor,
+  );
   const [hasMore, setHasMore] = useState(initialHasMore);
   const [isLoading, setIsLoading] = useState(false);
-  const [isInitialLoading, setIsInitialLoading] = useState(initialThreads.length === 0);
+  const [isInitialLoading, setIsInitialLoading] = useState(
+    initialThreads.length === 0,
+  );
   const [error, setError] = useState<string | null>(null);
 
   // Initial load if no threads provided
@@ -74,7 +78,7 @@ export function PublicFeed({
 
       if (cursor) {
         // Append to existing threads
-        setThreads(prev => [...prev, ...(data.threads || [])]);
+        setThreads((prev) => [...prev, ...(data.threads || [])]);
       } else {
         // Initial load or refresh
         setThreads(data.threads || []);
@@ -129,7 +133,8 @@ export function PublicFeed({
         <div className="text-4xl mb-4">🧵</div>
         <h3 className="text-lg font-semibold mb-2">No threads yet</h3>
         <p className="text-sm text-muted-foreground max-w-sm">
-          Be the first to share something! Create a thread to get the conversation started.
+          Be the first to share something! Create a thread to get the
+          conversation started.
         </p>
       </div>
     );

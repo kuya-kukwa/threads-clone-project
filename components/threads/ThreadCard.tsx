@@ -3,14 +3,14 @@
 /**
  * ThreadCard Component
  * Displays a single thread in the feed
- * 
+ *
  * Mobile-First Design:
  * - Single column layout
  * - Comfortable spacing
  * - Touch-friendly
  * - Images never overflow
  * - Clean typography
- * 
+ *
  * Structure (Threads-inspired):
  * - Avatar + Name + Username
  * - Content (with line breaks preserved)
@@ -35,7 +35,7 @@ export function ThreadCard({ thread }: ThreadCardProps) {
   // Get author initials for avatar fallback
   const authorInitials = author.displayName
     .split(' ')
-    .map(n => n[0])
+    .map((n) => n[0])
     .join('')
     .toUpperCase()
     .slice(0, 2);
@@ -45,10 +45,11 @@ export function ThreadCard({ thread }: ThreadCardProps) {
       <div className="flex gap-3">
         {/* Avatar */}
         <Avatar className="w-10 h-10 flex-shrink-0">
-          <AvatarImage src={author.avatarUrl || undefined} alt={author.displayName} />
-          <AvatarFallback className="text-sm">
-            {authorInitials}
-          </AvatarFallback>
+          <AvatarImage
+            src={author.avatarUrl || undefined}
+            alt={author.displayName}
+          />
+          <AvatarFallback className="text-sm">{authorInitials}</AvatarFallback>
         </Avatar>
 
         {/* Content */}

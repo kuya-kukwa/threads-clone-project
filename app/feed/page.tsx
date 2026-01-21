@@ -1,7 +1,7 @@
 /**
  * Feed Page
  * Main feed with thread creation and public timeline
- * 
+ *
  * Features:
  * - Thread composer at top
  * - Public feed with pagination
@@ -23,7 +23,7 @@ function FeedContent() {
 
   const handleThreadCreated = () => {
     // Refresh feed by updating key
-    setRefreshKey(prev => prev + 1);
+    setRefreshKey((prev) => prev + 1);
   };
 
   return (

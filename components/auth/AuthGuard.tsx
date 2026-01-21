@@ -2,7 +2,7 @@
  * Auth Guard Component
  * Protects routes that require authentication
  * Uses client-side session check since Appwrite uses client-side session management
- * 
+ *
  * Cross-device compatibility:
  * - Handles race condition where session may not be immediately available
  * - Uses retry logic before redirecting to login
@@ -38,7 +38,9 @@ export function AuthGuard({
     // If no user after loading completes, wait a bit more for session hydration
     // This helps with cross-device scenarios where session may take longer to establish
     if (!user && !hasWaitedForSession) {
-      logger.debug({ msg: 'AuthGuard: No user found, waiting for potential session hydration' });
+      logger.debug({
+        msg: 'AuthGuard: No user found, waiting for potential session hydration',
+      });
       const timer = setTimeout(() => {
         setHasWaitedForSession(true);
       }, 500); // Give session 500ms to hydrate
@@ -47,7 +49,9 @@ export function AuthGuard({
 
     // Only redirect after we've waited for session and still no user
     if (!user && hasWaitedForSession) {
-      logger.debug({ msg: 'AuthGuard: Redirecting to login after session check' });
+      logger.debug({
+        msg: 'AuthGuard: Redirecting to login after session check',
+      });
       const currentPath = window.location.pathname;
       router.push(`${fallbackUrl}?redirect=${encodeURIComponent(currentPath)}`);
     }
