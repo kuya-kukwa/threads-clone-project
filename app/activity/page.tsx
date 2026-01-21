@@ -141,19 +141,39 @@ const mockActivities = {
 };
 
 function AllActivity() {
-  return <ActivityList activities={mockActivities.all} emptyMessage="No activity yet" />;
+  return (
+    <ActivityList
+      activities={mockActivities.all}
+      emptyMessage="No activity yet"
+    />
+  );
 }
 
 function FollowsActivity() {
-  return <ActivityList activities={mockActivities.follows} emptyMessage="No new followers" />;
+  return (
+    <ActivityList
+      activities={mockActivities.follows}
+      emptyMessage="No new followers"
+    />
+  );
 }
 
 function ConversationsActivity() {
-  return <ActivityList activities={mockActivities.conversations} emptyMessage="No conversations yet" />;
+  return (
+    <ActivityList
+      activities={mockActivities.conversations}
+      emptyMessage="No conversations yet"
+    />
+  );
 }
 
 function MentionsActivity() {
-  return <ActivityList activities={mockActivities.mentions} emptyMessage="No mentions yet" />;
+  return (
+    <ActivityList
+      activities={mockActivities.mentions}
+      emptyMessage="No mentions yet"
+    />
+  );
 }
 
 function ActivityList({
@@ -189,7 +209,9 @@ function ActivityList({
             <div className="w-11 h-11 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center text-white font-medium">
               {activity.user.name[0]}
             </div>
-            <div className={`absolute -bottom-0.5 -right-0.5 w-5 h-5 rounded-full flex items-center justify-center ${getActivityIconBg(activity.type)}`}>
+            <div
+              className={`absolute -bottom-0.5 -right-0.5 w-5 h-5 rounded-full flex items-center justify-center ${getActivityIconBg(activity.type)}`}
+            >
               {getActivityIcon(activity.type)}
             </div>
           </div>
@@ -256,8 +278,18 @@ function getActivityIcon(type: string) {
 // Icons
 function BellIcon({ className }: { className?: string }) {
   return (
-    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5}>
-      <path strokeLinecap="round" strokeLinejoin="round" d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0" />
+    <svg
+      className={className}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={1.5}
+    >
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0"
+      />
     </svg>
   );
 }
@@ -272,24 +304,54 @@ function HeartIcon({ className }: { className?: string }) {
 
 function UserPlusIcon({ className }: { className?: string }) {
   return (
-    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
-      <path strokeLinecap="round" strokeLinejoin="round" d="M19 8.5v3m0 0v3m0-3h3m-3 0h-3M13 14.062V22h-2v-7.938a6 6 0 00-7-5.918V7h1.5A5.5 5.5 0 0111 12.5M13 14.062a5.48 5.48 0 00-2-1.562M13 14.062A6 6 0 0011 12.5m0 0A5.5 5.5 0 015.5 7" />
+    <svg
+      className={className}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={2}
+    >
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M19 8.5v3m0 0v3m0-3h3m-3 0h-3M13 14.062V22h-2v-7.938a6 6 0 00-7-5.918V7h1.5A5.5 5.5 0 0111 12.5M13 14.062a5.48 5.48 0 00-2-1.562M13 14.062A6 6 0 0011 12.5m0 0A5.5 5.5 0 015.5 7"
+      />
     </svg>
   );
 }
 
 function ReplyIcon({ className }: { className?: string }) {
   return (
-    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
-      <path strokeLinecap="round" strokeLinejoin="round" d="M9 15L3 9m0 0l6-6M3 9h12a6 6 0 010 12h-3" />
+    <svg
+      className={className}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={2}
+    >
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M9 15L3 9m0 0l6-6M3 9h12a6 6 0 010 12h-3"
+      />
     </svg>
   );
 }
 
 function AtIcon({ className }: { className?: string }) {
   return (
-    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
-      <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 12a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0zm0 0c0 1.657 1.007 3 2.25 3S21 13.657 21 12a9 9 0 10-2.636 6.364M16.5 12V8.25" />
+    <svg
+      className={className}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={2}
+    >
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M16.5 12a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0zm0 0c0 1.657 1.007 3 2.25 3S21 13.657 21 12a9 9 0 10-2.636 6.364M16.5 12V8.25"
+      />
     </svg>
   );
 }

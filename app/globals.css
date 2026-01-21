@@ -3,44 +3,44 @@
 @theme {
   /* Dark Theme - Premium Social Media Colors */
   /* Background hierarchy */
-  --color-background: 0 0% 4%;          /* #0a0a0a - Main bg */
-  --color-foreground: 0 0% 95%;          /* #f2f2f2 - Main text */
-  
+  --color-background: 0 0% 4%; /* #0a0a0a - Main bg */
+  --color-foreground: 0 0% 95%; /* #f2f2f2 - Main text */
+
   /* Card/Surface colors */
-  --color-card: 0 0% 7%;                 /* #121212 - Elevated surfaces */
+  --color-card: 0 0% 7%; /* #121212 - Elevated surfaces */
   --color-card-foreground: 0 0% 95%;
-  
+
   /* Popover/Modal */
-  --color-popover: 0 0% 9%;              /* #171717 */
+  --color-popover: 0 0% 9%; /* #171717 */
   --color-popover-foreground: 0 0% 95%;
-  
+
   /* Primary - Vibrant Blue/Indigo */
-  --color-primary: 234 89% 64%;          /* #4F6DF5 - Bright blue */
+  --color-primary: 234 89% 64%; /* #4F6DF5 - Bright blue */
   --color-primary-foreground: 0 0% 100%;
-  
+
   /* Secondary - Subtle gray */
-  --color-secondary: 0 0% 14%;           /* #242424 */
+  --color-secondary: 0 0% 14%; /* #242424 */
   --color-secondary-foreground: 0 0% 85%;
-  
+
   /* Muted - For subtle elements */
-  --color-muted: 0 0% 12%;               /* #1f1f1f */
-  --color-muted-foreground: 0 0% 55%;    /* #8c8c8c */
-  
+  --color-muted: 0 0% 12%; /* #1f1f1f */
+  --color-muted-foreground: 0 0% 55%; /* #8c8c8c */
+
   /* Accent - Soft purple/pink for highlights */
-  --color-accent: 280 60% 55%;           /* Purple accent */
+  --color-accent: 280 60% 55%; /* Purple accent */
   --color-accent-foreground: 0 0% 100%;
-  
+
   /* Destructive - Red */
   --color-destructive: 0 84% 60%;
   --color-destructive-foreground: 0 0% 100%;
-  
+
   /* Borders */
-  --color-border: 0 0% 16%;              /* #292929 */
-  --color-input: 0 0% 18%;               /* #2e2e2e */
-  --color-ring: 234 89% 64%;             /* Match primary */
+  --color-border: 0 0% 16%; /* #292929 */
+  --color-input: 0 0% 18%; /* #2e2e2e */
+  --color-ring: 234 89% 64%; /* Match primary */
 
   /* Success */
-  --color-success: 142 76% 45%;          /* Green */
+  --color-success: 142 76% 45%; /* Green */
   --color-success-foreground: 0 0% 100%;
 
   /* Radius */
@@ -61,7 +61,12 @@ html {
 body {
   background-color: hsl(var(--color-background));
   color: hsl(var(--color-foreground));
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
+  font-family:
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    'Segoe UI',
+    Roboto,
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -110,7 +115,11 @@ body {
 
 /* Gradient text */
 .gradient-text {
-  background: linear-gradient(135deg, hsl(234 89% 64%) 0%, hsl(280 60% 55%) 100%);
+  background: linear-gradient(
+    135deg,
+    hsl(234 89% 64%) 0%,
+    hsl(280 60% 55%) 100%
+  );
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -118,25 +127,37 @@ body {
 
 /* Primary gradient button */
 .btn-gradient {
-  background: linear-gradient(135deg, hsl(234 89% 64%) 0%, hsl(260 70% 58%) 100%);
+  background: linear-gradient(
+    135deg,
+    hsl(234 89% 64%) 0%,
+    hsl(260 70% 58%) 100%
+  );
 }
 
 .btn-gradient:hover {
-  background: linear-gradient(135deg, hsl(234 89% 58%) 0%, hsl(260 70% 52%) 100%);
+  background: linear-gradient(
+    135deg,
+    hsl(234 89% 58%) 0%,
+    hsl(260 70% 52%) 100%
+  );
 }
 
 /* Animation utilities */
 @keyframes fade-in {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 @keyframes slide-up {
-  from { 
+  from {
     opacity: 0;
     transform: translateY(10px);
   }
-  to { 
+  to {
     opacity: 1;
     transform: translateY(0);
   }

@@ -132,7 +132,7 @@ function InboxContent({ searchQuery }: { searchQuery: string }) {
   const filteredMessages = messages.filter(
     (msg) =>
       msg.user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      msg.lastMessage.toLowerCase().includes(searchQuery.toLowerCase())
+      msg.lastMessage.toLowerCase().includes(searchQuery.toLowerCase()),
   );
 
   if (filteredMessages.length === 0) {
@@ -143,7 +143,9 @@ function InboxContent({ searchQuery }: { searchQuery: string }) {
         </div>
         <h3 className="text-lg font-medium mb-1">No messages yet</h3>
         <p className="text-sm text-muted-foreground">
-          {searchQuery ? 'No messages match your search' : 'Start a conversation with someone'}
+          {searchQuery
+            ? 'No messages match your search'
+            : 'Start a conversation with someone'}
         </p>
       </div>
     );
@@ -161,12 +163,16 @@ function InboxContent({ searchQuery }: { searchQuery: string }) {
           </div>
           <div className="flex-1 min-w-0">
             <div className="flex items-center justify-between">
-              <span className={`font-medium ${msg.unread ? 'text-foreground' : 'text-foreground/80'}`}>
+              <span
+                className={`font-medium ${msg.unread ? 'text-foreground' : 'text-foreground/80'}`}
+              >
                 {msg.user.name}
               </span>
               <span className="text-xs text-muted-foreground">{msg.time}</span>
             </div>
-            <p className={`text-sm truncate ${msg.unread ? 'text-foreground' : 'text-muted-foreground'}`}>
+            <p
+              className={`text-sm truncate ${msg.unread ? 'text-foreground' : 'text-muted-foreground'}`}
+            >
               {msg.lastMessage}
             </p>
           </div>
@@ -205,7 +211,7 @@ function RequestsContent({ searchQuery }: { searchQuery: string }) {
   const filteredRequests = requests.filter(
     (req) =>
       req.user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      req.message.toLowerCase().includes(searchQuery.toLowerCase())
+      req.message.toLowerCase().includes(searchQuery.toLowerCase()),
   );
 
   if (filteredRequests.length === 0) {
@@ -216,7 +222,9 @@ function RequestsContent({ searchQuery }: { searchQuery: string }) {
         </div>
         <h3 className="text-lg font-medium mb-1">No requests</h3>
         <p className="text-sm text-muted-foreground">
-          {searchQuery ? 'No requests match your search' : 'Message requests will appear here'}
+          {searchQuery
+            ? 'No requests match your search'
+            : 'Message requests will appear here'}
         </p>
       </div>
     );
@@ -237,7 +245,9 @@ function RequestsContent({ searchQuery }: { searchQuery: string }) {
               <span className="font-medium">{req.user.name}</span>
               <span className="text-xs text-muted-foreground">{req.time}</span>
             </div>
-            <p className="text-sm text-muted-foreground truncate">{req.message}</p>
+            <p className="text-sm text-muted-foreground truncate">
+              {req.message}
+            </p>
           </div>
           <div className="flex gap-2 flex-shrink-0">
             <button className="px-3 py-1.5 text-sm font-medium rounded-lg bg-secondary hover:bg-secondary/80 transition-colors">
@@ -256,32 +266,72 @@ function RequestsContent({ searchQuery }: { searchQuery: string }) {
 // Icons
 function SearchIcon({ className }: { className?: string }) {
   return (
-    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5}>
-      <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+    <svg
+      className={className}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={1.5}
+    >
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"
+      />
     </svg>
   );
 }
 
 function FilterIcon({ className }: { className?: string }) {
   return (
-    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5}>
-      <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 6h9.75M10.5 6a1.5 1.5 0 11-3 0m3 0a1.5 1.5 0 10-3 0M3.75 6H7.5m3 12h9.75m-9.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-3.75 0H7.5m9-6h3.75m-3.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-9.75 0h9.75" />
+    <svg
+      className={className}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={1.5}
+    >
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M10.5 6h9.75M10.5 6a1.5 1.5 0 11-3 0m3 0a1.5 1.5 0 10-3 0M3.75 6H7.5m3 12h9.75m-9.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-3.75 0H7.5m9-6h3.75m-3.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-9.75 0h9.75"
+      />
     </svg>
   );
 }
 
 function MessageIcon({ className }: { className?: string }) {
   return (
-    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5}>
-      <path strokeLinecap="round" strokeLinejoin="round" d="M8.625 12a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H8.25m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H12m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0h-.375M21 12c0 4.556-4.03 8.25-9 8.25a9.764 9.764 0 01-2.555-.337A5.972 5.972 0 015.41 20.97a5.969 5.969 0 01-.474-.065 4.48 4.48 0 00.978-2.025c.09-.457-.133-.901-.467-1.226C3.93 16.178 3 14.189 3 12c0-4.556 4.03-8.25 9-8.25s9 3.694 9 8.25z" />
+    <svg
+      className={className}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={1.5}
+    >
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M8.625 12a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H8.25m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H12m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0h-.375M21 12c0 4.556-4.03 8.25-9 8.25a9.764 9.764 0 01-2.555-.337A5.972 5.972 0 015.41 20.97a5.969 5.969 0 01-.474-.065 4.48 4.48 0 00.978-2.025c.09-.457-.133-.901-.467-1.226C3.93 16.178 3 14.189 3 12c0-4.556 4.03-8.25 9-8.25s9 3.694 9 8.25z"
+      />
     </svg>
   );
 }
 
 function RequestIcon({ className }: { className?: string }) {
   return (
-    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5}>
-      <path strokeLinecap="round" strokeLinejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z" />
+    <svg
+      className={className}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={1.5}
+    >
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z"
+      />
     </svg>
   );
 }

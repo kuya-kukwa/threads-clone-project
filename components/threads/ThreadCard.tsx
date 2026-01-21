@@ -18,13 +18,7 @@ import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import { formatDistanceToNow } from 'date-fns';
 import Image from 'next/image';
-import {
-  useMemo,
-  useState,
-  useRef,
-  useCallback,
-  TouchEvent,
-} from 'react';
+import { useMemo, useState, useRef, useCallback, TouchEvent } from 'react';
 
 interface ThreadCardProps {
   thread: ThreadWithAuthor;
@@ -143,7 +137,9 @@ export function ThreadCard({ thread }: ThreadCardProps) {
 
             {/* Media Gallery - TikTok Style Swipeable */}
             {mediaItems.length > 0 && (
-              <div className={content && content.trim().length > 0 ? '' : 'mt-1'}>
+              <div
+                className={content && content.trim().length > 0 ? '' : 'mt-1'}
+              >
                 <SwipeableMediaGallery
                   items={mediaItems}
                   onItemClick={handleMediaClick}
@@ -356,7 +352,7 @@ function SingleMediaItem({
         }
       }
     },
-    [isPlaying]
+    [isPlaying],
   );
 
   const handleVideoEnded = useCallback(() => {
@@ -496,7 +492,7 @@ function MediaLightbox({
       if (e.key === 'ArrowRight') goToNext();
       if (e.key === 'Escape') onClose();
     },
-    [goToPrevious, goToNext, onClose]
+    [goToPrevious, goToNext, onClose],
   );
 
   if (!currentItem) return null;
@@ -692,7 +688,12 @@ function VideoIcon({ className }: { className?: string }) {
 
 function HeartIcon() {
   return (
-    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
+    <svg
+      fill="none"
+      stroke="currentColor"
+      viewBox="0 0 24 24"
+      strokeWidth={1.5}
+    >
       <path
         strokeLinecap="round"
         strokeLinejoin="round"
@@ -704,7 +705,12 @@ function HeartIcon() {
 
 function CommentIcon() {
   return (
-    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
+    <svg
+      fill="none"
+      stroke="currentColor"
+      viewBox="0 0 24 24"
+      strokeWidth={1.5}
+    >
       <path
         strokeLinecap="round"
         strokeLinejoin="round"
@@ -716,7 +722,12 @@ function CommentIcon() {
 
 function RepostIcon() {
   return (
-    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
+    <svg
+      fill="none"
+      stroke="currentColor"
+      viewBox="0 0 24 24"
+      strokeWidth={1.5}
+    >
       <path
         strokeLinecap="round"
         strokeLinejoin="round"
@@ -728,7 +739,12 @@ function RepostIcon() {
 
 function ShareIcon() {
   return (
-    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
+    <svg
+      fill="none"
+      stroke="currentColor"
+      viewBox="0 0 24 24"
+      strokeWidth={1.5}
+    >
       <path
         strokeLinecap="round"
         strokeLinejoin="round"

@@ -22,7 +22,9 @@ export default function CreatePage() {
   const { user } = useCurrentUser();
   const [content, setContent] = useState('');
   const [mediaFiles, setMediaFiles] = useState<File[]>([]);
-  const [mediaPreviews, setMediaPreviews] = useState<{ url: string; type: 'image' | 'video' }[]>([]);
+  const [mediaPreviews, setMediaPreviews] = useState<
+    { url: string; type: 'image' | 'video' }[]
+  >([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -60,7 +62,9 @@ export default function CreatePage() {
 
     const newPreviews = files.map((file) => ({
       url: URL.createObjectURL(file),
-      type: (file.type.startsWith('video/') ? 'video' : 'image') as 'image' | 'video',
+      type: (file.type.startsWith('video/') ? 'video' : 'image') as
+        | 'image'
+        | 'video',
     }));
     setMediaPreviews([...mediaPreviews, ...newPreviews]);
 
@@ -164,7 +168,9 @@ export default function CreatePage() {
 
             {/* Content area */}
             <div className="flex-1">
-              <p className="text-sm font-semibold mb-1">{user?.name || 'User'}</p>
+              <p className="text-sm font-semibold mb-1">
+                {user?.name || 'User'}
+              </p>
               <textarea
                 value={content}
                 onChange={(e) => setContent(e.target.value)}
@@ -176,11 +182,16 @@ export default function CreatePage() {
 
               {/* Media previews */}
               {mediaPreviews.length > 0 && (
-                <div className={`grid gap-2 mt-3 ${
-                  mediaPreviews.length === 1 ? 'grid-cols-1' : 'grid-cols-2'
-                }`}>
+                <div
+                  className={`grid gap-2 mt-3 ${
+                    mediaPreviews.length === 1 ? 'grid-cols-1' : 'grid-cols-2'
+                  }`}
+                >
                   {mediaPreviews.map((preview, index) => (
-                    <div key={index} className="relative rounded-xl overflow-hidden bg-secondary aspect-square">
+                    <div
+                      key={index}
+                      className="relative rounded-xl overflow-hidden bg-secondary aspect-square"
+                    >
                       {preview.type === 'video' ? (
                         <video
                           src={preview.url}
@@ -212,9 +223,7 @@ export default function CreatePage() {
               )}
 
               {/* Error message */}
-              {error && (
-                <p className="text-sm text-red-500 mt-2">{error}</p>
-              )}
+              {error && <p className="text-sm text-red-500 mt-2">{error}</p>}
             </div>
           </div>
         </div>
@@ -248,11 +257,15 @@ export default function CreatePage() {
               </div>
 
               {/* Character count */}
-              <span className={`text-xs ${
-                charsRemaining < 0 ? 'text-red-500' :
-                charsRemaining < 50 ? 'text-amber-500' :
-                'text-muted-foreground'
-              }`}>
+              <span
+                className={`text-xs ${
+                  charsRemaining < 0
+                    ? 'text-red-500'
+                    : charsRemaining < 50
+                      ? 'text-amber-500'
+                      : 'text-muted-foreground'
+                }`}
+              >
                 {charsRemaining}
               </span>
             </div>
@@ -266,16 +279,36 @@ export default function CreatePage() {
 // Icons
 function XIcon({ className }: { className?: string }) {
   return (
-    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
-      <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+    <svg
+      className={className}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={2}
+    >
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M6 18L18 6M6 6l12 12"
+      />
     </svg>
   );
 }
 
 function ImageIcon({ className }: { className?: string }) {
   return (
-    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5}>
-      <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
+    <svg
+      className={className}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={1.5}
+    >
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z"
+      />
     </svg>
   );
 }
