@@ -211,6 +211,7 @@ export async function deleteThreadImage(imageId: string): Promise<boolean> {
 
 /**
  * Get image preview URL
+ * Builds the URL manually since node-appwrite SDK methods return Promises
  * @param imageId - Appwrite file ID
  * @param width - Optional width for thumbnail
  * @param height - Optional height for thumbnail
@@ -227,19 +228,26 @@ export function getImagePreviewUrl(
   }
 
   try {
-    if (width && height) {
-      return serverStorage.getFilePreview(
-        APPWRITE_CONFIG.BUCKETS.THREAD_IMAGES,
-        imageId,
-        width,
-        height
-      ).toString();
+    const endpoint = process.env.NEXT_PUBLIC_APPWRITE_ENDPOINT;
+    const projectId = process.env.NEXT_PUBLIC_APPWRITE_PROJECT_ID;
+    const bucketId = APPWRITE_CONFIG.BUCKETS.THREAD_IMAGES;
+
+    if (!endpoint || !projectId) {
+      logger.error({ msg: 'Missing Appwrite config for image URL generation' });
+      return '';
     }
 
-    return serverStorage.getFileView(
-      APPWRITE_CONFIG.BUCKETS.THREAD_IMAGES,
-      imageId
-    ).toString();
+    // Build the URL manually to avoid async issues with SDK
+    // For preview with dimensions: /storage/buckets/{bucketId}/files/{fileId}/preview?width=X&height=Y&project={projectId}
+    // For view (full file): /storage/buckets/{bucketId}/files/{fileId}/view?project={projectId}
+    
+    const baseUrl = `${endpoint}/storage/buckets/${bucketId}/files/${imageId}`;
+    
+    if (width && height) {
+      return `${baseUrl}/preview?width=${width}&height=${height}&project=${projectId}`;
+    }
+
+    return `${baseUrl}/view?project=${projectId}`;
   } catch (error) {
     logger.error({
       msg: 'Failed to generate image preview URL',
