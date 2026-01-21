@@ -1,14 +1,15 @@
 /**
- * Profile Update API Route
- * Handles profile updates from client components
+ * Profile API Route
+ * Handles profile retrieval and updates from client components
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { createSessionClient } from '@/lib/appwriteServer';
+import { createSessionClient, serverDatabases } from '@/lib/appwriteServer';
 import { APPWRITE_CONFIG } from '@/lib/appwriteConfig';
 import { profileUpdateSchema } from '@/schemas/profile.schema';
 import { UserProfile } from '@/types/appwrite';
 import { logger } from '@/lib/logger/logger';
+import { Query } from 'node-appwrite';
 
 /**
  * Sanitize user input (prevent XSS)
@@ -18,6 +19,70 @@ function sanitizeInput(input: string): string {
     .trim()
     .replace(/[<>]/g, '') // Remove angle brackets
     .slice(0, 500); // Hard limit on input length
+}
+
+/**
+ * GET /api/profile/[id]
+ * Get user profile by userId
+ * Public endpoint - no authentication required
+ */
+export async function GET(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const { id: userId } = await params;
+    
+    logger.debug({ msg: 'Fetching profile', userId });
+    
+    // Search for profile by userId field
+    const response = await serverDatabases.listDocuments<UserProfile>(
+      APPWRITE_CONFIG.DATABASE_ID,
+      APPWRITE_CONFIG.COLLECTIONS.USERS,
+      [Query.equal('userId', userId), Query.limit(1)]
+    );
+    
+    logger.debug({ 
+      msg: 'Profile query result', 
+      userId, 
+      found: response.documents.length,
+      total: response.total 
+    });
+    
+    if (response.documents.length === 0) {
+      // Log more details to help debug
+      logger.warn({ 
+        msg: 'Profile not found', 
+        userId,
+        databaseId: APPWRITE_CONFIG.DATABASE_ID,
+        collectionId: APPWRITE_CONFIG.COLLECTIONS.USERS
+      });
+      return NextResponse.json(
+        { success: false, error: 'Profile not found', userId },
+        { status: 404 }
+      );
+    }
+    
+    const profile = response.documents[0];
+    logger.debug({ msg: 'Profile found', userId, profileId: profile.$id });
+    
+    return NextResponse.json({ 
+      success: true, 
+      profile 
+    });
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    const errorCode = (error as { code?: number }).code;
+    logger.error({ 
+      msg: 'Failed to fetch profile', 
+      error: errorMessage,
+      code: errorCode 
+    });
+    return NextResponse.json(
+      { success: false, error: 'Failed to fetch profile', details: errorMessage },
+      { status: 500 }
+    );
+  }
 }
 
 export async function PATCH(

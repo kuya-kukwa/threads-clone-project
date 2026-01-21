@@ -25,15 +25,18 @@ function ProfileContent({ userId }: { userId: string }) {
   useEffect(() => {
     const fetchProfile = async () => {
       try {
-        // Fetch profile via API
-        const response = await fetch(`/api/debug/profile/${userId}`);
+        // Fetch profile via proper API route
+        const response = await fetch(`/api/profile/${userId}`, {
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
         const data = await response.json();
 
-        // Debug API returns foundByUserId array
-        if (data.foundByUserId && data.foundByUserId.length > 0) {
-          setProfile(data.foundByUserId[0]);
+        if (data.success && data.profile) {
+          setProfile(data.profile);
         } else {
-          setError('Profile not found');
+          setError(data.error || 'Profile not found');
         }
       } catch (err) {
         console.error('Failed to fetch profile:', err);
@@ -57,8 +60,11 @@ function ProfileContent({ userId }: { userId: string }) {
           <h1 className="text-2xl font-bold text-gray-900 mb-2">
             Profile Not Found
           </h1>
-          <p className="text-gray-600">
+          <p className="text-gray-600 mb-4">
             {error || 'The requested profile does not exist.'}
+          </p>
+          <p className="text-sm text-gray-400">
+            User ID: {userId}
           </p>
         </div>
       </div>

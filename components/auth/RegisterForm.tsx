@@ -92,6 +92,7 @@ export function RegisterForm() {
                     <Input
                       type="email"
                       placeholder="name@example.com"
+                      autoComplete="email"
                       disabled={isLoading}
                       {...field}
                     />
@@ -112,6 +113,7 @@ export function RegisterForm() {
                     <Input
                       type="text"
                       placeholder="johndoe"
+                      autoComplete="username"
                       disabled={isLoading}
                       {...field}
                     />
@@ -135,6 +137,7 @@ export function RegisterForm() {
                     <Input
                       type="text"
                       placeholder="John Doe"
+                      autoComplete="name"
                       disabled={isLoading}
                       {...field}
                     />
@@ -155,6 +158,7 @@ export function RegisterForm() {
                     <Input
                       type="password"
                       placeholder=""
+                      autoComplete="new-password"
                       disabled={isLoading}
                       {...field}
                     />
@@ -175,6 +179,7 @@ export function RegisterForm() {
                     <Input
                       type="password"
                       placeholder=""
+                      autoComplete="new-password"
                       disabled={isLoading}
                       {...field}
                     />

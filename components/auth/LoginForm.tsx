@@ -93,6 +93,7 @@ export function LoginForm() {
                     <Input
                       type="email"
                       placeholder="name@example.com"
+                      autoComplete="email"
                       disabled={isLoading}
                       {...field}
                     />
@@ -113,6 +114,7 @@ export function LoginForm() {
                     <Input
                       type="password"
                       placeholder=""
+                      autoComplete="current-password"
                       disabled={isLoading}
                       {...field}
                     />
