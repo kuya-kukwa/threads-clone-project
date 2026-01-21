@@ -43,12 +43,12 @@ export function AuthGuard({
       logger.debug({
         msg: 'AuthGuard: No user found, waiting for potential session hydration',
       });
-      
+
       // Debug session state in production
       if (process.env.NODE_ENV === 'production') {
         debugSessionState();
       }
-      
+
       const timer = setTimeout(() => {
         setHasWaitedForSession(true);
       }, 800); // Increased wait time for production network latency
@@ -60,13 +60,15 @@ export function AuthGuard({
       logger.debug({
         msg: 'AuthGuard: Redirecting to login after session check',
       });
-      
+
       // Debug session state before redirect
       if (process.env.NODE_ENV === 'production') {
         debugSessionState();
-        console.log('[AuthGuard] Redirecting to login - no valid session found');
+        console.log(
+          '[AuthGuard] Redirecting to login - no valid session found',
+        );
       }
-      
+
       const currentPath = window.location.pathname;
       router.push(`${fallbackUrl}?redirect=${encodeURIComponent(currentPath)}`);
     }
