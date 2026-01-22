@@ -115,7 +115,7 @@ export default function CreatePage() {
 
       if (mediaFiles.length > 0) {
         setUploadProgress('Uploading media...');
-        
+
         // Use multi-media upload endpoint for batch upload
         const formData = new FormData();
         mediaFiles.forEach((file, index) => {
@@ -389,9 +389,7 @@ export default function CreatePage() {
                     {charsRemaining <= 20 && (
                       <span
                         className={`text-xs font-medium ${
-                          charsRemaining < 0
-                            ? 'text-red-500'
-                            : 'text-amber-500'
+                          charsRemaining < 0 ? 'text-red-500' : 'text-amber-500'
                         }`}
                       >
                         {charsRemaining}
