@@ -14,7 +14,7 @@ import { useCurrentUser } from '@/hooks';
 import { getSessionToken } from '@/lib/appwriteClient';
 
 const MAX_CHARS = 500;
-const MAX_FILES = 10;
+const MAX_FILES = 4; // Maximum 4 media files per post
 const MAX_FILE_SIZE = 50 * 1024 * 1024; // 50MB
 
 export default function CreatePage() {
@@ -95,8 +95,8 @@ export default function CreatePage() {
         return;
       }
 
-      // Upload media files first
-      const mediaUrls: string[] = [];
+      // Store uploaded media items for API
+      let uploadedMedia: { id: string; url: string; type: 'image' | 'video'; altText?: string }[] = [];
 
       if (mediaFiles.length > 0) {
         // Use multi-media upload endpoint for batch upload
@@ -123,9 +123,7 @@ export default function CreatePage() {
 
         const uploadResult = await response.json();
         if (uploadResult.success && uploadResult.media) {
-          uploadResult.media.forEach((item: { url: string }) => {
-            mediaUrls.push(item.url);
-          });
+          uploadedMedia = uploadResult.media;
         } else {
           throw new Error(uploadResult.error || 'Upload failed');
         }
@@ -142,7 +140,7 @@ export default function CreatePage() {
         credentials: 'include',
         body: JSON.stringify({
           content: content.trim(),
-          mediaUrls: mediaUrls.length > 0 ? mediaUrls : undefined,
+          media: uploadedMedia.length > 0 ? uploadedMedia : undefined,
         }),
       });
 
@@ -288,10 +286,17 @@ export default function CreatePage() {
                   </div>
                   <span className="text-sm">
                     {mediaFiles.length > 0
-                      ? `${mediaFiles.length}/${MAX_FILES} media`
-                      : 'Add photos/videos'}
+                      ? `${mediaFiles.length}/${MAX_FILES}`
+                      : 'Add media'}
                   </span>
                 </button>
+
+                {/* Media limit hint */}
+                {mediaFiles.length === 0 && (
+                  <span className="text-xs text-muted-foreground/60">
+                    Max 4 photos/videos
+                  </span>
+                )}
 
                 {/* Spacer */}
                 <div className="flex-1" />

@@ -25,7 +25,8 @@ function addSecurityHeaders(response: NextResponse): void {
       "default-src 'self'",
       "script-src 'self' 'unsafe-eval' 'unsafe-inline'", // Next.js requires unsafe-eval and unsafe-inline
       "style-src 'self' 'unsafe-inline'",
-      "img-src 'self' data: https:",
+      "img-src 'self' data: blob: https:", // blob: for local file previews
+      "media-src 'self' data: blob: https:", // blob: for local video previews
       "font-src 'self' data:",
       "connect-src 'self' https://*.appwrite.io", // Allow Appwrite API
       "frame-ancestors 'none'",
