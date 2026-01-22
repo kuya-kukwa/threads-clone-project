@@ -97,7 +97,7 @@ export default function CreatePage() {
 
       // Upload media files first
       const mediaUrls: string[] = [];
-      
+
       if (mediaFiles.length > 0) {
         // Use multi-media upload endpoint for batch upload
         const formData = new FormData();

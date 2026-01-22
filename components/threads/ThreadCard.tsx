@@ -497,22 +497,22 @@ function MediaLightbox({
 
   const handleDotsTouchMove = (e: React.TouchEvent) => {
     if (!dotsContainerRef.current) return;
-    
+
     const diff = e.touches[0].clientX - dotsTouchStartX.current;
     const containerWidth = dotsContainerRef.current.offsetWidth;
     const dotWidth = containerWidth / items.length;
-    
+
     // Calculate how many dots to move based on swipe distance
     const indexChange = Math.round(-diff / (dotWidth * 1.5));
     let newIndex = dotsScrollStartX.current + indexChange;
-    
+
     // Clamp to valid range
     newIndex = Math.max(0, Math.min(items.length - 1, newIndex));
-    
+
     if (newIndex !== currentIndex) {
       setCurrentIndex(newIndex);
     }
-    
+
     e.stopPropagation();
   };
 
@@ -550,7 +550,7 @@ function MediaLightbox({
         <DialogTitle className="sr-only">Media viewer</DialogTitle>
 
         {/* Full-screen clickable backdrop */}
-        <div 
+        <div
           className="absolute inset-0 flex items-center justify-center"
           onClick={handleBackdropClick}
           onTouchStart={handleTouchStart}
@@ -628,7 +628,7 @@ function MediaLightbox({
 
           {/* Dots indicator - TikTok style swipeable */}
           {hasMultiple && (
-            <div 
+            <div
               ref={dotsContainerRef}
               className="absolute bottom-8 left-1/2 -translate-x-1/2 flex items-center gap-2 px-4 py-2 rounded-full bg-black/30 backdrop-blur-sm touch-pan-x"
               onTouchStart={handleDotsTouchStart}
@@ -656,7 +656,7 @@ function MediaLightbox({
 
           {/* Counter indicator */}
           {hasMultiple && (
-            <div 
+            <div
               className="absolute top-4 left-4 px-3 py-1 rounded-full bg-black/30 backdrop-blur-sm text-white text-sm"
               onClick={(e) => e.stopPropagation()}
             >
