@@ -146,7 +146,7 @@ function ProfileContent({ userId }: { userId: string }) {
         </div>
 
         {/* Tabs */}
-        <div className="sticky top-12 z-40 glass border-b border-border/50">
+        <div className="sticky top-0 md:top-12 z-40 bg-background border-b border-border/50">
           <div className="max-w-2xl mx-auto px-4">
             <div className="flex">
               {tabs.map((tab) => (
