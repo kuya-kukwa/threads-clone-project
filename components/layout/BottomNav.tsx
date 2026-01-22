@@ -73,12 +73,12 @@ export function BottomNav() {
     const observer = new MutationObserver(() => {
       setIsModalOpen(document.body.classList.contains('modal-open'));
     });
-    
+
     observer.observe(document.body, {
       attributes: true,
       attributeFilter: ['class'],
     });
-    
+
     return () => observer.disconnect();
   }, []);
 
