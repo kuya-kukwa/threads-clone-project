@@ -139,8 +139,8 @@ export function BottomNav() {
         isVisible ? 'translate-y-0' : 'translate-y-full'
       }`}
     >
-      {/* Glass background */}
-      <div className="glass border-t border-border/50">
+      {/* Solid background */}
+      <div className="bg-card border-t border-border/50">
         <div
           className="flex items-center justify-around px-1"
           style={{ paddingBottom: 'max(0.5rem, env(safe-area-inset-bottom))' }}
