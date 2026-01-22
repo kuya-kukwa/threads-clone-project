@@ -11,7 +11,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { AuthGuard } from '@/components/auth/AuthGuard';
 import { useCurrentUser } from '@/hooks';
-import { apiClient } from '@/lib/api/apiClient';
+import { getSessionToken } from '@/lib/appwriteClient';
 
 const MAX_CHARS = 500;
 const MAX_FILES = 10;
@@ -87,32 +87,69 @@ export default function CreatePage() {
     setError(null);
 
     try {
+      // Get session token for authenticated requests
+      const sessionId = getSessionToken();
+      if (!sessionId) {
+        setError('Please log in to post');
+        setIsSubmitting(false);
+        return;
+      }
+
       // Upload media files first
       const mediaUrls: string[] = [];
-      for (const file of mediaFiles) {
+      
+      if (mediaFiles.length > 0) {
+        // Use multi-media upload endpoint for batch upload
         const formData = new FormData();
-        formData.append('file', file);
+        mediaFiles.forEach((file, index) => {
+          formData.append(`file${index}`, file);
+          formData.append(`altText${index}`, '');
+        });
 
-        const response = await fetch('/api/upload/image', {
+        const response = await fetch('/api/upload/media', {
           method: 'POST',
-          body: formData,
+          headers: {
+            'x-session-id': sessionId,
+            'X-CSRF-Token': 'true',
+          },
           credentials: 'include',
+          body: formData,
         });
 
         if (!response.ok) {
           const errorData = await response.json();
-          throw new Error(errorData.message || 'Failed to upload file');
+          throw new Error(errorData.error || 'Failed to upload files');
         }
 
-        const { url } = await response.json();
-        mediaUrls.push(url);
+        const uploadResult = await response.json();
+        if (uploadResult.success && uploadResult.media) {
+          uploadResult.media.forEach((item: { url: string }) => {
+            mediaUrls.push(item.url);
+          });
+        } else {
+          throw new Error(uploadResult.error || 'Upload failed');
+        }
       }
 
       // Create thread
-      await apiClient.post('/api/threads', {
-        content: content.trim(),
-        mediaUrls: mediaUrls.length > 0 ? mediaUrls : undefined,
+      const threadResponse = await fetch('/api/threads', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-session-id': sessionId,
+          'X-CSRF-Token': 'true',
+        },
+        credentials: 'include',
+        body: JSON.stringify({
+          content: content.trim(),
+          mediaUrls: mediaUrls.length > 0 ? mediaUrls : undefined,
+        }),
       });
+
+      if (!threadResponse.ok) {
+        const threadError = await threadResponse.json();
+        throw new Error(threadError.error || 'Failed to create post');
+      }
 
       // Clean up previews
       mediaPreviews.forEach((preview) => URL.revokeObjectURL(preview.url));
@@ -239,7 +276,7 @@ export default function CreatePage() {
                   onChange={handleFileSelect}
                   className="hidden"
                 />
-                
+
                 {/* Add media button */}
                 <button
                   onClick={() => fileInputRef.current?.click()}
@@ -250,10 +287,9 @@ export default function CreatePage() {
                     <ImageIcon className="w-5 h-5" />
                   </div>
                   <span className="text-sm">
-                    {mediaFiles.length > 0 
+                    {mediaFiles.length > 0
                       ? `${mediaFiles.length}/${MAX_FILES} media`
-                      : 'Add photos/videos'
-                    }
+                      : 'Add photos/videos'}
                   </span>
                 </button>
 
@@ -286,13 +322,6 @@ export default function CreatePage() {
               )}
             </div>
           </div>
-        </div>
-
-        {/* Help text */}
-        <div className="max-w-2xl mx-auto w-full px-4 pb-4">
-          <p className="text-xs text-muted-foreground/60 text-center">
-            💡 Tip: You can select multiple photos and videos at once
-          </p>
         </div>
       </div>
     </AuthGuard>
