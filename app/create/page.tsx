@@ -6,7 +6,7 @@
  * Mobile-optimized with full-screen composer
  */
 
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { AuthGuard } from '@/components/auth/AuthGuard';
@@ -26,11 +26,21 @@ export default function CreatePage() {
     { url: string; type: 'image' | 'video' }[]
   >([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   const charsRemaining = MAX_CHARS - content.length;
   const canPost = content.trim().length > 0 || mediaFiles.length > 0;
+
+  // Auto-resize textarea
+  useEffect(() => {
+    if (textareaRef.current) {
+      textareaRef.current.style.height = 'auto';
+      textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`;
+    }
+  }, [content]);
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
@@ -104,6 +114,8 @@ export default function CreatePage() {
       }[] = [];
 
       if (mediaFiles.length > 0) {
+        setUploadProgress('Uploading media...');
+        
         // Use multi-media upload endpoint for batch upload
         const formData = new FormData();
         mediaFiles.forEach((file, index) => {
@@ -144,6 +156,8 @@ export default function CreatePage() {
         }
       }
 
+      setUploadProgress('Creating post...');
+
       // Create thread
       const threadResponse = await fetch('/api/threads', {
         method: 'POST',
@@ -177,6 +191,7 @@ export default function CreatePage() {
       router.refresh();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to create post');
+      setUploadProgress(null);
     } finally {
       setIsSubmitting(false);
     }
@@ -186,23 +201,24 @@ export default function CreatePage() {
     <AuthGuard>
       <div className="min-h-screen bg-background flex flex-col pb-20 md:pb-0">
         {/* Header */}
-        <div className="sticky top-0 z-50 glass border-b border-border/50">
+        <div className="sticky top-0 z-50 bg-background border-b border-border/50">
           <div className="max-w-2xl mx-auto px-4">
-            <div className="flex items-center justify-between h-12">
+            <div className="flex items-center justify-between h-14">
               <Link
                 href="/feed"
-                className="text-sm text-muted-foreground hover:text-foreground transition-colors min-w-[60px]"
+                className="flex items-center gap-1 text-muted-foreground hover:text-foreground transition-colors"
               >
-                Cancel
+                <ChevronLeftIcon className="w-5 h-5" />
+                <span className="text-sm">Back</span>
               </Link>
-              <h1 className="text-sm font-semibold">New Thread</h1>
+              <h1 className="text-base font-semibold">New thread</h1>
               <button
                 onClick={handleSubmit}
                 disabled={!canPost || isSubmitting}
-                className={`text-sm font-semibold transition-colors min-w-[60px] text-right ${
+                className={`px-4 py-1.5 rounded-full text-sm font-semibold transition-all ${
                   canPost && !isSubmitting
-                    ? 'text-primary hover:text-primary/80'
-                    : 'text-muted-foreground'
+                    ? 'bg-foreground text-background hover:opacity-90'
+                    : 'bg-muted text-muted-foreground cursor-not-allowed'
                 }`}
               >
                 {isSubmitting ? 'Posting...' : 'Post'}
@@ -212,69 +228,64 @@ export default function CreatePage() {
         </div>
 
         {/* Composer */}
-        <div className="flex-1 max-w-2xl mx-auto w-full px-4 py-4">
+        <div className="flex-1 max-w-2xl mx-auto w-full px-4 py-6">
           <div className="flex gap-3">
-            {/* User avatar */}
-            <div className="shrink-0">
-              <div className="w-10 h-10 rounded-full bg-linear-to-br from-primary to-accent flex items-center justify-center text-white font-medium">
-                {user?.name?.[0] || 'U'}
+            {/* User avatar with thread line */}
+            <div className="flex flex-col items-center">
+              <div className="w-11 h-11 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center text-white font-semibold text-lg shrink-0">
+                {user?.name?.[0]?.toUpperCase() || 'U'}
               </div>
-              {/* Vertical line connecting avatar to add button */}
-              <div className="w-0.5 h-full min-h-8 bg-border/50 mx-auto mt-2" />
+              {/* Thread line */}
+              <div className="w-0.5 flex-1 min-h-[40px] bg-border/40 mt-2 rounded-full" />
             </div>
 
             {/* Content area */}
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-semibold mb-1">
+            <div className="flex-1 min-w-0 pt-1">
+              {/* Username */}
+              <p className="text-base font-semibold text-foreground">
                 {user?.name || 'User'}
               </p>
+
+              {/* Textarea */}
               <textarea
+                ref={textareaRef}
                 value={content}
                 onChange={(e) => setContent(e.target.value)}
-                placeholder="Start a thread..."
+                placeholder="What's new?"
                 maxLength={MAX_CHARS}
-                className="w-full bg-transparent border-0 resize-none text-foreground placeholder:text-muted-foreground focus:outline-none text-base min-h-[80px]"
+                className="w-full bg-transparent border-0 resize-none text-foreground placeholder:text-muted-foreground/60 focus:outline-none text-[15px] leading-relaxed mt-1 min-h-[100px]"
                 autoFocus
+                rows={1}
               />
-
-              {/* Character count */}
-              <div className="flex items-center gap-2">
-                {content.length > 0 && (
-                  <div
-                    className={`text-xs px-2 py-1 rounded-full ${
-                      charsRemaining < 0
-                        ? 'bg-red-500/20 text-red-500'
-                        : charsRemaining < 50
-                          ? 'bg-amber-500/20 text-amber-500'
-                          : 'bg-secondary text-muted-foreground'
-                    }`}
-                  >
-                    {charsRemaining}
-                  </div>
-                )}
-              </div>
 
               {/* Media previews */}
               {mediaPreviews.length > 0 && (
                 <div
-                  className={`grid gap-2 mt-2 ${
+                  className={`grid gap-2 mt-3 ${
                     mediaPreviews.length === 1
-                      ? 'grid-cols-1'
+                      ? 'grid-cols-1 max-w-sm'
                       : mediaPreviews.length === 2
                         ? 'grid-cols-2'
-                        : 'grid-cols-3'
+                        : 'grid-cols-2'
                   }`}
                 >
                   {mediaPreviews.map((preview, index) => (
                     <div
                       key={index}
-                      className="relative rounded-xl overflow-hidden bg-secondary aspect-square"
+                      className={`relative rounded-xl overflow-hidden bg-secondary ${
+                        mediaPreviews.length === 1
+                          ? 'aspect-video'
+                          : mediaPreviews.length === 3 && index === 0
+                            ? 'row-span-2 aspect-[3/4]'
+                            : 'aspect-square'
+                      }`}
                     >
                       {preview.type === 'video' ? (
                         <video
                           src={preview.url}
                           className="w-full h-full object-cover"
                           muted
+                          playsInline
                         />
                       ) : (
                         // eslint-disable-next-line @next/next/no-img-element
@@ -284,14 +295,17 @@ export default function CreatePage() {
                           className="w-full h-full object-cover"
                         />
                       )}
+                      {/* Remove button */}
                       <button
                         onClick={() => removeMedia(index)}
-                        className="absolute top-1.5 right-1.5 w-6 h-6 rounded-full bg-background/80 backdrop-blur-sm flex items-center justify-center hover:bg-background transition-colors"
+                        className="absolute top-2 right-2 w-7 h-7 rounded-full bg-black/60 backdrop-blur-sm flex items-center justify-center hover:bg-black/80 transition-colors"
                       >
-                        <XIcon className="w-3.5 h-3.5" />
+                        <XIcon className="w-4 h-4 text-white" />
                       </button>
+                      {/* Video badge */}
                       {preview.type === 'video' && (
-                        <div className="absolute bottom-1.5 left-1.5 px-1.5 py-0.5 rounded bg-background/80 backdrop-blur-sm text-xs">
+                        <div className="absolute bottom-2 left-2 px-2 py-0.5 rounded-md bg-black/60 backdrop-blur-sm text-xs text-white flex items-center gap-1">
+                          <PlayIcon className="w-3 h-3" />
                           Video
                         </div>
                       )}
@@ -300,8 +314,8 @@ export default function CreatePage() {
                 </div>
               )}
 
-              {/* Inline toolbar - always visible */}
-              <div className="flex items-center gap-3 mt-4 pt-3 border-t border-border/30">
+              {/* Toolbar */}
+              <div className="flex items-center gap-1 mt-4">
                 {/* Hidden file input */}
                 <input
                   ref={fileInputRef}
@@ -316,38 +330,107 @@ export default function CreatePage() {
                 <button
                   onClick={() => fileInputRef.current?.click()}
                   disabled={mediaFiles.length >= MAX_FILES}
-                  className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors disabled:opacity-50 group"
+                  className="p-2 rounded-full hover:bg-secondary transition-colors disabled:opacity-40 disabled:cursor-not-allowed text-muted-foreground hover:text-foreground"
+                  title="Add photos or videos"
                 >
-                  <div className="p-2 rounded-lg bg-secondary/50 group-hover:bg-secondary transition-colors">
-                    <ImageIcon className="w-5 h-5" />
-                  </div>
-                  <span className="text-sm">
-                    {mediaFiles.length > 0
-                      ? `${mediaFiles.length}/${MAX_FILES}`
-                      : 'Add media'}
-                  </span>
+                  <ImageIcon className="w-5 h-5" />
                 </button>
 
-                {/* Media limit hint */}
-                {mediaFiles.length === 0 && (
-                  <span className="text-xs text-muted-foreground/60">
-                    Max 4 photos/videos
+                {/* Camera button */}
+                <button
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={mediaFiles.length >= MAX_FILES}
+                  className="p-2 rounded-full hover:bg-secondary transition-colors disabled:opacity-40 disabled:cursor-not-allowed text-muted-foreground hover:text-foreground"
+                  title="Take a photo"
+                >
+                  <CameraIcon className="w-5 h-5" />
+                </button>
+
+                {/* GIF button (placeholder) */}
+                <button
+                  className="p-2 rounded-full hover:bg-secondary transition-colors text-muted-foreground hover:text-foreground opacity-40 cursor-not-allowed"
+                  title="GIFs coming soon"
+                  disabled
+                >
+                  <GifIcon className="w-5 h-5" />
+                </button>
+
+                {/* Media count indicator */}
+                {mediaFiles.length > 0 && (
+                  <span className="ml-2 text-xs text-muted-foreground">
+                    {mediaFiles.length}/{MAX_FILES}
                   </span>
                 )}
 
                 {/* Spacer */}
                 <div className="flex-1" />
-              </div>
 
-              {/* Error message */}
-              {error && (
-                <div className="mt-3 p-3 rounded-lg bg-red-500/10 border border-red-500/20">
-                  <p className="text-sm text-red-500">{error}</p>
-                </div>
-              )}
+                {/* Character count */}
+                {content.length > 0 && (
+                  <div className="flex items-center gap-2">
+                    <div
+                      className={`w-5 h-5 rounded-full border-2 ${
+                        charsRemaining < 0
+                          ? 'border-red-500'
+                          : charsRemaining < 50
+                            ? 'border-amber-500'
+                            : 'border-muted-foreground/30'
+                      }`}
+                      style={{
+                        background: `conic-gradient(${
+                          charsRemaining < 0
+                            ? '#ef4444'
+                            : charsRemaining < 50
+                              ? '#f59e0b'
+                              : 'var(--muted-foreground)'
+                        } ${Math.min(100, (content.length / MAX_CHARS) * 100)}%, transparent 0)`,
+                      }}
+                    />
+                    {charsRemaining <= 20 && (
+                      <span
+                        className={`text-xs font-medium ${
+                          charsRemaining < 0
+                            ? 'text-red-500'
+                            : 'text-amber-500'
+                        }`}
+                      >
+                        {charsRemaining}
+                      </span>
+                    )}
+                  </div>
+                )}
+              </div>
             </div>
           </div>
+
+          {/* Add to thread hint */}
+          <div className="flex items-center gap-3 mt-4 pl-14 text-muted-foreground/60">
+            <div className="w-6 h-6 rounded-full border-2 border-dashed border-current flex items-center justify-center">
+              <span className="text-xs">+</span>
+            </div>
+            <span className="text-sm">Add to thread</span>
+          </div>
+
+          {/* Error message */}
+          {error && (
+            <div className="mt-4 p-3 rounded-xl bg-red-500/10 border border-red-500/20">
+              <p className="text-sm text-red-500">{error}</p>
+            </div>
+          )}
+
+          {/* Upload progress */}
+          {uploadProgress && (
+            <div className="mt-4 p-3 rounded-xl bg-primary/10 border border-primary/20">
+              <div className="flex items-center gap-2">
+                <div className="w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+                <p className="text-sm text-primary">{uploadProgress}</p>
+              </div>
+            </div>
+          )}
         </div>
+
+        {/* Bottom safe area */}
+        <div className="h-safe" />
       </div>
     </AuthGuard>
   );
@@ -386,6 +469,59 @@ function ImageIcon({ className }: { className?: string }) {
         strokeLinejoin="round"
         d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z"
       />
+    </svg>
+  );
+}
+
+function CameraIcon({ className }: { className?: string }) {
+  return (
+    <svg
+      className={className}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={1.5}
+    >
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z"
+      />
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M16.5 12.75a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0zM18.75 10.5h.008v.008h-.008V10.5z"
+      />
+    </svg>
+  );
+}
+
+function GifIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="currentColor">
+      <path d="M19 10.5V8.8h-4.4v6.4h1.7v-2h2v-1.7h-2v-1H19zm-7.3-1.7h1.7v6.4h-1.7V8.8zm-3.6 1.6c.4 0 .9.2 1.2.5l1.2-1C9.9 9.2 9 8.8 8.1 8.8c-1.8 0-3.2 1.4-3.2 3.2s1.4 3.2 3.2 3.2c1 0 1.8-.4 2.4-1v-2.5H7.7v1.2h1.2v.6c-.2.1-.5.2-.8.2-.9 0-1.6-.7-1.6-1.7 0-1 .7-1.7 1.6-1.7z" />
+    </svg>
+  );
+}
+
+function ChevronLeftIcon({ className }: { className?: string }) {
+  return (
+    <svg
+      className={className}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={2}
+    >
+      <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+    </svg>
+  );
+}
+
+function PlayIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="currentColor">
+      <path d="M8 5v14l11-7z" />
     </svg>
   );
 }
