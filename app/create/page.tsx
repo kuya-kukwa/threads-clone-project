@@ -237,6 +237,23 @@ export default function CreatePage() {
                 autoFocus
               />
 
+              {/* Character count */}
+              <div className="flex items-center gap-2">
+                {content.length > 0 && (
+                  <div
+                    className={`text-xs px-2 py-1 rounded-full ${
+                      charsRemaining < 0
+                        ? 'bg-red-500/20 text-red-500'
+                        : charsRemaining < 50
+                          ? 'bg-amber-500/20 text-amber-500'
+                          : 'bg-secondary text-muted-foreground'
+                    }`}
+                  >
+                    {charsRemaining}
+                  </div>
+                )}
+              </div>
+
               {/* Media previews */}
               {mediaPreviews.length > 0 && (
                 <div
@@ -320,23 +337,6 @@ export default function CreatePage() {
 
                 {/* Spacer */}
                 <div className="flex-1" />
-
-                {/* Character count */}
-                <div className="flex items-center gap-2">
-                  {content.length > 0 && (
-                    <div
-                      className={`text-xs px-2 py-1 rounded-full ${
-                        charsRemaining < 0
-                          ? 'bg-red-500/20 text-red-500'
-                          : charsRemaining < 50
-                            ? 'bg-amber-500/20 text-amber-500'
-                            : 'bg-secondary text-muted-foreground'
-                      }`}
-                    >
-                      {charsRemaining}
-                    </div>
-                  )}
-                </div>
               </div>
 
               {/* Error message */}
