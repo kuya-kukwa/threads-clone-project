@@ -122,8 +122,18 @@ export default function CreatePage() {
         });
 
         if (!response.ok) {
-          const errorData = await response.json();
-          throw new Error(errorData.error || 'Failed to upload files');
+          // Handle non-JSON error responses (like "Request Entity Too Large")
+          const contentType = response.headers.get('content-type');
+          if (contentType && contentType.includes('application/json')) {
+            const errorData = await response.json();
+            throw new Error(errorData.error || 'Failed to upload files');
+          } else {
+            // Non-JSON response - likely server error like body too large
+            if (response.status === 413) {
+              throw new Error('File too large. Videos must be under 50MB.');
+            }
+            throw new Error(`Upload failed (${response.status}): Server error`);
+          }
         }
 
         const uploadResult = await response.json();
@@ -150,8 +160,13 @@ export default function CreatePage() {
       });
 
       if (!threadResponse.ok) {
-        const threadError = await threadResponse.json();
-        throw new Error(threadError.error || 'Failed to create post');
+        const contentType = threadResponse.headers.get('content-type');
+        if (contentType && contentType.includes('application/json')) {
+          const threadError = await threadResponse.json();
+          throw new Error(threadError.error || 'Failed to create post');
+        } else {
+          throw new Error(`Failed to create post (${threadResponse.status})`);
+        }
       }
 
       // Clean up previews

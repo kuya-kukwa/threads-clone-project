@@ -11,7 +11,7 @@
 
 import { ID, Query } from 'node-appwrite';
 import { serverDatabases } from '@/lib/appwriteServer';
-import { APPWRITE_CONFIG } from '@/lib/appwriteConfig';
+import { APPWRITE_CONFIG, SECURITY_CONFIG } from '@/lib/appwriteConfig';
 import { Thread, ThreadWithAuthor, UserProfile, MediaItem } from '@/types/appwrite';
 import { threadCreateSchema } from '@/schemas/thread.schema';
 import { sanitizeInput } from '@/lib/utils';
@@ -27,7 +27,8 @@ import { getMediaUrl } from './mediaService';
  */
 export function sanitizeThreadContent(content: string): string {
   // Use existing sanitizeInput for basic XSS protection
-  let sanitized = sanitizeInput(content, APPWRITE_CONFIG.THREAD_ATTRIBUTES.CONTENT.length);
+  // Use MAX_LENGTHS.THREAD_CONTENT (500) instead of attribute name length
+  let sanitized = sanitizeInput(content, SECURITY_CONFIG.MAX_LENGTHS.THREAD_CONTENT);
   
   // Preserve line breaks (convert \n to actual newlines)
   sanitized = sanitized.replace(/\\n/g, '\n');

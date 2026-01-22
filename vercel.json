@@ -2,5 +2,10 @@
   "buildCommand": "next build",
   "framework": "nextjs",
   "installCommand": "npm install",
-  "outputDirectory": ".next"
+  "outputDirectory": ".next",
+  "functions": {
+    "app/api/upload/media/route.ts": {
+      "maxDuration": 60
+    }
+  }
 }
