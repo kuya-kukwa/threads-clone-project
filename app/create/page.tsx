@@ -400,15 +400,6 @@ export default function CreatePage() {
               </div>
             </div>
           </div>
-
-          {/* Add to thread hint */}
-          <div className="flex items-center gap-3 mt-4 pl-14 text-muted-foreground/60">
-            <div className="w-6 h-6 rounded-full border-2 border-dashed border-current flex items-center justify-center">
-              <span className="text-xs">+</span>
-            </div>
-            <span className="text-sm">Add to thread</span>
-          </div>
-
           {/* Error message */}
           {error && (
             <div className="mt-4 p-3 rounded-xl bg-red-500/10 border border-red-500/20">
