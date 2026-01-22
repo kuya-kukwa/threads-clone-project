@@ -211,23 +211,21 @@ function ProfileHeader({
   isOwnProfile: boolean;
   onSettingsClick: () => void;
 }) {
+  if (!isOwnProfile) {
+    return null;
+  }
+
   return (
-    <div className="sticky top-12 z-40 glass border-b border-border/50">
+    <div className="sticky top-0 z-40 bg-background">
       <div className="max-w-2xl mx-auto px-4">
-        <div className="flex items-center justify-between h-12">
-          <div className="w-10" /> {/* Spacer */}
-          <h1 className="text-sm font-semibold">Profile</h1>
-          {isOwnProfile ? (
-            <button
-              onClick={onSettingsClick}
-              className="p-2 rounded-lg hover:bg-secondary transition-colors"
-              aria-label="Settings"
-            >
-              <MenuIcon className="w-5 h-5" />
-            </button>
-          ) : (
-            <div className="w-10" /> /* Spacer */
-          )}
+        <div className="flex items-center justify-end h-12">
+          <button
+            onClick={onSettingsClick}
+            className="p-2 rounded-lg hover:bg-secondary transition-colors"
+            aria-label="Settings"
+          >
+            <MenuIcon className="w-5 h-5" />
+          </button>
         </div>
       </div>
     </div>
@@ -391,6 +389,14 @@ function SettingsModal({
   onLogout: () => void;
   isLoggingOut: boolean;
 }) {
+  // Hide bottom nav when modal is open
+  useEffect(() => {
+    document.body.classList.add('modal-open');
+    return () => {
+      document.body.classList.remove('modal-open');
+    };
+  }, []);
+
   return (
     <div className="fixed inset-0 z-50 flex items-end justify-center md:items-center">
       {/* Backdrop */}

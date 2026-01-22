@@ -64,8 +64,23 @@ export function BottomNav() {
   const pathname = usePathname();
   const { user, isLoading } = useCurrentUser();
   const [isVisible, setIsVisible] = useState(true);
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const lastScrollY = useRef(0);
   const ticking = useRef(false);
+
+  // Listen for modal-open class on body to hide nav
+  useEffect(() => {
+    const observer = new MutationObserver(() => {
+      setIsModalOpen(document.body.classList.contains('modal-open'));
+    });
+    
+    observer.observe(document.body, {
+      attributes: true,
+      attributeFilter: ['class'],
+    });
+    
+    return () => observer.disconnect();
+  }, []);
 
   // Handle scroll to show/hide nav
   useEffect(() => {
@@ -136,7 +151,7 @@ export function BottomNav() {
   return (
     <nav
       className={`fixed bottom-0 left-0 right-0 z-50 md:hidden transition-transform duration-300 ${
-        isVisible ? 'translate-y-0' : 'translate-y-full'
+        isVisible && !isModalOpen ? 'translate-y-0' : 'translate-y-full'
       }`}
     >
       {/* Solid opaque background */}
