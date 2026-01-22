@@ -59,9 +59,7 @@ export function ProfileCard({
           <h1 className="text-2xl font-bold text-foreground truncate">
             {profile.displayName}
           </h1>
-          <p className="text-base text-muted-foreground">
-            @{profile.username}
-          </p>
+          <p className="text-base text-muted-foreground">@{profile.username}</p>
         </div>
 
         {/* Right: Avatar */}
@@ -79,13 +77,6 @@ export function ProfileCard({
           {profile.bio}
         </p>
       )}
-
-      {/* Stats row */}
-      <div className="flex items-center gap-4 mt-4">
-        <span className="text-sm text-muted-foreground">
-          Joined {new Date(profile.createdAt).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}
-        </span>
-      </div>
 
       {/* Action button */}
       {isOwnProfile ? (
