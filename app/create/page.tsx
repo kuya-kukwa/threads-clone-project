@@ -96,7 +96,12 @@ export default function CreatePage() {
       }
 
       // Store uploaded media items for API
-      let uploadedMedia: { id: string; url: string; type: 'image' | 'video'; altText?: string }[] = [];
+      let uploadedMedia: {
+        id: string;
+        url: string;
+        type: 'image' | 'video';
+        altText?: string;
+      }[] = [];
 
       if (mediaFiles.length > 0) {
         // Use multi-media upload endpoint for batch upload
