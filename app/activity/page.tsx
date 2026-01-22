@@ -26,7 +26,7 @@ export default function ActivityPage() {
     <AuthGuard>
       <div className="min-h-screen bg-background pb-20 md:pb-0">
         {/* Header with tabs */}
-        <div className="sticky top-12 z-40 glass border-b border-border/50">
+        <div className="sticky top-0 md:top-12 z-40 bg-background border-b border-border/50">
           <div className="max-w-2xl mx-auto px-4">
             {/* Title */}
             <div className="py-3">
