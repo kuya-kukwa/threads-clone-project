@@ -62,7 +62,7 @@ export function MobileTopNav({
   return (
     <>
       {/* Top Nav Bar - Mobile only */}
-      <div className="sticky top-0 z-40 bg-background border-b border-border/50 md:hidden">
+      <div className="sticky top-0 z-40 bg-background/100 isolate border-b border-border/50 md:hidden">
         <div className="flex items-center justify-between h-12 px-4">
           {/* Hamburger Menu Button */}
           <button
