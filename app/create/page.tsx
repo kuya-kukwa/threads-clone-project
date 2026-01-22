@@ -129,14 +129,14 @@ export default function CreatePage() {
 
   return (
     <AuthGuard>
-      <div className="min-h-screen bg-background flex flex-col">
+      <div className="min-h-screen bg-background flex flex-col pb-20 md:pb-0">
         {/* Header */}
         <div className="sticky top-0 z-50 glass border-b border-border/50">
           <div className="max-w-2xl mx-auto px-4">
             <div className="flex items-center justify-between h-12">
               <Link
                 href="/feed"
-                className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+                className="text-sm text-muted-foreground hover:text-foreground transition-colors min-w-[60px]"
               >
                 Cancel
               </Link>
@@ -144,7 +144,7 @@ export default function CreatePage() {
               <button
                 onClick={handleSubmit}
                 disabled={!canPost || isSubmitting}
-                className={`text-sm font-semibold transition-colors ${
+                className={`text-sm font-semibold transition-colors min-w-[60px] text-right ${
                   canPost && !isSubmitting
                     ? 'text-primary hover:text-primary/80'
                     : 'text-muted-foreground'
@@ -160,14 +160,16 @@ export default function CreatePage() {
         <div className="flex-1 max-w-2xl mx-auto w-full px-4 py-4">
           <div className="flex gap-3">
             {/* User avatar */}
-            <div className="flex-shrink-0">
-              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center text-white font-medium">
+            <div className="shrink-0">
+              <div className="w-10 h-10 rounded-full bg-linear-to-br from-primary to-accent flex items-center justify-center text-white font-medium">
                 {user?.name?.[0] || 'U'}
               </div>
+              {/* Vertical line connecting avatar to add button */}
+              <div className="w-0.5 h-full min-h-8 bg-border/50 mx-auto mt-2" />
             </div>
 
             {/* Content area */}
-            <div className="flex-1">
+            <div className="flex-1 min-w-0">
               <p className="text-sm font-semibold mb-1">
                 {user?.name || 'User'}
               </p>
@@ -176,15 +178,19 @@ export default function CreatePage() {
                 onChange={(e) => setContent(e.target.value)}
                 placeholder="Start a thread..."
                 maxLength={MAX_CHARS}
-                className="w-full bg-transparent border-0 resize-none text-foreground placeholder:text-muted-foreground focus:outline-none text-base min-h-[120px]"
+                className="w-full bg-transparent border-0 resize-none text-foreground placeholder:text-muted-foreground focus:outline-none text-base min-h-[80px]"
                 autoFocus
               />
 
               {/* Media previews */}
               {mediaPreviews.length > 0 && (
                 <div
-                  className={`grid gap-2 mt-3 ${
-                    mediaPreviews.length === 1 ? 'grid-cols-1' : 'grid-cols-2'
+                  className={`grid gap-2 mt-2 ${
+                    mediaPreviews.length === 1
+                      ? 'grid-cols-1'
+                      : mediaPreviews.length === 2
+                        ? 'grid-cols-2'
+                        : 'grid-cols-3'
                   }`}
                 >
                   {mediaPreviews.map((preview, index) => (
@@ -208,12 +214,12 @@ export default function CreatePage() {
                       )}
                       <button
                         onClick={() => removeMedia(index)}
-                        className="absolute top-2 right-2 w-7 h-7 rounded-full bg-background/80 backdrop-blur-sm flex items-center justify-center hover:bg-background transition-colors"
+                        className="absolute top-1.5 right-1.5 w-6 h-6 rounded-full bg-background/80 backdrop-blur-sm flex items-center justify-center hover:bg-background transition-colors"
                       >
-                        <XIcon className="w-4 h-4" />
+                        <XIcon className="w-3.5 h-3.5" />
                       </button>
                       {preview.type === 'video' && (
-                        <div className="absolute bottom-2 left-2 px-2 py-1 rounded bg-background/80 backdrop-blur-sm text-xs">
+                        <div className="absolute bottom-1.5 left-1.5 px-1.5 py-0.5 rounded bg-background/80 backdrop-blur-sm text-xs">
                           Video
                         </div>
                       )}
@@ -222,18 +228,9 @@ export default function CreatePage() {
                 </div>
               )}
 
-              {/* Error message */}
-              {error && <p className="text-sm text-red-500 mt-2">{error}</p>}
-            </div>
-          </div>
-        </div>
-
-        {/* Bottom toolbar */}
-        <div className="sticky bottom-0 glass border-t border-border/50 pb-safe">
-          <div className="max-w-2xl mx-auto px-4">
-            <div className="flex items-center justify-between h-12">
-              {/* Media button */}
-              <div className="flex items-center gap-2">
+              {/* Inline toolbar - always visible */}
+              <div className="flex items-center gap-3 mt-4 pt-3 border-t border-border/30">
+                {/* Hidden file input */}
                 <input
                   ref={fileInputRef}
                   type="file"
@@ -242,34 +239,60 @@ export default function CreatePage() {
                   onChange={handleFileSelect}
                   className="hidden"
                 />
+                
+                {/* Add media button */}
                 <button
                   onClick={() => fileInputRef.current?.click()}
                   disabled={mediaFiles.length >= MAX_FILES}
-                  className="p-2 rounded-lg hover:bg-secondary transition-colors disabled:opacity-50"
+                  className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors disabled:opacity-50 group"
                 >
-                  <ImageIcon className="w-5 h-5 text-muted-foreground" />
-                </button>
-                {mediaFiles.length > 0 && (
-                  <span className="text-xs text-muted-foreground">
-                    {mediaFiles.length}/{MAX_FILES}
+                  <div className="p-2 rounded-lg bg-secondary/50 group-hover:bg-secondary transition-colors">
+                    <ImageIcon className="w-5 h-5" />
+                  </div>
+                  <span className="text-sm">
+                    {mediaFiles.length > 0 
+                      ? `${mediaFiles.length}/${MAX_FILES} media`
+                      : 'Add photos/videos'
+                    }
                   </span>
-                )}
+                </button>
+
+                {/* Spacer */}
+                <div className="flex-1" />
+
+                {/* Character count */}
+                <div className="flex items-center gap-2">
+                  {content.length > 0 && (
+                    <div
+                      className={`text-xs px-2 py-1 rounded-full ${
+                        charsRemaining < 0
+                          ? 'bg-red-500/20 text-red-500'
+                          : charsRemaining < 50
+                            ? 'bg-amber-500/20 text-amber-500'
+                            : 'bg-secondary text-muted-foreground'
+                      }`}
+                    >
+                      {charsRemaining}
+                    </div>
+                  )}
+                </div>
               </div>
 
-              {/* Character count */}
-              <span
-                className={`text-xs ${
-                  charsRemaining < 0
-                    ? 'text-red-500'
-                    : charsRemaining < 50
-                      ? 'text-amber-500'
-                      : 'text-muted-foreground'
-                }`}
-              >
-                {charsRemaining}
-              </span>
+              {/* Error message */}
+              {error && (
+                <div className="mt-3 p-3 rounded-lg bg-red-500/10 border border-red-500/20">
+                  <p className="text-sm text-red-500">{error}</p>
+                </div>
+              )}
             </div>
           </div>
+        </div>
+
+        {/* Help text */}
+        <div className="max-w-2xl mx-auto w-full px-4 pb-4">
+          <p className="text-xs text-muted-foreground/60 text-center">
+            💡 Tip: You can select multiple photos and videos at once
+          </p>
         </div>
       </div>
     </AuthGuard>
