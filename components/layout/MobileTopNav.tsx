@@ -17,7 +17,10 @@ interface MobileTopNavProps {
   onTabChange?: (tab: FeedTab) => void;
 }
 
-export function MobileTopNav({ activeTab = 'for-you', onTabChange }: MobileTopNavProps) {
+export function MobileTopNav({
+  activeTab = 'for-you',
+  onTabChange,
+}: MobileTopNavProps) {
   const pathname = usePathname();
   const [showMenu, setShowMenu] = useState(false);
   const [showSearch, setShowSearch] = useState(false);
@@ -43,7 +46,11 @@ export function MobileTopNav({ activeTab = 'for-you', onTabChange }: MobileTopNa
 
   const menuItems: { id: FeedTab; label: string; icon: React.ReactNode }[] = [
     { id: 'for-you', label: 'For You', icon: <HomeIcon className="w-5 h-5" /> },
-    { id: 'following', label: 'Following', icon: <UsersIcon className="w-5 h-5" /> },
+    {
+      id: 'following',
+      label: 'Following',
+      icon: <UsersIcon className="w-5 h-5" />,
+    },
     { id: 'likes', label: 'Likes', icon: <HeartIcon className="w-5 h-5" /> },
   ];
 
