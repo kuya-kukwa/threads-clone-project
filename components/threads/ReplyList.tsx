@@ -1,7 +1,7 @@
 /**
  * ReplyList Component
  * Displays paginated list of replies for a thread
- * 
+ *
  * Features:
  * - Cursor-based pagination
  * - Lazy loading
@@ -44,7 +44,10 @@ export function ReplyList({ threadId, refreshTrigger = 0 }: ReplyListProps) {
         }
         setError(null);
 
-        const url = new URL(`/api/threads/${threadId}/replies`, window.location.origin);
+        const url = new URL(
+          `/api/threads/${threadId}/replies`,
+          window.location.origin,
+        );
         if (cursor) {
           url.searchParams.set('cursor', cursor);
         }
@@ -61,7 +64,11 @@ export function ReplyList({ threadId, refreshTrigger = 0 }: ReplyListProps) {
           throw new Error('Invalid response format');
         }
 
-        const { replies: newReplies, nextCursor: newCursor, hasMore: more } = data.data;
+        const {
+          replies: newReplies,
+          nextCursor: newCursor,
+          hasMore: more,
+        } = data.data;
 
         setReplies((prev) => (cursor ? [...prev, ...newReplies] : newReplies));
         setNextCursor(newCursor);
@@ -74,7 +81,7 @@ export function ReplyList({ threadId, refreshTrigger = 0 }: ReplyListProps) {
         setLoadingMore(false);
       }
     },
-    [threadId]
+    [threadId],
   );
 
   // Initial load and refresh on trigger change
@@ -130,7 +137,9 @@ export function ReplyList({ threadId, refreshTrigger = 0 }: ReplyListProps) {
             <MessageSquareIcon className="w-6 h-6 text-muted-foreground" />
           </div>
           <p className="font-medium text-sm mb-1">No replies yet</p>
-          <p className="text-xs text-muted-foreground">Be the first to reply to this thread</p>
+          <p className="text-xs text-muted-foreground">
+            Be the first to reply to this thread
+          </p>
         </div>
       </div>
     );
@@ -172,8 +181,18 @@ export function ReplyList({ threadId, refreshTrigger = 0 }: ReplyListProps) {
 // Icons
 function MessageSquareIcon({ className }: { className?: string }) {
   return (
-    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5}>
-      <path strokeLinecap="round" strokeLinejoin="round" d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2v10z" />
+    <svg
+      className={className}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={1.5}
+    >
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2v10z"
+      />
     </svg>
   );
 }
@@ -187,7 +206,11 @@ function LoadingSpinner({ className }: { className?: string }) {
       stroke="currentColor"
       strokeWidth={2}
     >
-      <path strokeLinecap="round" strokeLinejoin="round" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" />
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+      />
     </svg>
   );
 }

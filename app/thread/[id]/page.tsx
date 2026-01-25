@@ -1,7 +1,7 @@
 /**
  * Thread Detail Page
  * Displays a single thread with its replies
- * 
+ *
  * Features:
  * - Thread detail with author info
  * - Reply composer
@@ -9,7 +9,7 @@
  * - Mobile-first layout
  * - Error handling (404, deleted, etc.)
  * - Skeleton loaders
- * 
+ *
  * Route: /thread/[id]
  */
 
@@ -204,7 +204,10 @@ function ThreadDetailContent({ threadId }: { threadId: string }) {
 
         {/* Reply Composer */}
         <div className="border-b border-border/50">
-          <ReplyComposer threadId={threadId} onReplyCreated={handleReplyCreated} />
+          <ReplyComposer
+            threadId={threadId}
+            onReplyCreated={handleReplyCreated}
+          />
         </div>
 
         {/* Replies List */}
@@ -217,7 +220,13 @@ function ThreadDetailContent({ threadId }: { threadId: string }) {
 // Icons
 function ChevronLeftIcon({ className }: { className?: string }) {
   return (
-    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+    <svg
+      className={className}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={2}
+    >
       <path strokeLinecap="round" strokeLinejoin="round" d="M15 18l-6-6 6-6" />
     </svg>
   );
@@ -225,8 +234,18 @@ function ChevronLeftIcon({ className }: { className?: string }) {
 
 function SearchOffIcon({ className }: { className?: string }) {
   return (
-    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5}>
-      <path strokeLinecap="round" strokeLinejoin="round" d="M3 3l18 18M21 21l-4.35-4.35M9.5 9.5a3 3 0 014.5 4.5m-2.5 5.5a6 6 0 01-6-6 6 6 0 016-6" />
+    <svg
+      className={className}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={1.5}
+    >
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M3 3l18 18M21 21l-4.35-4.35M9.5 9.5a3 3 0 014.5 4.5m-2.5 5.5a6 6 0 01-6-6 6 6 0 016-6"
+      />
       <circle cx="11" cy="11" r="8" />
     </svg>
   );
@@ -234,16 +253,26 @@ function SearchOffIcon({ className }: { className?: string }) {
 
 function AlertCircleIcon({ className }: { className?: string }) {
   return (
-    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5}>
+    <svg
+      className={className}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={1.5}
+    >
       <circle cx="12" cy="12" r="10" />
-      <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4M12 16h.01" />
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M12 8v4M12 16h.01"
+      />
     </svg>
   );
 }
 
 export default function ThreadDetailPage({ params }: ThreadDetailPageProps) {
   const resolvedParams = use(params);
-  
+
   return (
     <AuthGuard>
       <ThreadDetailContent threadId={resolvedParams.id} />

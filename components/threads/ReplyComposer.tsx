@@ -1,7 +1,7 @@
 /**
  * ReplyComposer Component
  * Mobile-first reply input for thread detail page
- * 
+ *
  * Features:
  * - Auto-resize textarea
  * - Character count
@@ -25,7 +25,10 @@ interface ReplyComposerProps {
   onReplyCreated?: () => void;
 }
 
-export function ReplyComposer({ threadId, onReplyCreated }: ReplyComposerProps) {
+export function ReplyComposer({
+  threadId,
+  onReplyCreated,
+}: ReplyComposerProps) {
   const { user } = useCurrentUser();
   const [content, setContent] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -39,12 +42,13 @@ export function ReplyComposer({ threadId, onReplyCreated }: ReplyComposerProps) 
   const canSubmit = content.trim().length > 0 && !isOverLimit && !isSubmitting;
 
   // Get user initials for avatar
-  const userInitials = user?.name
-    ?.split(' ')
-    .map((n: string) => n[0])
-    .join('')
-    .toUpperCase()
-    .slice(0, 2) || '??';
+  const userInitials =
+    user?.name
+      ?.split(' ')
+      .map((n: string) => n[0])
+      .join('')
+      .toUpperCase()
+      .slice(0, 2) || '??';
 
   // Auto-resize textarea
   const adjustTextareaHeight = useCallback(() => {
@@ -185,7 +189,11 @@ export function ReplyComposer({ threadId, onReplyCreated }: ReplyComposerProps) 
 
           {/* Hint */}
           <p className="text-xs text-muted-foreground mt-2">
-            {typeof window !== 'undefined' && window.navigator.platform.includes('Mac') ? 'Cmd' : 'Ctrl'}+Enter to post
+            {typeof window !== 'undefined' &&
+            window.navigator.platform.includes('Mac')
+              ? 'Cmd'
+              : 'Ctrl'}
+            +Enter to post
           </p>
         </div>
       </div>
@@ -203,7 +211,11 @@ function LoadingSpinner({ className }: { className?: string }) {
       stroke="currentColor"
       strokeWidth={2}
     >
-      <path strokeLinecap="round" strokeLinejoin="round" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" />
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+      />
     </svg>
   );
 }

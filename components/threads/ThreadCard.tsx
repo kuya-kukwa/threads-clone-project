@@ -114,18 +114,18 @@ export function ThreadCard({ thread, clickable = true }: ThreadCardProps) {
     ) {
       return;
     }
-    
+
     // Don't navigate if already on thread detail page or not clickable
     if (!clickable || window.location.pathname.startsWith('/thread/')) {
       return;
     }
-    
+
     router.push(`/thread/${thread.$id}`);
   };
 
   return (
     <>
-      <article 
+      <article
         onClick={handleCardClick}
         className={`border-b border-border/50 p-4 hover:bg-card/50 transition-colors animate-fade-in ${clickable ? 'cursor-pointer' : ''}`}
       >
@@ -177,8 +177,16 @@ export function ThreadCard({ thread, clickable = true }: ThreadCardProps) {
 
             {/* Action buttons */}
             <div className="flex items-center gap-6 mt-3 -ml-2">
-              <ActionButton icon={<HeartIcon />} label="Like" count={thread.likeCount || 0} />
-              <ActionButton icon={<CommentIcon />} label="Reply" count={thread.replyCount || 0} />
+              <ActionButton
+                icon={<HeartIcon />}
+                label="Like"
+                count={thread.likeCount || 0}
+              />
+              <ActionButton
+                icon={<CommentIcon />}
+                label="Reply"
+                count={thread.replyCount || 0}
+              />
               <ActionButton icon={<RepostIcon />} label="Repost" />
               <ActionButton icon={<ShareIcon />} label="Share" />
             </div>

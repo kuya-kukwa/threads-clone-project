@@ -1,7 +1,7 @@
 /**
  * ReplyItem Component
  * Displays a single reply in the thread detail page
- * 
+ *
  * Features:
  * - Compact mobile-first layout
  * - Author info
@@ -52,14 +52,22 @@ export function ReplyItem({ reply }: ReplyItemProps) {
         <div className="flex-1 min-w-0">
           {/* Header */}
           <div className="flex items-center gap-2 mb-1">
-            <span className="font-semibold text-sm truncate">{author.displayName}</span>
-            <span className="text-xs text-muted-foreground flex-shrink-0">·</span>
-            <span className="text-xs text-muted-foreground flex-shrink-0">{timeAgo}</span>
+            <span className="font-semibold text-sm truncate">
+              {author.displayName}
+            </span>
+            <span className="text-xs text-muted-foreground flex-shrink-0">
+              ·
+            </span>
+            <span className="text-xs text-muted-foreground flex-shrink-0">
+              {timeAgo}
+            </span>
           </div>
 
           {/* Content Text */}
           {content && (
-            <p className="text-sm whitespace-pre-wrap break-words mb-2">{content}</p>
+            <p className="text-sm whitespace-pre-wrap break-words mb-2">
+              {content}
+            </p>
           )}
 
           {/* Image if present */}
@@ -120,7 +128,13 @@ export function ReplyItem({ reply }: ReplyItemProps) {
 // Icons
 function HeartIcon({ className }: { className?: string }) {
   return (
-    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5}>
+    <svg
+      className={className}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={1.5}
+    >
       <path
         strokeLinecap="round"
         strokeLinejoin="round"
@@ -132,8 +146,18 @@ function HeartIcon({ className }: { className?: string }) {
 
 function XIcon({ className }: { className?: string }) {
   return (
-    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
-      <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+    <svg
+      className={className}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={2}
+    >
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M6 18L18 6M6 6l12 12"
+      />
     </svg>
   );
 }

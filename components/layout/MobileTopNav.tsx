@@ -8,7 +8,6 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
 
 type FeedTab = 'for-you' | 'following' | 'likes';
 
@@ -21,16 +20,9 @@ export function MobileTopNav({
   activeTab = 'for-you',
   onTabChange,
 }: MobileTopNavProps) {
-  const pathname = usePathname();
   const [showMenu, setShowMenu] = useState(false);
   const [showSearch, setShowSearch] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-
-  // Close menu when route changes
-  useEffect(() => {
-    setShowMenu(false);
-    setShowSearch(false);
-  }, [pathname]);
 
   // Add modal-open class when menu is open to hide bottom nav
   useEffect(() => {
