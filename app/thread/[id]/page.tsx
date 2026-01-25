@@ -111,7 +111,7 @@ function ThreadDetailContent({ threadId }: { threadId: string }) {
             <h1 className="text-lg font-semibold ml-2">Thread</h1>
           </div>
         </div>
-        
+
         <div className="flex items-center justify-center px-4 py-20">
           <div className="text-center max-w-md">
             <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-destructive/10 flex items-center justify-center">
@@ -181,7 +181,11 @@ function ThreadDetailContent({ threadId }: { threadId: string }) {
               <p className="text-muted-foreground mb-4">
                 This thread doesn&apos;t exist or has been deleted.
               </p>
-              <Button onClick={() => router.push('/feed')} variant="default" size="sm">
+              <Button
+                onClick={() => router.push('/feed')}
+                variant="default"
+                size="sm"
+              >
                 Back to Feed
               </Button>
             </div>
