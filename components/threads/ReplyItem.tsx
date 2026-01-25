@@ -18,7 +18,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { formatDistanceToNow } from 'date-fns';
 import Image from 'next/image';
 import { useState } from 'react';
-import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 
 interface ReplyItemProps {
   reply: ThreadWithAuthor;
@@ -102,6 +102,9 @@ export function ReplyItem({ reply }: ReplyItemProps) {
         <Dialog open={imageOpen} onOpenChange={setImageOpen}>
           <DialogContent className="max-w-4xl p-0 bg-black/95 border-none">
             <DialogTitle className="sr-only">Image</DialogTitle>
+            <DialogDescription className="sr-only">
+              Full size image viewer
+            </DialogDescription>
             <button
               onClick={() => setImageOpen(false)}
               className="absolute top-4 right-4 z-50 p-2 rounded-full bg-black/50 hover:bg-black/70 transition-colors"

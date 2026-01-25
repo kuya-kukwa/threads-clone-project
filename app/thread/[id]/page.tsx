@@ -79,92 +79,63 @@ function ThreadDetailContent({ threadId }: { threadId: string }) {
     fetchThread();
   };
 
-  // Loading state
-  if (loading) {
+  // Inline thread loading skeleton - shown inside the layout
+  const ThreadSkeleton = () => (
+    <div className="p-4 space-y-3">
+      <div className="flex items-start gap-3">
+        <Skeleton className="w-10 h-10 rounded-full" />
+        <div className="flex-1 space-y-2">
+          <Skeleton className="h-4 w-32" />
+          <Skeleton className="h-4 w-20" />
+        </div>
+      </div>
+      <Skeleton className="h-20 w-full" />
+      <Skeleton className="h-6 w-24" />
+    </div>
+  );
+
+  // Error state - only show after we've tried loading and have a non-recoverable error
+  if (error && !loading) {
     return (
       <div className="min-h-screen bg-background pb-20 md:pb-0">
-        <div className="max-w-2xl mx-auto px-4 py-4 space-y-4">
-          {/* Thread skeleton */}
-          <div className="space-y-3">
-            <div className="flex items-start gap-3">
-              <Skeleton className="w-10 h-10 rounded-full" />
-              <div className="flex-1 space-y-2">
-                <Skeleton className="h-4 w-32" />
-                <Skeleton className="h-4 w-20" />
-              </div>
+        {/* Header - Mobile */}
+        <div className="sticky top-0 z-40 bg-[#121212] border-b border-border/50 md:hidden">
+          <div className="flex items-center h-12 px-4">
+            <button
+              onClick={() => router.back()}
+              className="p-2 -ml-2 rounded-lg hover:bg-secondary transition-colors"
+              aria-label="Back"
+            >
+              <ChevronLeftIcon className="w-5 h-5" />
+            </button>
+            <h1 className="text-lg font-semibold ml-2">Thread</h1>
+          </div>
+        </div>
+        
+        <div className="flex items-center justify-center px-4 py-20">
+          <div className="text-center max-w-md">
+            <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-destructive/10 flex items-center justify-center">
+              <AlertCircleIcon className="w-8 h-8 text-destructive" />
             </div>
-            <Skeleton className="h-20 w-full" />
-            <Skeleton className="h-6 w-24" />
-          </div>
-
-          {/* Reply composer skeleton */}
-          <div className="border-t border-border pt-4">
-            <Skeleton className="h-24 w-full rounded-xl" />
-          </div>
-
-          {/* Replies skeleton */}
-          <div className="space-y-4">
-            {[1, 2, 3].map((i) => (
-              <div key={i} className="flex items-start gap-3">
-                <Skeleton className="w-8 h-8 rounded-full" />
-                <div className="flex-1 space-y-2">
-                  <Skeleton className="h-3 w-24" />
-                  <Skeleton className="h-12 w-full" />
-                </div>
-              </div>
-            ))}
+            <h1 className="text-2xl font-bold mb-2">Error Loading Thread</h1>
+            <p className="text-muted-foreground mb-6">
+              {error || 'Something went wrong. Please try again.'}
+            </p>
+            <div className="flex gap-3 justify-center">
+              <Button onClick={fetchThread} variant="default">
+                Retry
+              </Button>
+              <Button onClick={() => router.push('/feed')} variant="outline">
+                Back to Feed
+              </Button>
+            </div>
           </div>
         </div>
       </div>
     );
   }
 
-  // Not found state
-  if (notFound) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center px-4">
-        <div className="text-center max-w-md">
-          <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-secondary flex items-center justify-center">
-            <SearchOffIcon className="w-8 h-8 text-muted-foreground" />
-          </div>
-          <h1 className="text-2xl font-bold mb-2">Thread Not Found</h1>
-          <p className="text-muted-foreground mb-6">
-            This thread doesn&apos;t exist or has been deleted.
-          </p>
-          <Button onClick={() => router.push('/feed')} variant="default">
-            Back to Feed
-          </Button>
-        </div>
-      </div>
-    );
-  }
-
-  // Error state
-  if (error || !thread) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center px-4">
-        <div className="text-center max-w-md">
-          <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-destructive/10 flex items-center justify-center">
-            <AlertCircleIcon className="w-8 h-8 text-destructive" />
-          </div>
-          <h1 className="text-2xl font-bold mb-2">Error Loading Thread</h1>
-          <p className="text-muted-foreground mb-6">
-            {error || 'Something went wrong. Please try again.'}
-          </p>
-          <div className="flex gap-3 justify-center">
-            <Button onClick={fetchThread} variant="default">
-              Retry
-            </Button>
-            <Button onClick={() => router.push('/feed')} variant="outline">
-              Back to Feed
-            </Button>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  // Success state
+  // Main layout - always render immediately for smooth transitions
   return (
     <div className="min-h-screen bg-background pb-20 md:pb-0">
       {/* Header - Mobile */}
@@ -197,21 +168,42 @@ function ThreadDetailContent({ threadId }: { threadId: string }) {
 
       {/* Content */}
       <div className="max-w-2xl mx-auto">
-        {/* Original Thread */}
+        {/* Original Thread - Show skeleton while loading, then thread content */}
         <div className="border-b border-border/50">
-          <ThreadCard thread={thread} />
+          {loading ? (
+            <ThreadSkeleton />
+          ) : notFound ? (
+            <div className="p-8 text-center">
+              <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-secondary flex items-center justify-center">
+                <SearchOffIcon className="w-8 h-8 text-muted-foreground" />
+              </div>
+              <h2 className="text-xl font-semibold mb-2">Thread Not Found</h2>
+              <p className="text-muted-foreground mb-4">
+                This thread doesn&apos;t exist or has been deleted.
+              </p>
+              <Button onClick={() => router.push('/feed')} variant="default" size="sm">
+                Back to Feed
+              </Button>
+            </div>
+          ) : thread ? (
+            <ThreadCard thread={thread} />
+          ) : null}
         </div>
 
-        {/* Reply Composer */}
-        <div className="border-b border-border/50">
-          <ReplyComposer
-            threadId={threadId}
-            onReplyCreated={handleReplyCreated}
-          />
-        </div>
+        {/* Reply Composer - Only show when thread is loaded */}
+        {thread && (
+          <div className="border-b border-border/50">
+            <ReplyComposer
+              threadId={threadId}
+              onReplyCreated={handleReplyCreated}
+            />
+          </div>
+        )}
 
-        {/* Replies List */}
-        <ReplyList threadId={threadId} refreshTrigger={replyRefreshTrigger} />
+        {/* Replies List - Only show when thread is loaded */}
+        {thread && (
+          <ReplyList threadId={threadId} refreshTrigger={replyRefreshTrigger} />
+        )}
       </div>
     </div>
   );

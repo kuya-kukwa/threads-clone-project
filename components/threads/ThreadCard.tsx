@@ -15,7 +15,7 @@
 import { ThreadWithAuthor, MediaItem as MediaItemType } from '@/types/appwrite';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { formatDistanceToNow } from 'date-fns';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
@@ -186,6 +186,7 @@ export function ThreadCard({ thread, clickable = true }: ThreadCardProps) {
                 icon={<CommentIcon />}
                 label="Reply"
                 count={thread.replyCount || 0}
+                onClick={() => router.push(`/thread/${thread.$id}`)}
               />
               <ActionButton icon={<RepostIcon />} label="Repost" />
               <ActionButton icon={<ShareIcon />} label="Share" />
@@ -213,15 +214,18 @@ function ActionButton({
   icon,
   label,
   count,
+  onClick,
 }: {
   icon: React.ReactNode;
   label: string;
   count?: number;
+  onClick?: () => void;
 }) {
   return (
     <button
       className="flex items-center gap-1.5 text-muted-foreground hover:text-primary transition-colors p-2 rounded-full hover:bg-primary/10"
       aria-label={label}
+      onClick={onClick}
     >
       <span className="w-5 h-5">{icon}</span>
       {count !== undefined && count > 0 && (
@@ -584,6 +588,9 @@ function MediaLightbox({
         showCloseButton={false}
       >
         <DialogTitle className="sr-only">Media viewer</DialogTitle>
+        <DialogDescription className="sr-only">
+          Swipe or use arrows to navigate between images
+        </DialogDescription>
 
         {/* Full-screen clickable backdrop */}
         <div

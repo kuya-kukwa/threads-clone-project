@@ -19,6 +19,7 @@ import { useCurrentUser } from '@/hooks/useCurrentUser';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { SECURITY_CONFIG } from '@/lib/appwriteConfig';
+import { getSessionToken } from '@/lib/appwriteClient';
 
 interface ReplyComposerProps {
   threadId: string;
@@ -71,21 +72,23 @@ export function ReplyComposer({
       setIsSubmitting(true);
       setError(null);
 
-      // Get session from localStorage
-      const session = localStorage.getItem('session');
-      if (!session) {
-        throw new Error('Not authenticated');
+      // Get session token from Appwrite
+      const sessionId = getSessionToken();
+      if (!sessionId || !user?.$id) {
+        setError('Please log in to reply');
+        setIsSubmitting(false);
+        return;
       }
-
-      const sessionData = JSON.parse(session);
 
       const response = await fetch(`/api/threads/${threadId}/reply`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'x-session-id': sessionData.$id,
-          'x-user-id': sessionData.userId,
+          'x-session-id': sessionId,
+          'x-user-id': user.$id,
+          'X-CSRF-Token': 'true',
         },
+        credentials: 'include',
         body: JSON.stringify({
           content: content.trim(),
         }),
