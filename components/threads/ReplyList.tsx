@@ -22,9 +22,10 @@ import { Skeleton } from '@/components/ui/skeleton';
 interface ReplyListProps {
   threadId: string;
   refreshTrigger?: number; // Change this to trigger refresh
+  onReplyToComment?: (username: string, displayName: string) => void;
 }
 
-export function ReplyList({ threadId, refreshTrigger = 0 }: ReplyListProps) {
+export function ReplyList({ threadId, refreshTrigger = 0, onReplyToComment }: ReplyListProps) {
   const [replies, setReplies] = useState<ThreadWithAuthor[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
@@ -150,7 +151,11 @@ export function ReplyList({ threadId, refreshTrigger = 0 }: ReplyListProps) {
     <div className="divide-y divide-border/50">
       {/* Replies */}
       {replies.map((reply) => (
-        <ReplyItem key={reply.$id} reply={reply} />
+        <ReplyItem 
+          key={reply.$id} 
+          reply={reply} 
+          onReplyToComment={onReplyToComment}
+        />
       ))}
 
       {/* Load More Button */}

@@ -28,8 +28,6 @@ import { useMemo, useState, useRef, useCallback, TouchEvent } from 'react';
 
 interface ThreadCardProps {
   thread: ThreadWithAuthor;
-  /** If true, clicking the card navigates to thread detail */
-  clickable?: boolean;
 }
 
 /**
@@ -81,7 +79,7 @@ function parseThreadMedia(thread: ThreadWithAuthor): MediaItemType[] {
   return media;
 }
 
-export function ThreadCard({ thread, clickable = true }: ThreadCardProps) {
+export function ThreadCard({ thread }: ThreadCardProps) {
   const router = useRouter();
   const { author, content, createdAt } = thread;
   const [lightboxOpen, setLightboxOpen] = useState(false);
@@ -107,32 +105,16 @@ export function ThreadCard({ thread, clickable = true }: ThreadCardProps) {
     setLightboxOpen(true);
   };
 
-  // Handle card click - navigate to thread detail
-  const handleCardClick = (e: React.MouseEvent) => {
-    // Don't navigate if clicking on interactive elements
-    const target = e.target as HTMLElement;
-    if (
-      target.closest('button') ||
-      target.closest('a') ||
-      target.closest('[role="button"]') ||
-      target.closest('video')
-    ) {
-      return;
-    }
-
-    // Don't navigate if already on thread detail page or not clickable
-    if (!clickable || window.location.pathname.startsWith('/thread/')) {
-      return;
-    }
-
+  // Handle comment button click - navigate to thread detail (comment section)
+  const handleCommentClick = (e?: React.MouseEvent) => {
+    e?.stopPropagation();
     router.push(`/thread/${thread.$id}`);
   };
 
   return (
     <>
       <article
-        onClick={handleCardClick}
-        className={`border-b border-border/50 p-4 hover:bg-card/50 transition-colors animate-fade-in ${clickable ? 'cursor-pointer' : ''}`}
+        className="border-b border-border/50 p-4 hover:bg-card/50 transition-colors animate-fade-in"
       >
         <div className="flex gap-3">
           {/* Avatar */}
@@ -191,7 +173,7 @@ export function ThreadCard({ thread, clickable = true }: ThreadCardProps) {
                 icon={<CommentIcon />}
                 label="Reply"
                 count={thread.replyCount || 0}
-                onClick={() => router.push(`/thread/${thread.$id}`)}
+                onClick={handleCommentClick}
               />
               <ActionButton icon={<RepostIcon />} label="Repost" />
               <ActionButton icon={<ShareIcon />} label="Share" />
@@ -224,7 +206,7 @@ function ActionButton({
   icon: React.ReactNode;
   label: string;
   count?: number;
-  onClick?: () => void;
+  onClick?: (e?: React.MouseEvent) => void;
 }) {
   return (
     <button

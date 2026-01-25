@@ -8,7 +8,8 @@
  * - Timestamp
  * - Content display
  * - Optional image support
- * - Indented appearance
+ * - Reply to comment functionality
+ * - @mention support
  */
 
 'use client';
@@ -27,9 +28,10 @@ import {
 
 interface ReplyItemProps {
   reply: ThreadWithAuthor;
+  onReplyToComment?: (username: string, displayName: string) => void;
 }
 
-export function ReplyItem({ reply }: ReplyItemProps) {
+export function ReplyItem({ reply, onReplyToComment }: ReplyItemProps) {
   const { author, content, createdAt, imageUrl } = reply;
   const [imageOpen, setImageOpen] = useState(false);
 
@@ -92,11 +94,18 @@ export function ReplyItem({ reply }: ReplyItemProps) {
             </button>
           )}
 
-          {/* Actions placeholder - like, reply to reply (future) */}
+          {/* Actions - like and reply */}
           <div className="flex items-center gap-4 mt-2">
             <button className="text-xs text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1">
               <HeartIcon className="w-4 h-4" />
               <span>{reply.likeCount || 0}</span>
+            </button>
+            <button 
+              className="text-xs text-muted-foreground hover:text-primary transition-colors flex items-center gap-1"
+              onClick={() => onReplyToComment?.(author.username, author.displayName)}
+            >
+              <ReplyIcon className="w-4 h-4" />
+              <span>Reply</span>
             </button>
           </div>
         </div>
@@ -147,6 +156,24 @@ function HeartIcon({ className }: { className?: string }) {
         strokeLinecap="round"
         strokeLinejoin="round"
         d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z"
+      />
+    </svg>
+  );
+}
+
+function ReplyIcon({ className }: { className?: string }) {
+  return (
+    <svg
+      className={className}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={1.5}
+    >
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M3 10h10a5 5 0 015 5v6M3 10l6 6M3 10l6-6"
       />
     </svg>
   );

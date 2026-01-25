@@ -10,31 +10,104 @@
  * - Error handling
  * - Optimistic UI updates
  * - Keyboard-friendly (submit doesn't get hidden)
+ * - @mention support when replying to comments
  */
 
 'use client';
 
-import { useState, useRef, useEffect, useCallback } from 'react';
+import { useState, useRef, useEffect, useCallback, forwardRef, useImperativeHandle } from 'react';
 import { useCurrentUser } from '@/hooks/useCurrentUser';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { SECURITY_CONFIG } from '@/lib/appwriteConfig';
 import { getSessionToken } from '@/lib/appwriteClient';
 
+// Loading spinner icon
+function LoadingSpinner({ className }: { className?: string }) {
+  return (
+    <svg
+      className={`${className} animate-spin`}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={2}
+    >
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+      />
+    </svg>
+  );
+}
+
+// X icon for cancel button
+function XIcon({ className }: { className?: string }) {
+  return (
+    <svg
+      className={className}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={2}
+    >
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M6 18L18 6M6 6l12 12"
+      />
+    </svg>
+  );
+}
+
+export interface ReplyToInfo {
+  username: string;
+  displayName: string;
+}
+
+export interface ReplyComposerHandle {
+  setReplyTo: (info: ReplyToInfo | null) => void;
+  focus: () => void;
+}
+
 interface ReplyComposerProps {
   threadId: string;
   onReplyCreated?: () => void;
 }
 
-export function ReplyComposer({
-  threadId,
-  onReplyCreated,
-}: ReplyComposerProps) {
+export const ReplyComposer = forwardRef<ReplyComposerHandle, ReplyComposerProps>(function ReplyComposer(
+  { threadId, onReplyCreated },
+  ref
+) {
   const { user } = useCurrentUser();
   const [content, setContent] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [replyTo, setReplyTo] = useState<ReplyToInfo | null>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  // Expose methods to parent via ref
+  useImperativeHandle(ref, () => ({
+    setReplyTo: (info: ReplyToInfo | null) => {
+      setReplyTo(info);
+      if (info) {
+        // Prefill with @mention if not already there
+        const mention = `@${info.username} `;
+        if (!content.startsWith(mention)) {
+          setContent(mention + content);
+        }
+        // Focus and move cursor to end
+        setTimeout(() => {
+          textareaRef.current?.focus();
+          const len = textareaRef.current?.value.length || 0;
+          textareaRef.current?.setSelectionRange(len, len);
+        }, 50);
+      }
+    },
+    focus: () => {
+      textareaRef.current?.focus();
+    }
+  }), [content]);
 
   const maxLength = SECURITY_CONFIG.MAX_LENGTHS.THREAD_CONTENT;
   const remainingChars = maxLength - content.length;
@@ -103,6 +176,7 @@ export function ReplyComposer({
       // Success - clear form and notify parent
       setContent('');
       setError(null);
+      setReplyTo(null);
       onReplyCreated?.();
     } catch (err) {
       console.error('Error posting reply:', err);
@@ -126,6 +200,28 @@ export function ReplyComposer({
       {error && (
         <div className="mb-3 p-3 rounded-xl bg-destructive/10 border border-destructive/20">
           <p className="text-sm text-destructive">{error}</p>
+        </div>
+      )}
+
+      {/* Replying to indicator */}
+      {replyTo && (
+        <div className="mb-3 flex items-center gap-2 text-sm">
+          <span className="text-muted-foreground">Replying to</span>
+          <span className="text-primary font-medium">@{replyTo.username}</span>
+          <button
+            onClick={() => {
+              setReplyTo(null);
+              // Remove the @mention from content if it's at the start
+              const mention = `@${replyTo.username} `;
+              if (content.startsWith(mention)) {
+                setContent(content.slice(mention.length));
+              }
+            }}
+            className="ml-auto p-1 rounded-full hover:bg-secondary transition-colors"
+            aria-label="Cancel reply"
+          >
+            <XIcon className="w-4 h-4 text-muted-foreground" />
+          </button>
         </div>
       )}
 
@@ -202,23 +298,4 @@ export function ReplyComposer({
       </div>
     </div>
   );
-}
-
-// Loading spinner icon
-function LoadingSpinner({ className }: { className?: string }) {
-  return (
-    <svg
-      className={`${className} animate-spin`}
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth={2}
-    >
-      <path
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
-      />
-    </svg>
-  );
-}
+});

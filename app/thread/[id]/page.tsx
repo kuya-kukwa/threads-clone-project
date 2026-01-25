@@ -15,11 +15,11 @@
 
 'use client';
 
-import { use, useEffect, useState, useCallback } from 'react';
+import { use, useEffect, useState, useCallback, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { AuthGuard } from '@/components/auth/AuthGuard';
 import { ThreadCard } from '@/components/threads/ThreadCard';
-import { ReplyComposer } from '@/components/threads/ReplyComposer';
+import { ReplyComposer, ReplyComposerHandle } from '@/components/threads/ReplyComposer';
 import { ReplyList } from '@/components/threads/ReplyList';
 import { ThreadWithAuthor } from '@/types/appwrite';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -36,6 +36,7 @@ function ThreadDetailContent({ threadId }: { threadId: string }) {
   const [error, setError] = useState<string | null>(null);
   const [notFound, setNotFound] = useState(false);
   const [replyRefreshTrigger, setReplyRefreshTrigger] = useState(0);
+  const replyComposerRef = useRef<ReplyComposerHandle>(null);
 
   // Fetch thread detail
   const fetchThread = useCallback(async () => {
@@ -77,6 +78,11 @@ function ThreadDetailContent({ threadId }: { threadId: string }) {
     setReplyRefreshTrigger((prev) => prev + 1);
     // Also refresh thread to update reply count
     fetchThread();
+  };
+
+  // Handle replying to a comment - set @mention in composer
+  const handleReplyToComment = (username: string, displayName: string) => {
+    replyComposerRef.current?.setReplyTo({ username, displayName });
   };
 
   // Inline thread loading skeleton - shown inside the layout
@@ -198,6 +204,7 @@ function ThreadDetailContent({ threadId }: { threadId: string }) {
         {thread && (
           <div className="border-b border-border/50">
             <ReplyComposer
+              ref={replyComposerRef}
               threadId={threadId}
               onReplyCreated={handleReplyCreated}
             />
@@ -206,7 +213,11 @@ function ThreadDetailContent({ threadId }: { threadId: string }) {
 
         {/* Replies List - Only show when thread is loaded */}
         {thread && (
-          <ReplyList threadId={threadId} refreshTrigger={replyRefreshTrigger} />
+          <ReplyList 
+            threadId={threadId} 
+            refreshTrigger={replyRefreshTrigger} 
+            onReplyToComment={handleReplyToComment}
+          />
         )}
       </div>
     </div>
