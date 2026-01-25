@@ -306,8 +306,12 @@ export async function getPublicFeed(
       limit: validLimit,
     });
 
-    // Build queries
+    // Build queries - only fetch parent threads (not replies)
     const queries = [
+      Query.or([
+        Query.equal('parentThreadId', ''),
+        Query.isNull('parentThreadId'),
+      ]),
       Query.orderDesc('createdAt'),
       Query.limit(validLimit + 1), // Fetch one extra to check if there are more
     ];

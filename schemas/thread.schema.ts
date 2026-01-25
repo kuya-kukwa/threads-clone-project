@@ -138,6 +138,31 @@ export const mediaUploadSchema = z.object({
 );
 
 /**
+ * Reply creation input schema
+ * Similar to thread creation but requires content (replies should be meaningful)
+ * Images are optional in replies
+ */
+export const replyCreateSchema = z.object({
+  content: z
+    .string()
+    .min(1, 'Reply cannot be empty')
+    .max(
+      SECURITY_CONFIG.MAX_LENGTHS.THREAD_CONTENT,
+      `Reply cannot exceed ${SECURITY_CONFIG.MAX_LENGTHS.THREAD_CONTENT} characters`
+    )
+    .trim(),
+  
+  imageId: z
+    .string()
+    .optional(),
+  
+  altText: z
+    .string()
+    .max(200, 'Alt text cannot exceed 200 characters')
+    .optional(),
+});
+
+/**
  * Feed pagination parameters schema
  */
 export const feedPaginationSchema = z.object({
@@ -150,11 +175,21 @@ export const feedPaginationSchema = z.object({
 });
 
 /**
+ * Thread ID parameter schema
+ * Validates thread ID from URL params
+ */
+export const threadIdSchema = z.object({
+  id: z.string().min(1, 'Thread ID is required'),
+});
+
+/**
  * Type exports for TypeScript
  */
 export type ThreadCreateInput = z.infer<typeof threadCreateSchema>;
 export type ThreadUpdateInput = z.infer<typeof threadUpdateSchema>;
+export type ReplyCreateInput = z.infer<typeof replyCreateSchema>;
 export type ImageUploadInput = z.infer<typeof imageUploadSchema>;
 export type VideoUploadInput = z.infer<typeof videoUploadSchema>;
 export type MediaUploadInput = z.infer<typeof mediaUploadSchema>;
 export type FeedPaginationInput = z.infer<typeof feedPaginationSchema>;
+export type ThreadIdInput = z.infer<typeof threadIdSchema>;

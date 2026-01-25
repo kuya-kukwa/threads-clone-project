@@ -18,10 +18,13 @@ import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import { formatDistanceToNow } from 'date-fns';
 import Image from 'next/image';
+import { useRouter } from 'next/navigation';
 import { useMemo, useState, useRef, useCallback, TouchEvent } from 'react';
 
 interface ThreadCardProps {
   thread: ThreadWithAuthor;
+  /** If true, clicking the card navigates to thread detail */
+  clickable?: boolean;
 }
 
 /**
@@ -73,7 +76,8 @@ function parseThreadMedia(thread: ThreadWithAuthor): MediaItemType[] {
   return media;
 }
 
-export function ThreadCard({ thread }: ThreadCardProps) {
+export function ThreadCard({ thread, clickable = true }: ThreadCardProps) {
+  const router = useRouter();
   const { author, content, createdAt } = thread;
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState(0);
@@ -98,9 +102,33 @@ export function ThreadCard({ thread }: ThreadCardProps) {
     setLightboxOpen(true);
   };
 
+  // Handle card click - navigate to thread detail
+  const handleCardClick = (e: React.MouseEvent) => {
+    // Don't navigate if clicking on interactive elements
+    const target = e.target as HTMLElement;
+    if (
+      target.closest('button') ||
+      target.closest('a') ||
+      target.closest('[role="button"]') ||
+      target.closest('video')
+    ) {
+      return;
+    }
+    
+    // Don't navigate if already on thread detail page or not clickable
+    if (!clickable || window.location.pathname.startsWith('/thread/')) {
+      return;
+    }
+    
+    router.push(`/thread/${thread.$id}`);
+  };
+
   return (
     <>
-      <article className="border-b border-border/50 p-4 hover:bg-card/50 transition-colors animate-fade-in">
+      <article 
+        onClick={handleCardClick}
+        className={`border-b border-border/50 p-4 hover:bg-card/50 transition-colors animate-fade-in ${clickable ? 'cursor-pointer' : ''}`}
+      >
         <div className="flex gap-3">
           {/* Avatar */}
           <Avatar className="w-10 h-10 flex-shrink-0 ring-2 ring-border/50">
@@ -149,8 +177,8 @@ export function ThreadCard({ thread }: ThreadCardProps) {
 
             {/* Action buttons */}
             <div className="flex items-center gap-6 mt-3 -ml-2">
-              <ActionButton icon={<HeartIcon />} label="Like" count={0} />
-              <ActionButton icon={<CommentIcon />} label="Reply" count={0} />
+              <ActionButton icon={<HeartIcon />} label="Like" count={thread.likeCount || 0} />
+              <ActionButton icon={<CommentIcon />} label="Reply" count={thread.replyCount || 0} />
               <ActionButton icon={<RepostIcon />} label="Repost" />
               <ActionButton icon={<ShareIcon />} label="Share" />
             </div>
