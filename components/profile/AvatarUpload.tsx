@@ -52,9 +52,16 @@ export function AvatarUpload({
 
   // Show preview during upload, then current avatar
   const displayUrl = previewUrl || currentAvatarUrl;
-  
+
   // Debug logging
-  console.log('[AvatarUpload] displayUrl:', displayUrl, 'previewUrl:', previewUrl, 'currentAvatarUrl:', currentAvatarUrl);
+  console.log(
+    '[AvatarUpload] displayUrl:',
+    displayUrl,
+    'previewUrl:',
+    previewUrl,
+    'currentAvatarUrl:',
+    currentAvatarUrl,
+  );
 
   /**
    * Validate file before upload
@@ -101,7 +108,7 @@ export function AvatarUpload({
         });
 
         const result = await response.json();
-        
+
         console.log('[AvatarUpload] API Response:', result);
 
         if (!response.ok || !result.success) {
@@ -110,7 +117,7 @@ export function AvatarUpload({
 
         const avatarUrl = result.data.avatarUrl;
         console.log('[AvatarUpload] Avatar URL received:', avatarUrl);
-        
+
         setUploadState('success');
         onUploadSuccess(avatarUrl);
 
@@ -240,14 +247,20 @@ export function AvatarUpload({
             isDragging
               ? 'ring-primary scale-105'
               : uploadState === 'success'
-              ? 'ring-green-500'
-              : uploadState === 'error'
-              ? 'ring-destructive'
-              : 'ring-border group-hover:ring-primary/60'
+                ? 'ring-green-500'
+                : uploadState === 'error'
+                  ? 'ring-destructive'
+                  : 'ring-border group-hover:ring-primary/60'
           }`}
         >
-          <AvatarImage src={displayUrl} alt={displayName} className="object-cover" />
-          <AvatarFallback className="text-xl bg-muted">{initials}</AvatarFallback>
+          <AvatarImage
+            src={displayUrl}
+            alt={displayName}
+            className="object-cover"
+          />
+          <AvatarFallback className="text-xl bg-muted">
+            {initials}
+          </AvatarFallback>
         </Avatar>
 
         {/* Hover Overlay - only show when idle */}
@@ -316,9 +329,9 @@ export function AvatarUpload({
         {uploadState === 'error' && error && (
           <div className="flex flex-col items-center gap-1">
             <p className="text-xs text-destructive">{error}</p>
-            <Button 
-              size="sm" 
-              variant="ghost" 
+            <Button
+              size="sm"
+              variant="ghost"
               onClick={handleRetry}
               className="h-7 text-xs"
             >
@@ -392,7 +405,11 @@ function XIcon({ className }: { className?: string }) {
       stroke="currentColor"
       strokeWidth={2}
     >
-      <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M6 18L18 6M6 6l12 12"
+      />
     </svg>
   );
 }
