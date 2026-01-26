@@ -89,6 +89,7 @@ export async function createThread(
     const imageUrl = (imageId && imageId.trim()) ? getImagePreviewUrl(imageId) : '';
 
     // Create thread document
+    // Note: replyToUsername may not exist in older databases, so we don't include it for new threads
     const thread = await serverDatabases.createDocument<Thread>(
       APPWRITE_CONFIG.DATABASE_ID,
       APPWRITE_CONFIG.COLLECTIONS.THREADS,

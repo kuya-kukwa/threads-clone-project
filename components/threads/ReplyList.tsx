@@ -1,6 +1,6 @@
 /**
  * ReplyList Component
- * Displays paginated list of replies for a thread
+ * Displays paginated list of replies for a thread with TikTok-style nested replies
  *
  * Features:
  * - Cursor-based pagination
@@ -9,11 +9,12 @@
  * - Error handling
  * - Empty state
  * - Mobile-first layout
+ * - TikTok-style nested replies with "View X replies" collapsible UI
  */
 
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { ThreadWithAuthor } from '@/types/appwrite';
 import { ReplyItem } from './ReplyItem';
 import { Button } from '@/components/ui/button';
@@ -22,16 +23,27 @@ import { Skeleton } from '@/components/ui/skeleton';
 interface ReplyListProps {
   threadId: string;
   refreshTrigger?: number; // Change this to trigger refresh
-  onReplyToComment?: (username: string, displayName: string) => void;
+  onReplyToComment?: (username: string, displayName: string, replyId: string) => void;
 }
 
-export function ReplyList({ threadId, refreshTrigger = 0, onReplyToComment }: ReplyListProps) {
+// Group replies into parent and child relationships
+interface GroupedReplies {
+  parentReplies: ThreadWithAuthor[];
+  childRepliesByParent: Map<string, ThreadWithAuthor[]>;
+}
+
+export function ReplyList({
+  threadId,
+  refreshTrigger = 0,
+  onReplyToComment,
+}: ReplyListProps) {
   const [replies, setReplies] = useState<ThreadWithAuthor[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [nextCursor, setNextCursor] = useState<string | null>(null);
   const [hasMore, setHasMore] = useState(false);
+  const [expandedReplies, setExpandedReplies] = useState<Set<string>>(new Set());
 
   // Fetch replies
   const fetchReplies = useCallback(
@@ -52,7 +64,7 @@ export function ReplyList({ threadId, refreshTrigger = 0, onReplyToComment }: Re
         if (cursor) {
           url.searchParams.set('cursor', cursor);
         }
-        url.searchParams.set('limit', '20');
+        url.searchParams.set('limit', '50'); // Fetch more to include nested replies
 
         const response = await fetch(url.toString());
         const data = await response.json();
@@ -84,6 +96,41 @@ export function ReplyList({ threadId, refreshTrigger = 0, onReplyToComment }: Re
     },
     [threadId],
   );
+
+  // Group replies by parent
+  const groupedReplies = useMemo((): GroupedReplies => {
+    const parentReplies: ThreadWithAuthor[] = [];
+    const childRepliesByParent = new Map<string, ThreadWithAuthor[]>();
+
+    replies.forEach((reply) => {
+      const parentReplyId = reply.parentReplyId;
+      
+      if (parentReplyId && parentReplyId.trim()) {
+        // This is a child reply (nested)
+        const existing = childRepliesByParent.get(parentReplyId) || [];
+        existing.push(reply);
+        childRepliesByParent.set(parentReplyId, existing);
+      } else {
+        // This is a top-level reply
+        parentReplies.push(reply);
+      }
+    });
+
+    return { parentReplies, childRepliesByParent };
+  }, [replies]);
+
+  // Toggle expanded state for a reply
+  const toggleExpanded = (replyId: string) => {
+    setExpandedReplies((prev) => {
+      const newSet = new Set(prev);
+      if (newSet.has(replyId)) {
+        newSet.delete(replyId);
+      } else {
+        newSet.add(replyId);
+      }
+      return newSet;
+    });
+  };
 
   // Initial load and refresh on trigger change
   useEffect(() => {
@@ -146,17 +193,64 @@ export function ReplyList({ threadId, refreshTrigger = 0, onReplyToComment }: Re
     );
   }
 
-  // Replies list
+  const { parentReplies, childRepliesByParent } = groupedReplies;
+
+  // Replies list with nested structure
   return (
     <div className="divide-y divide-border/50">
-      {/* Replies */}
-      {replies.map((reply) => (
-        <ReplyItem 
-          key={reply.$id} 
-          reply={reply} 
-          onReplyToComment={onReplyToComment}
-        />
-      ))}
+      {/* Parent Replies */}
+      {parentReplies.map((reply) => {
+        const childReplies = childRepliesByParent.get(reply.$id) || [];
+        const hasChildReplies = childReplies.length > 0;
+        const isExpanded = expandedReplies.has(reply.$id);
+
+        return (
+          <div key={reply.$id}>
+            {/* Parent Reply */}
+            <ReplyItem
+              reply={reply}
+              onReplyToComment={onReplyToComment}
+            />
+
+            {/* View Replies Button - TikTok style */}
+            {hasChildReplies && !isExpanded && (
+              <button
+                onClick={() => toggleExpanded(reply.$id)}
+                className="flex items-center gap-2 ml-14 mb-3 text-xs text-primary hover:text-primary/80 transition-colors"
+              >
+                <div className="w-6 h-px bg-muted-foreground/30" />
+                <span className="font-medium">
+                  View {childReplies.length} {childReplies.length === 1 ? 'reply' : 'replies'}
+                </span>
+                <ChevronDownIcon className="w-3 h-3" />
+              </button>
+            )}
+
+            {/* Nested Replies - Only show when expanded */}
+            {hasChildReplies && isExpanded && (
+              <div>
+                {childReplies.map((childReply) => (
+                  <ReplyItem
+                    key={childReply.$id}
+                    reply={childReply}
+                    onReplyToComment={onReplyToComment}
+                    isNested
+                  />
+                ))}
+                
+                {/* Hide Replies Button */}
+                <button
+                  onClick={() => toggleExpanded(reply.$id)}
+                  className="flex items-center gap-2 ml-12 py-2 text-xs text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  <ChevronUpIcon className="w-3 h-3" />
+                  <span>Hide replies</span>
+                </button>
+              </div>
+            )}
+          </div>
+        );
+      })}
 
       {/* Load More Button */}
       {hasMore && (
@@ -215,6 +309,42 @@ function LoadingSpinner({ className }: { className?: string }) {
         strokeLinecap="round"
         strokeLinejoin="round"
         d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+      />
+    </svg>
+  );
+}
+
+function ChevronDownIcon({ className }: { className?: string }) {
+  return (
+    <svg
+      className={className}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={2}
+    >
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M19 9l-7 7-7-7"
+      />
+    </svg>
+  );
+}
+
+function ChevronUpIcon({ className }: { className?: string }) {
+  return (
+    <svg
+      className={className}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={2}
+    >
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M5 15l7-7 7 7"
       />
     </svg>
   );

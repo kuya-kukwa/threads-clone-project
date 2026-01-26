@@ -96,17 +96,22 @@ export async function POST(
       );
     }
 
-    const { content, imageId, altText } = validation.data;
+    const { content, imageId, altText, replyToUsername, parentReplyId } = validation.data;
 
     // Sanitize inputs
     const sanitizedContent = sanitizeThreadContent(content);
     const sanitizedAltText = altText ? sanitizeInput(altText, 200) : undefined;
+    const sanitizedReplyToUsername = replyToUsername ? sanitizeInput(replyToUsername, 50) : undefined;
+    const sanitizedParentReplyId = parentReplyId ? sanitizeInput(parentReplyId, 50) : undefined;
 
     logger.info({
       msg: 'Creating reply',
       parentThreadId,
       hasImage: !!imageId,
       contentLength: sanitizedContent.length,
+      hasReplyToUsername: !!sanitizedReplyToUsername,
+      replyToUsernameValue: sanitizedReplyToUsername || 'none',
+      parentReplyId: sanitizedParentReplyId || 'none',
       requestId,
     });
 
@@ -133,17 +138,7 @@ export async function POST(
       throw error;
     }
 
-    // Don't allow replies to replies (single-level threading only for now)
-    if (parentThread.parentThreadId) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: 'Cannot reply to a reply. Please reply to the parent thread instead.',
-          code: 'INVALID_OPERATION',
-        },
-        { status: 400 }
-      );
-    }
+    // Nested replies are now supported - we use parentReplyId to track which comment is being replied to
 
     // TODO: Get actual userId from session validation
     // For now, extract from session header (this should be validated properly)
@@ -162,25 +157,91 @@ export async function POST(
     // Generate image URL if imageId is provided
     const imageUrl = (imageId && imageId.trim()) ? getImagePreviewUrl(imageId) : '';
 
-    // Create reply document
+    // Create reply document with proper typing
+    // Note: replyToUsername and parentReplyId are optional - only included if the attributes exist in Appwrite
     const now = new Date().toISOString();
-    const reply = await serverDatabases.createDocument<Thread>(
-      APPWRITE_CONFIG.DATABASE_ID,
-      APPWRITE_CONFIG.COLLECTIONS.THREADS,
-      ID.unique(),
-      {
-        authorId: userId,
-        content: sanitizedContent,
-        imageId: imageId || '',
-        imageUrl: imageUrl || '',
-        altText: sanitizedAltText || '',
-        parentThreadId: parentThreadId,
-        replyCount: 0,
-        likeCount: 0,
-        createdAt: now,
-        updatedAt: now,
+    
+    // Base document data (always included)
+    const baseDocumentData = {
+      authorId: userId,
+      content: sanitizedContent,
+      imageId: imageId || '',
+      imageUrl: imageUrl || '',
+      altText: sanitizedAltText || '',
+      parentThreadId: parentThreadId,
+      replyCount: 0,
+      likeCount: 0,
+      createdAt: now,
+      updatedAt: now,
+    };
+
+    // Determine which optional fields to include
+    const hasReplyToUsername = sanitizedReplyToUsername && sanitizedReplyToUsername.trim().length > 0;
+    const hasParentReplyId = sanitizedParentReplyId && sanitizedParentReplyId.trim().length > 0;
+
+    logger.debug({
+      msg: 'Document data prepared',
+      documentKeys: Object.keys(baseDocumentData),
+      hasReplyToUsername,
+      hasParentReplyId,
+      requestId,
+    });
+
+    let reply: Thread;
+    
+    // Build the optional fields object
+    const optionalFields: Record<string, string> = {};
+    if (hasReplyToUsername) {
+      optionalFields.replyToUsername = sanitizedReplyToUsername!;
+    }
+    if (hasParentReplyId) {
+      optionalFields.parentReplyId = sanitizedParentReplyId!;
+    }
+    
+    // Try to create with optional fields if we have any
+    if (Object.keys(optionalFields).length > 0) {
+      try {
+        reply = await serverDatabases.createDocument<Thread>(
+          APPWRITE_CONFIG.DATABASE_ID,
+          APPWRITE_CONFIG.COLLECTIONS.THREADS,
+          ID.unique(),
+          { ...baseDocumentData, ...optionalFields }
+        );
+      } catch (createError: unknown) {
+        // If it fails due to unknown attribute, retry without optional fields
+        const err = createError as { message?: string; code?: number };
+        const errorMessage = err.message || '';
+        
+        const shouldRetryWithoutOptionalFields = 
+          errorMessage.includes('replyToUsername') ||
+          errorMessage.includes('parentReplyId') ||
+          errorMessage.includes('Unknown attribute') ||
+          (err.code === 400 && errorMessage.includes('Invalid document'));
+        
+        if (shouldRetryWithoutOptionalFields) {
+          logger.info({
+            msg: 'Optional attributes not supported, retrying without them',
+            requestId,
+          });
+          reply = await serverDatabases.createDocument<Thread>(
+            APPWRITE_CONFIG.DATABASE_ID,
+            APPWRITE_CONFIG.COLLECTIONS.THREADS,
+            ID.unique(),
+            baseDocumentData
+          );
+        } else {
+          throw createError;
+        }
       }
-    );
+    } else {
+      // No optional fields, create document directly
+      reply = await serverDatabases.createDocument<Thread>(
+        APPWRITE_CONFIG.DATABASE_ID,
+        APPWRITE_CONFIG.COLLECTIONS.THREADS,
+        ID.unique(),
+        baseDocumentData
+      );
+    }
 
     // Atomically increment parent thread's reply count
     try {

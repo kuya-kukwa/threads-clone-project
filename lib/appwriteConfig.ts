@@ -103,6 +103,7 @@ export const APPWRITE_CONFIG = {
   // Storage buckets
   BUCKETS: {
     THREAD_IMAGES: 'thread-images',
+    AVATARS: 'avatars',
   },
   
   // User profile attributes
@@ -124,6 +125,7 @@ export const APPWRITE_CONFIG = {
     IMAGE_URL: 'imageUrl',
     ALT_TEXT: 'altText',
     PARENT_THREAD_ID: 'parentThreadId',
+    REPLY_TO_USERNAME: 'replyToUsername',
     REPLY_COUNT: 'replyCount',
     LIKE_COUNT: 'likeCount',
     CREATED_AT: 'createdAt',
@@ -175,6 +177,14 @@ export const SECURITY_CONFIG = {
   IMAGE: {
     MAX_SIZE_MB: 5,
     ALLOWED_TYPES: ['image/jpeg', 'image/png', 'image/webp', 'image/gif'],
+  },
+  
+  // Avatar upload limits
+  AVATAR: {
+    MAX_SIZE_MB: 2,
+    ALLOWED_TYPES: ['image/jpeg', 'image/png', 'image/webp'],
+    MIN_DIMENSION: 100,
+    MAX_DIMENSION: 1000,
   },
   
   // Video upload limits

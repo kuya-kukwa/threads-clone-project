@@ -2,15 +2,7 @@
  * Login Form Component
  * Client Component - handles user interaction and form submission
  *
- * WHY CLIENT: Uses react-hook-form, handles user input, manages loading state
- *
- * DATA FLOW:
- * 1. User enters email/password
- * 2. Zod validates via loginSchema
- * 3. Form calls authService.login()
- * 4. Service communicates with Appwrite
- * 5. On success: redirect to /feed
- * 6. On error: display error message
+ * Modern minimalistic design with clean aesthetics
  */
 
 'use client';
@@ -27,18 +19,9 @@ import {
   FormControl,
   FormField,
   FormItem,
-  FormLabel,
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
 
 import { loginSchema, type LoginInput } from '@/schemas/auth.schema';
 import { useAuth } from '@/hooks';
@@ -48,7 +31,6 @@ export function LoginForm() {
   const { login, isLoading } = useAuth();
   const searchParams = useSearchParams();
 
-  // Initialize react-hook-form with Zod validation
   const form = useForm<LoginInput>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
@@ -57,10 +39,6 @@ export function LoginForm() {
     },
   });
 
-  /**
-   * Handle form submission
-   * WHY: Uses custom hook for authentication logic
-   */
   async function onSubmit(data: LoginInput) {
     setError(null);
     const redirectParam = searchParams.get('redirect');
@@ -71,85 +49,142 @@ export function LoginForm() {
   }
 
   return (
-    <Card>
-      <CardHeader className="space-y-1">
-        <CardTitle className="text-2xl font-bold">Welcome back</CardTitle>
-        <CardDescription>
-          Enter your credentials to access your account
-        </CardDescription>
-      </CardHeader>
+    <div className="space-y-6">
+      {/* Header */}
+      <div className="text-center space-y-2">
+        <h2 className="text-xl font-semibold text-foreground">Welcome back</h2>
+        <p className="text-sm text-muted-foreground">
+          Sign in to continue to Threads
+        </p>
+      </div>
 
-      <CardContent>
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-            {/* Email Field */}
-            <FormField
-              control={form.control}
-              name="email"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Email</FormLabel>
-                  <FormControl>
-                    <Input
-                      type="email"
-                      placeholder="name@example.com"
-                      autoComplete="email"
-                      disabled={isLoading}
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            {/* Password Field */}
-            <FormField
-              control={form.control}
-              name="password"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Password</FormLabel>
-                  <FormControl>
-                    <Input
-                      type="password"
-                      placeholder=""
-                      autoComplete="current-password"
-                      disabled={isLoading}
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            {/* Error Message */}
-            {error && (
-              <div className="p-3 text-sm text-destructive bg-destructive/10 border border-destructive/20 rounded-lg">
-                {error}
-              </div>
+      {/* Form */}
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+          {/* Email Field */}
+          <FormField
+            control={form.control}
+            name="email"
+            render={({ field }) => (
+              <FormItem>
+                <FormControl>
+                  <Input
+                    type="email"
+                    placeholder="Email"
+                    autoComplete="email"
+                    disabled={isLoading}
+                    className="h-12 bg-secondary/50 border-0 rounded-xl px-4 text-sm placeholder:text-muted-foreground/60 focus:bg-secondary focus:ring-1 focus:ring-primary/50 transition-all"
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage className="text-xs px-1" />
+              </FormItem>
             )}
+          />
 
-            {/* Submit Button */}
-            <Button type="submit" className="w-full btn-gradient text-white" disabled={isLoading}>
-              {isLoading ? 'Signing in...' : 'Sign in'}
-            </Button>
-          </form>
-        </Form>
-      </CardContent>
+          {/* Password Field */}
+          <FormField
+            control={form.control}
+            name="password"
+            render={({ field }) => (
+              <FormItem>
+                <FormControl>
+                  <Input
+                    type="password"
+                    placeholder="Password"
+                    autoComplete="current-password"
+                    disabled={isLoading}
+                    className="h-12 bg-secondary/50 border-0 rounded-xl px-4 text-sm placeholder:text-muted-foreground/60 focus:bg-secondary focus:ring-1 focus:ring-primary/50 transition-all"
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage className="text-xs px-1" />
+              </FormItem>
+            )}
+          />
 
-      <CardFooter className="flex flex-col space-y-2">
-        <div className="text-sm text-muted-foreground">
+          {/* Error Message */}
+          {error && (
+            <div className="flex items-center gap-2 p-3 text-sm text-destructive bg-destructive/10 rounded-xl">
+              <AlertIcon className="w-4 h-4 flex-shrink-0" />
+              <span>{error}</span>
+            </div>
+          )}
+
+          {/* Submit Button */}
+          <Button
+            type="submit"
+            className="w-full h-12 rounded-xl btn-gradient text-white font-medium text-sm transition-all hover:opacity-90 disabled:opacity-50"
+            disabled={isLoading}
+          >
+            {isLoading ? (
+              <div className="flex items-center gap-2">
+                <LoadingSpinner className="w-4 h-4" />
+                <span>Signing in...</span>
+              </div>
+            ) : (
+              'Sign in'
+            )}
+          </Button>
+        </form>
+      </Form>
+
+      {/* Divider */}
+      <div className="relative">
+        <div className="absolute inset-0 flex items-center">
+          <div className="w-full border-t border-border/50" />
+        </div>
+        <div className="relative flex justify-center text-xs">
+          <span className="px-3 bg-background text-muted-foreground">or</span>
+        </div>
+      </div>
+
+      {/* Sign Up Link */}
+      <div className="text-center">
+        <p className="text-sm text-muted-foreground">
           Don&apos;t have an account?{' '}
           <Link
             href="/register"
-            className="text-primary hover:underline font-medium"
+            className="text-primary hover:text-primary/80 font-medium transition-colors"
           >
             Sign up
           </Link>
-        </div>
-      </CardFooter>
-    </Card>
+        </p>
+      </div>
+    </div>
+  );
+}
+
+function AlertIcon({ className }: { className?: string }) {
+  return (
+    <svg
+      className={className}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={2}
+    >
+      <circle cx="12" cy="12" r="10" />
+      <line x1="12" y1="8" x2="12" y2="12" />
+      <line x1="12" y1="16" x2="12.01" y2="16" />
+    </svg>
+  );
+}
+
+function LoadingSpinner({ className }: { className?: string }) {
+  return (
+    <svg
+      className={`${className} animate-spin`}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={2}
+    >
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+      />
+    </svg>
   );
 }

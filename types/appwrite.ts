@@ -63,6 +63,8 @@ export interface Thread extends Models.Document {
   mediaAltTexts?: string; // JSON array of alt texts: '["alt1", "alt2"]'
   
   parentThreadId?: string; // If reply, references parent Thread.$id (future feature)
+  parentReplyId?: string; // If replying to a comment, references the parent comment's $id
+  replyToUsername?: string; // Username of the user being replied to (for @mention display)
   replyCount: number; // Denormalized count of direct replies (default: 0)
   likeCount: number; // Denormalized count of likes (default: 0)
   createdAt: string; // ISO timestamp

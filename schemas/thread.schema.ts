@@ -160,6 +160,16 @@ export const replyCreateSchema = z.object({
     .string()
     .max(200, 'Alt text cannot exceed 200 characters')
     .optional(),
+
+  replyToUsername: z
+    .string()
+    .max(50, 'Username cannot exceed 50 characters')
+    .optional(),
+
+  parentReplyId: z
+    .string()
+    .max(50, 'Parent reply ID cannot exceed 50 characters')
+    .optional(),
 });
 
 /**

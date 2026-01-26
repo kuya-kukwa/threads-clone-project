@@ -15,7 +15,14 @@
 
 'use client';
 
-import { useState, useRef, useEffect, useCallback, forwardRef, useImperativeHandle } from 'react';
+import {
+  useState,
+  useRef,
+  useEffect,
+  useCallback,
+  forwardRef,
+  useImperativeHandle,
+} from 'react';
 import { useCurrentUser } from '@/hooks/useCurrentUser';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
@@ -63,6 +70,7 @@ function XIcon({ className }: { className?: string }) {
 export interface ReplyToInfo {
   username: string;
   displayName: string;
+  replyId?: string; // The ID of the comment being replied to (for nested replies)
 }
 
 export interface ReplyComposerHandle {
@@ -75,10 +83,10 @@ interface ReplyComposerProps {
   onReplyCreated?: () => void;
 }
 
-export const ReplyComposer = forwardRef<ReplyComposerHandle, ReplyComposerProps>(function ReplyComposer(
-  { threadId, onReplyCreated },
-  ref
-) {
+export const ReplyComposer = forwardRef<
+  ReplyComposerHandle,
+  ReplyComposerProps
+>(function ReplyComposer({ threadId, onReplyCreated }, ref) {
   const { user } = useCurrentUser();
   const [content, setContent] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -87,27 +95,31 @@ export const ReplyComposer = forwardRef<ReplyComposerHandle, ReplyComposerProps>
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   // Expose methods to parent via ref
-  useImperativeHandle(ref, () => ({
-    setReplyTo: (info: ReplyToInfo | null) => {
-      setReplyTo(info);
-      if (info) {
-        // Prefill with @mention if not already there
-        const mention = `@${info.username} `;
-        if (!content.startsWith(mention)) {
-          setContent(mention + content);
+  useImperativeHandle(
+    ref,
+    () => ({
+      setReplyTo: (info: ReplyToInfo | null) => {
+        setReplyTo(info);
+        if (info) {
+          // Prefill with @mention if not already there
+          const mention = `@${info.username} `;
+          if (!content.startsWith(mention)) {
+            setContent(mention + content);
+          }
+          // Focus and move cursor to end
+          setTimeout(() => {
+            textareaRef.current?.focus();
+            const len = textareaRef.current?.value.length || 0;
+            textareaRef.current?.setSelectionRange(len, len);
+          }, 50);
         }
-        // Focus and move cursor to end
-        setTimeout(() => {
-          textareaRef.current?.focus();
-          const len = textareaRef.current?.value.length || 0;
-          textareaRef.current?.setSelectionRange(len, len);
-        }, 50);
-      }
-    },
-    focus: () => {
-      textareaRef.current?.focus();
-    }
-  }), [content]);
+      },
+      focus: () => {
+        textareaRef.current?.focus();
+      },
+    }),
+    [content],
+  );
 
   const maxLength = SECURITY_CONFIG.MAX_LENGTHS.THREAD_CONTENT;
   const remainingChars = maxLength - content.length;
@@ -164,6 +176,10 @@ export const ReplyComposer = forwardRef<ReplyComposerHandle, ReplyComposerProps>
         credentials: 'include',
         body: JSON.stringify({
           content: content.trim(),
+          // Include replyToUsername when replying to a specific comment
+          ...(replyTo?.username && { replyToUsername: replyTo.username }),
+          // Include parentReplyId for nested replies
+          ...(replyTo?.replyId && { parentReplyId: replyTo.replyId }),
         }),
       });
 
@@ -287,13 +303,13 @@ export const ReplyComposer = forwardRef<ReplyComposerHandle, ReplyComposerProps>
           </div>
 
           {/* Hint */}
-          <p className="text-xs text-muted-foreground mt-2">
+          {/* <p className="text-xs text-muted-foreground mt-2">
             {typeof window !== 'undefined' &&
             window.navigator.platform.includes('Mac')
               ? 'Cmd'
               : 'Ctrl'}
             +Enter to post
-          </p>
+          </p>*/}
         </div>
       </div>
     </div>

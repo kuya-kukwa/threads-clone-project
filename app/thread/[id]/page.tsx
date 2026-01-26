@@ -19,7 +19,10 @@ import { use, useEffect, useState, useCallback, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { AuthGuard } from '@/components/auth/AuthGuard';
 import { ThreadCard } from '@/components/threads/ThreadCard';
-import { ReplyComposer, ReplyComposerHandle } from '@/components/threads/ReplyComposer';
+import {
+  ReplyComposer,
+  ReplyComposerHandle,
+} from '@/components/threads/ReplyComposer';
 import { ReplyList } from '@/components/threads/ReplyList';
 import { ThreadWithAuthor } from '@/types/appwrite';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -81,8 +84,8 @@ function ThreadDetailContent({ threadId }: { threadId: string }) {
   };
 
   // Handle replying to a comment - set @mention in composer
-  const handleReplyToComment = (username: string, displayName: string) => {
-    replyComposerRef.current?.setReplyTo({ username, displayName });
+  const handleReplyToComment = (username: string, displayName: string, replyId: string) => {
+    replyComposerRef.current?.setReplyTo({ username, displayName, replyId });
   };
 
   // Inline thread loading skeleton - shown inside the layout
@@ -213,9 +216,9 @@ function ThreadDetailContent({ threadId }: { threadId: string }) {
 
         {/* Replies List - Only show when thread is loaded */}
         {thread && (
-          <ReplyList 
-            threadId={threadId} 
-            refreshTrigger={replyRefreshTrigger} 
+          <ReplyList
+            threadId={threadId}
+            refreshTrigger={replyRefreshTrigger}
             onReplyToComment={handleReplyToComment}
           />
         )}

@@ -69,6 +69,7 @@ const COLLECTIONS = {
       { key: 'content', type: 'string', size: 500, required: true },
       { key: 'imageUrl', type: 'string', size: 500, required: false, default: '' },
       { key: 'parentThreadId', type: 'string', size: 255, required: false, default: '' },
+      { key: 'replyToUsername', type: 'string', size: 50, required: false, default: '' },
       { key: 'replyCount', type: 'integer', required: false, default: 0 },
       { key: 'likeCount', type: 'integer', required: false, default: 0 },
 

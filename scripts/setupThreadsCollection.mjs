@@ -70,6 +70,7 @@ async function setupThreadsCollection() {
       { key: 'imageUrl', type: 'string', size: 500, required: false },
       { key: 'altText', type: 'string', size: 200, required: false },
       { key: 'parentThreadId', type: 'string', size: 50, required: false },
+      { key: 'replyToUsername', type: 'string', size: 50, required: false },
       { key: 'replyCount', type: 'integer', required: true, default: 0 },
       { key: 'likeCount', type: 'integer', required: true, default: 0 },
       { key: 'createdAt', type: 'datetime', required: true },

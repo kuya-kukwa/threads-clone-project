@@ -113,9 +113,7 @@ export function ThreadCard({ thread }: ThreadCardProps) {
 
   return (
     <>
-      <article
-        className="border-b border-border/50 p-4 hover:bg-card/50 transition-colors animate-fade-in"
-      >
+      <article className="border-b border-border/50 p-4 hover:bg-card/50 transition-colors animate-fade-in">
         <div className="flex gap-3">
           {/* Avatar */}
           <Avatar className="w-10 h-10 flex-shrink-0 ring-2 ring-border/50">
