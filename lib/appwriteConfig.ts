@@ -103,7 +103,7 @@ export const APPWRITE_CONFIG = {
   // Storage buckets
   BUCKETS: {
     THREAD_IMAGES: 'thread-images',
-    AVATARS: 'avatars',
+    AVATARS: 'thread-images', // Using same bucket for avatars (plan limit)
   },
   
   // User profile attributes

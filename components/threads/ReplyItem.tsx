@@ -28,11 +28,19 @@ import {
 
 interface ReplyItemProps {
   reply: ThreadWithAuthor;
-  onReplyToComment?: (username: string, displayName: string, replyId: string) => void;
+  onReplyToComment?: (
+    username: string,
+    displayName: string,
+    replyId: string,
+  ) => void;
   isNested?: boolean;
 }
 
-export function ReplyItem({ reply, onReplyToComment, isNested = false }: ReplyItemProps) {
+export function ReplyItem({
+  reply,
+  onReplyToComment,
+  isNested = false,
+}: ReplyItemProps) {
   const { author, content, createdAt, imageUrl, replyToUsername } = reply;
   const [imageOpen, setImageOpen] = useState(false);
 
@@ -64,8 +72,9 @@ export function ReplyItem({ reply, onReplyToComment, isNested = false }: ReplyIt
   const replyingTo = getReplyingTo();
 
   return (
-    <div className={`p-4 hover:bg-secondary/30 transition-colors ${isNested ? 'ml-6' : ''}`}>
-
+    <div
+      className={`p-4 hover:bg-secondary/30 transition-colors ${isNested ? 'ml-6' : ''}`}
+    >
       <div className="flex gap-3">
         {/* Author Avatar - Smaller for replies */}
         <Avatar className="w-8 h-8 flex-shrink-0">
@@ -83,7 +92,9 @@ export function ReplyItem({ reply, onReplyToComment, isNested = false }: ReplyIt
             {replyingTo && (
               <>
                 <span className="text-xs text-muted-foreground">›</span>
-                <span className="text-xs text-primary font-medium">@{replyingTo}</span>
+                <span className="text-xs text-primary font-medium">
+                  @{replyingTo}
+                </span>
               </>
             )}
             <span className="text-xs text-muted-foreground flex-shrink-0">
@@ -127,7 +138,11 @@ export function ReplyItem({ reply, onReplyToComment, isNested = false }: ReplyIt
             <button
               className="text-xs text-muted-foreground hover:text-primary transition-colors flex items-center gap-1"
               onClick={() =>
-                onReplyToComment?.(author.username, author.displayName, reply.$id)
+                onReplyToComment?.(
+                  author.username,
+                  author.displayName,
+                  reply.$id,
+                )
               }
             >
               <ReplyIcon className="w-4 h-4" />

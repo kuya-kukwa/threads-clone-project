@@ -29,7 +29,7 @@ export const dynamic = 'force-dynamic';
 
 // Avatar validation constants
 const MAX_SIZE_BYTES = SECURITY_CONFIG.AVATAR.MAX_SIZE_MB * 1024 * 1024;
-const ALLOWED_TYPES = SECURITY_CONFIG.AVATAR.ALLOWED_TYPES;
+const ALLOWED_TYPES: readonly string[] = SECURITY_CONFIG.AVATAR.ALLOWED_TYPES;
 
 /**
  * Validate avatar file

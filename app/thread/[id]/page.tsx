@@ -84,7 +84,11 @@ function ThreadDetailContent({ threadId }: { threadId: string }) {
   };
 
   // Handle replying to a comment - set @mention in composer
-  const handleReplyToComment = (username: string, displayName: string, replyId: string) => {
+  const handleReplyToComment = (
+    username: string,
+    displayName: string,
+    replyId: string,
+  ) => {
     replyComposerRef.current?.setReplyTo({ username, displayName, replyId });
   };
 

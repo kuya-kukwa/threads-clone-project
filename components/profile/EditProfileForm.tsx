@@ -4,6 +4,12 @@
  * Edit Profile Form Component
  * Inline form for updating user profile with Zod validation
  * Follows mobile-first architecture
+ * 
+ * Features:
+ * - Avatar upload with preview
+ * - Display name editing
+ * - Bio editing with character count
+ * - Real-time validation
  */
 
 import { useState } from 'react';
@@ -19,7 +25,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { AvatarUpload } from './AvatarUpload';
 import { getSessionToken } from '@/lib/appwriteClient';
 import { getErrorMessage } from '@/lib/errors';
 
@@ -36,6 +42,7 @@ export function EditProfileForm({
 }: EditProfileFormProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [currentAvatarUrl, setCurrentAvatarUrl] = useState(profile.avatarUrl || '');
 
   const {
     register,
@@ -52,14 +59,19 @@ export function EditProfileForm({
   });
 
   const bio = watch('bio') || '';
-  const avatarUrl = watch('avatarUrl') || '';
+
+  /**
+   * Handle avatar upload success
+   */
+  const handleAvatarUploadSuccess = (avatarUrl: string) => {
+    setCurrentAvatarUrl(avatarUrl);
+  };
 
   const onSubmit = async (data: ProfileUpdateInput) => {
     setIsLoading(true);
     setError(null);
 
     try {
-      // Use the utility function to get the session token
       const sessionId = getSessionToken();
 
       if (!sessionId) {
@@ -68,15 +80,21 @@ export function EditProfileForm({
         return;
       }
 
+      // Use the current avatar URL (which may have been updated by upload)
+      const updateData = {
+        ...data,
+        avatarUrl: currentAvatarUrl,
+      };
+
       const response = await fetch(`/api/profile/${profile.$id}`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
           'x-csrf-token': 'true',
-          'x-session-id': sessionId, // Send session ID in custom header
+          'x-session-id': sessionId,
         },
         credentials: 'include',
-        body: JSON.stringify(data),
+        body: JSON.stringify(updateData),
       });
 
       const result = await response.json();
@@ -84,12 +102,10 @@ export function EditProfileForm({
       if (result.success && result.profile) {
         onSuccess(result.profile);
       } else {
-        // Show detailed error message if available
         const errorMsg = result.error || 'Failed to update profile';
         const detailsMsg = result.details ? `\n${result.details}` : '';
         setError(errorMsg + detailsMsg);
 
-        // If it's a session error, suggest re-login
         if (response.status === 401 || response.status === 403) {
           setError('Session expired. Please log in again.');
         }
@@ -102,18 +118,16 @@ export function EditProfileForm({
   };
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 sm:space-y-6">
-      {/* Avatar Preview */}
-      <div className="flex items-center gap-4">
-        <Avatar className="w-16 h-16 sm:w-20 sm:h-20">
-          <AvatarImage src={avatarUrl} alt={profile.displayName} />
-          <AvatarFallback className="text-lg sm:text-xl">
-            {profile.displayName.slice(0, 2).toUpperCase()}
-          </AvatarFallback>
-        </Avatar>
-        <div className="text-xs sm:text-sm text-muted-foreground">
-          Update your avatar URL below
-        </div>
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+      {/* Avatar Upload */}
+      <div className="flex justify-center">
+        <AvatarUpload
+          currentAvatarUrl={currentAvatarUrl}
+          displayName={profile.displayName}
+          onUploadSuccess={handleAvatarUploadSuccess}
+          onUploadError={(err) => setError(err)}
+          disabled={isLoading}
+        />
       </div>
 
       {/* Display Name */}

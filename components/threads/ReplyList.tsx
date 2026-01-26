@@ -23,7 +23,11 @@ import { Skeleton } from '@/components/ui/skeleton';
 interface ReplyListProps {
   threadId: string;
   refreshTrigger?: number; // Change this to trigger refresh
-  onReplyToComment?: (username: string, displayName: string, replyId: string) => void;
+  onReplyToComment?: (
+    username: string,
+    displayName: string,
+    replyId: string,
+  ) => void;
 }
 
 // Group replies into parent and child relationships
@@ -43,7 +47,9 @@ export function ReplyList({
   const [error, setError] = useState<string | null>(null);
   const [nextCursor, setNextCursor] = useState<string | null>(null);
   const [hasMore, setHasMore] = useState(false);
-  const [expandedReplies, setExpandedReplies] = useState<Set<string>>(new Set());
+  const [expandedReplies, setExpandedReplies] = useState<Set<string>>(
+    new Set(),
+  );
 
   // Fetch replies
   const fetchReplies = useCallback(
@@ -104,7 +110,7 @@ export function ReplyList({
 
     replies.forEach((reply) => {
       const parentReplyId = reply.parentReplyId;
-      
+
       if (parentReplyId && parentReplyId.trim()) {
         // This is a child reply (nested)
         const existing = childRepliesByParent.get(parentReplyId) || [];
@@ -207,10 +213,7 @@ export function ReplyList({
         return (
           <div key={reply.$id}>
             {/* Parent Reply */}
-            <ReplyItem
-              reply={reply}
-              onReplyToComment={onReplyToComment}
-            />
+            <ReplyItem reply={reply} onReplyToComment={onReplyToComment} />
 
             {/* View Replies Button - TikTok style */}
             {hasChildReplies && !isExpanded && (
@@ -220,7 +223,8 @@ export function ReplyList({
               >
                 <div className="w-6 h-px bg-muted-foreground/30" />
                 <span className="font-medium">
-                  View {childReplies.length} {childReplies.length === 1 ? 'reply' : 'replies'}
+                  View {childReplies.length}{' '}
+                  {childReplies.length === 1 ? 'reply' : 'replies'}
                 </span>
                 <ChevronDownIcon className="w-3 h-3" />
               </button>
@@ -237,7 +241,7 @@ export function ReplyList({
                     isNested
                   />
                 ))}
-                
+
                 {/* Hide Replies Button */}
                 <button
                   onClick={() => toggleExpanded(reply.$id)}
@@ -323,11 +327,7 @@ function ChevronDownIcon({ className }: { className?: string }) {
       stroke="currentColor"
       strokeWidth={2}
     >
-      <path
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        d="M19 9l-7 7-7-7"
-      />
+      <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
     </svg>
   );
 }
@@ -341,11 +341,7 @@ function ChevronUpIcon({ className }: { className?: string }) {
       stroke="currentColor"
       strokeWidth={2}
     >
-      <path
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        d="M5 15l7-7 7 7"
-      />
+      <path strokeLinecap="round" strokeLinejoin="round" d="M5 15l7-7 7 7" />
     </svg>
   );
 }

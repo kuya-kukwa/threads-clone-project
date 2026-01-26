@@ -52,7 +52,9 @@ export function RegisterForm() {
     <div className="space-y-6">
       {/* Header */}
       <div className="text-center space-y-2">
-        <h2 className="text-xl font-semibold text-foreground">Create account</h2>
+        <h2 className="text-xl font-semibold text-foreground">
+          Create account
+        </h2>
         <p className="text-sm text-muted-foreground">
           Join Threads and start sharing
         </p>
