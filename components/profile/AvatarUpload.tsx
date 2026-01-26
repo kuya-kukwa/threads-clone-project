@@ -1,7 +1,7 @@
 /**
  * AvatarUpload Component
  * Handles avatar image selection, preview, and upload
- * 
+ *
  * Features:
  * - Click to upload or drag & drop
  * - Image preview before upload
@@ -56,7 +56,8 @@ export function AvatarUpload({
    */
   const validateFile = useCallback((file: File): string | null => {
     const maxSize = SECURITY_CONFIG.AVATAR.MAX_SIZE_MB * 1024 * 1024;
-    const allowedTypes: readonly string[] = SECURITY_CONFIG.AVATAR.ALLOWED_TYPES;
+    const allowedTypes: readonly string[] =
+      SECURITY_CONFIG.AVATAR.ALLOWED_TYPES;
 
     if (file.size > maxSize) {
       return `File size must be under ${SECURITY_CONFIG.AVATAR.MAX_SIZE_MB}MB`;
@@ -72,69 +73,75 @@ export function AvatarUpload({
   /**
    * Upload file to server
    */
-  const uploadFile = useCallback(async (file: File) => {
-    setUploadState('uploading');
-    setError(null);
+  const uploadFile = useCallback(
+    async (file: File) => {
+      setUploadState('uploading');
+      setError(null);
 
-    try {
-      const sessionId = getSessionToken();
-      if (!sessionId) {
-        throw new Error('Please log in to upload an avatar');
+      try {
+        const sessionId = getSessionToken();
+        if (!sessionId) {
+          throw new Error('Please log in to upload an avatar');
+        }
+
+        const formData = new FormData();
+        formData.append('file', file);
+
+        const response = await fetch('/api/upload/avatar', {
+          method: 'POST',
+          headers: {
+            'x-session-id': sessionId,
+          },
+          body: formData,
+        });
+
+        const result = await response.json();
+
+        if (!response.ok || !result.success) {
+          throw new Error(result.error || 'Upload failed');
+        }
+
+        setUploadState('success');
+        onUploadSuccess(result.data.avatarUrl);
+
+        // Clear preview after successful upload
+        setTimeout(() => {
+          setPreviewUrl(null);
+          setUploadState('idle');
+        }, 1500);
+      } catch (err) {
+        const errorMessage =
+          err instanceof Error ? err.message : 'Upload failed';
+        setError(errorMessage);
+        setUploadState('error');
+        onUploadError?.(errorMessage);
       }
-
-      const formData = new FormData();
-      formData.append('file', file);
-
-      const response = await fetch('/api/upload/avatar', {
-        method: 'POST',
-        headers: {
-          'x-session-id': sessionId,
-        },
-        body: formData,
-      });
-
-      const result = await response.json();
-
-      if (!response.ok || !result.success) {
-        throw new Error(result.error || 'Upload failed');
-      }
-
-      setUploadState('success');
-      onUploadSuccess(result.data.avatarUrl);
-
-      // Clear preview after successful upload
-      setTimeout(() => {
-        setPreviewUrl(null);
-        setUploadState('idle');
-      }, 1500);
-
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Upload failed';
-      setError(errorMessage);
-      setUploadState('error');
-      onUploadError?.(errorMessage);
-    }
-  }, [onUploadSuccess, onUploadError]);
+    },
+    [onUploadSuccess, onUploadError],
+  );
 
   /**
    * Handle file selection
    */
-  const handleFileSelect = useCallback((file: File) => {
-    const validationError = validateFile(file);
-    if (validationError) {
-      setError(validationError);
-      setUploadState('error');
-      return;
-    }
+  const handleFileSelect = useCallback(
+    (file: File) => {
+      const validationError = validateFile(file);
+      if (validationError) {
+        setError(validationError);
+        setUploadState('error');
+        return;
+      }
 
-    // Create preview
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      setPreviewUrl(e.target?.result as string);
-      setUploadState('selecting');
-    };
-    reader.readAsDataURL(file);
-  }, [validateFile]);
+      // Create preview
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setPreviewUrl(e.target?.result as string);
+        setUploadState('selecting');
+      };
+      reader.readAsDataURL(file);
+    },
+    [validateFile],
+  );
 
   /**
    * Handle input change
@@ -232,9 +239,13 @@ export function AvatarUpload({
           }
         }}
       >
-        <Avatar className={`w-24 h-24 sm:w-28 sm:h-28 ring-2 ring-offset-2 ring-offset-background transition-all ${
-          isDragging ? 'ring-primary' : 'ring-border group-hover:ring-primary/50'
-        }`}>
+        <Avatar
+          className={`w-24 h-24 sm:w-28 sm:h-28 ring-2 ring-offset-2 ring-offset-background transition-all ${
+            isDragging
+              ? 'ring-primary'
+              : 'ring-border group-hover:ring-primary/50'
+          }`}
+        >
           <AvatarImage src={displayUrl} alt={displayName} />
           <AvatarFallback className="text-2xl">{initials}</AvatarFallback>
         </Avatar>
@@ -281,7 +292,8 @@ export function AvatarUpload({
       <div className="text-center">
         {uploadState === 'idle' && (
           <p className="text-xs text-muted-foreground">
-            Click or drag to upload • JPG, PNG, WebP • Max {SECURITY_CONFIG.AVATAR.MAX_SIZE_MB}MB
+            Click or drag to upload • JPG, PNG, WebP • Max{' '}
+            {SECURITY_CONFIG.AVATAR.MAX_SIZE_MB}MB
           </p>
         )}
 
@@ -294,11 +306,7 @@ export function AvatarUpload({
             >
               Save Avatar
             </Button>
-            <Button
-              size="sm"
-              variant="outline"
-              onClick={handleCancel}
-            >
+            <Button size="sm" variant="outline" onClick={handleCancel}>
               Cancel
             </Button>
           </div>
@@ -311,9 +319,7 @@ export function AvatarUpload({
         )}
 
         {uploadState === 'success' && (
-          <p className="text-xs text-green-500 font-medium">
-            Avatar updated!
-          </p>
+          <p className="text-xs text-green-500 font-medium">Avatar updated!</p>
         )}
 
         {uploadState === 'error' && error && (
@@ -376,11 +382,7 @@ function CheckIcon({ className }: { className?: string }) {
       stroke="currentColor"
       strokeWidth={2}
     >
-      <path
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        d="M20 6L9 17l-5-5"
-      />
+      <path strokeLinecap="round" strokeLinejoin="round" d="M20 6L9 17l-5-5" />
     </svg>
   );
 }

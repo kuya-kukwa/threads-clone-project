@@ -4,7 +4,7 @@
  * Edit Profile Form Component
  * Inline form for updating user profile with Zod validation
  * Follows mobile-first architecture
- * 
+ *
  * Features:
  * - Avatar upload with preview
  * - Display name editing
@@ -42,7 +42,9 @@ export function EditProfileForm({
 }: EditProfileFormProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [currentAvatarUrl, setCurrentAvatarUrl] = useState(profile.avatarUrl || '');
+  const [currentAvatarUrl, setCurrentAvatarUrl] = useState(
+    profile.avatarUrl || '',
+  );
 
   const {
     register,
