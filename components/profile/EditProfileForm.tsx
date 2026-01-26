@@ -66,6 +66,7 @@ export function EditProfileForm({
    * Handle avatar upload success
    */
   const handleAvatarUploadSuccess = (avatarUrl: string) => {
+    console.log('[EditProfileForm] Avatar upload success, new URL:', avatarUrl);
     setCurrentAvatarUrl(avatarUrl);
   };
 

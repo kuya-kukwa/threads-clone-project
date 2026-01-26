@@ -5,6 +5,7 @@
  * Features:
  * - Click to upload or drag & drop
  * - Image preview before upload
+ * - Auto-upload on selection (no confirm step)
  * - Progress indicator
  * - Error handling with retry
  * - Accessible design
@@ -27,7 +28,7 @@ interface AvatarUploadProps {
   disabled?: boolean;
 }
 
-type UploadState = 'idle' | 'selecting' | 'uploading' | 'success' | 'error';
+type UploadState = 'idle' | 'uploading' | 'success' | 'error';
 
 export function AvatarUpload({
   currentAvatarUrl,
@@ -49,7 +50,11 @@ export function AvatarUpload({
     .toUpperCase()
     .slice(0, 2);
 
+  // Show preview during upload, then current avatar
   const displayUrl = previewUrl || currentAvatarUrl;
+  
+  // Debug logging
+  console.log('[AvatarUpload] displayUrl:', displayUrl, 'previewUrl:', previewUrl, 'currentAvatarUrl:', currentAvatarUrl);
 
   /**
    * Validate file before upload
@@ -74,7 +79,7 @@ export function AvatarUpload({
    * Upload file to server
    */
   const uploadFile = useCallback(
-    async (file: File) => {
+    async (file: File, localPreviewUrl: string) => {
       setUploadState('uploading');
       setError(null);
 
@@ -96,15 +101,20 @@ export function AvatarUpload({
         });
 
         const result = await response.json();
+        
+        console.log('[AvatarUpload] API Response:', result);
 
         if (!response.ok || !result.success) {
           throw new Error(result.error || 'Upload failed');
         }
 
+        const avatarUrl = result.data.avatarUrl;
+        console.log('[AvatarUpload] Avatar URL received:', avatarUrl);
+        
         setUploadState('success');
-        onUploadSuccess(result.data.avatarUrl);
+        onUploadSuccess(avatarUrl);
 
-        // Clear preview after successful upload
+        // Clear preview and reset state after success
         setTimeout(() => {
           setPreviewUrl(null);
           setUploadState('idle');
@@ -114,6 +124,8 @@ export function AvatarUpload({
           err instanceof Error ? err.message : 'Upload failed';
         setError(errorMessage);
         setUploadState('error');
+        // Clear preview on error
+        setPreviewUrl(null);
         onUploadError?.(errorMessage);
       }
     },
@@ -121,7 +133,7 @@ export function AvatarUpload({
   );
 
   /**
-   * Handle file selection
+   * Handle file selection - validates and auto-uploads
    */
   const handleFileSelect = useCallback(
     (file: File) => {
@@ -132,15 +144,17 @@ export function AvatarUpload({
         return;
       }
 
-      // Create preview
+      // Create preview and immediately start upload
       const reader = new FileReader();
       reader.onload = (e) => {
-        setPreviewUrl(e.target?.result as string);
-        setUploadState('selecting');
+        const localPreviewUrl = e.target?.result as string;
+        setPreviewUrl(localPreviewUrl);
+        // Auto-upload immediately after showing preview
+        uploadFile(file, localPreviewUrl);
       };
       reader.readAsDataURL(file);
     },
-    [validateFile],
+    [validateFile, uploadFile],
   );
 
   /**
@@ -190,19 +204,9 @@ export function AvatarUpload({
   };
 
   /**
-   * Confirm and upload selected image
+   * Retry after error
    */
-  const handleConfirmUpload = () => {
-    if (previewUrl && fileInputRef.current?.files?.[0]) {
-      uploadFile(fileInputRef.current.files[0]);
-    }
-  };
-
-  /**
-   * Cancel selection
-   */
-  const handleCancel = () => {
-    setPreviewUrl(null);
+  const handleRetry = () => {
     setError(null);
     setUploadState('idle');
     if (fileInputRef.current) {
@@ -210,21 +214,13 @@ export function AvatarUpload({
     }
   };
 
-  /**
-   * Retry after error
-   */
-  const handleRetry = () => {
-    setError(null);
-    setUploadState('idle');
-  };
-
   return (
-    <div className="flex flex-col items-center gap-4">
+    <div className="flex flex-col items-center gap-3">
       {/* Avatar Preview Area */}
       <div
-        className={`relative group cursor-pointer transition-all ${
+        className={`relative group cursor-pointer transition-all duration-200 ${
           isDragging ? 'scale-105' : ''
-        } ${disabled ? 'opacity-50 cursor-not-allowed' : ''}`}
+        } ${disabled || uploadState === 'uploading' ? 'opacity-70 cursor-not-allowed' : ''}`}
         onClick={handleClick}
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
@@ -240,34 +236,45 @@ export function AvatarUpload({
         }}
       >
         <Avatar
-          className={`w-24 h-24 sm:w-28 sm:h-28 ring-2 ring-offset-2 ring-offset-background transition-all ${
+          className={`w-24 h-24 ring-2 ring-offset-2 ring-offset-background transition-all duration-200 ${
             isDragging
-              ? 'ring-primary'
-              : 'ring-border group-hover:ring-primary/50'
+              ? 'ring-primary scale-105'
+              : uploadState === 'success'
+              ? 'ring-green-500'
+              : uploadState === 'error'
+              ? 'ring-destructive'
+              : 'ring-border group-hover:ring-primary/60'
           }`}
         >
-          <AvatarImage src={displayUrl} alt={displayName} />
-          <AvatarFallback className="text-2xl">{initials}</AvatarFallback>
+          <AvatarImage src={displayUrl} alt={displayName} className="object-cover" />
+          <AvatarFallback className="text-xl bg-muted">{initials}</AvatarFallback>
         </Avatar>
 
-        {/* Overlay */}
-        {uploadState !== 'uploading' && !disabled && (
-          <div className="absolute inset-0 flex items-center justify-center bg-black/50 rounded-full opacity-0 group-hover:opacity-100 transition-opacity">
-            <CameraIcon className="w-8 h-8 text-white" />
+        {/* Hover Overlay - only show when idle */}
+        {uploadState === 'idle' && !disabled && (
+          <div className="absolute inset-0 flex items-center justify-center bg-black/50 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+            <CameraIcon className="w-7 h-7 text-white" />
           </div>
         )}
 
         {/* Upload Progress Indicator */}
         {uploadState === 'uploading' && (
           <div className="absolute inset-0 flex items-center justify-center bg-black/60 rounded-full">
-            <LoadingSpinner className="w-8 h-8 text-white" />
+            <LoadingSpinner className="w-7 h-7 text-white" />
           </div>
         )}
 
         {/* Success Indicator */}
         {uploadState === 'success' && (
-          <div className="absolute inset-0 flex items-center justify-center bg-green-500/60 rounded-full">
-            <CheckIcon className="w-8 h-8 text-white" />
+          <div className="absolute inset-0 flex items-center justify-center bg-green-500/70 rounded-full">
+            <CheckIcon className="w-7 h-7 text-white" />
+          </div>
+        )}
+
+        {/* Error Indicator */}
+        {uploadState === 'error' && (
+          <div className="absolute inset-0 flex items-center justify-center bg-destructive/70 rounded-full">
+            <XIcon className="w-7 h-7 text-white" />
           </div>
         )}
 
@@ -285,31 +292,15 @@ export function AvatarUpload({
         onChange={handleInputChange}
         className="hidden"
         aria-hidden="true"
-        disabled={disabled}
+        disabled={disabled || uploadState === 'uploading'}
       />
 
-      {/* Instructions / Status */}
-      <div className="text-center">
+      {/* Status Text */}
+      <div className="text-center min-h-8 flex flex-col items-center justify-center">
         {uploadState === 'idle' && (
           <p className="text-xs text-muted-foreground">
-            Click or drag to upload • JPG, PNG, WebP • Max{' '}
-            {SECURITY_CONFIG.AVATAR.MAX_SIZE_MB}MB
+            Click to change avatar
           </p>
-        )}
-
-        {uploadState === 'selecting' && previewUrl && (
-          <div className="flex gap-2 justify-center">
-            <Button
-              size="sm"
-              onClick={handleConfirmUpload}
-              className="btn-gradient text-white"
-            >
-              Save Avatar
-            </Button>
-            <Button size="sm" variant="outline" onClick={handleCancel}>
-              Cancel
-            </Button>
-          </div>
         )}
 
         {uploadState === 'uploading' && (
@@ -323,9 +314,14 @@ export function AvatarUpload({
         )}
 
         {uploadState === 'error' && error && (
-          <div className="space-y-2">
+          <div className="flex flex-col items-center gap-1">
             <p className="text-xs text-destructive">{error}</p>
-            <Button size="sm" variant="outline" onClick={handleRetry}>
+            <Button 
+              size="sm" 
+              variant="ghost" 
+              onClick={handleRetry}
+              className="h-7 text-xs"
+            >
               Try Again
             </Button>
           </div>
@@ -383,6 +379,20 @@ function CheckIcon({ className }: { className?: string }) {
       strokeWidth={2}
     >
       <path strokeLinecap="round" strokeLinejoin="round" d="M20 6L9 17l-5-5" />
+    </svg>
+  );
+}
+
+function XIcon({ className }: { className?: string }) {
+  return (
+    <svg
+      className={className}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={2}
+    >
+      <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
     </svg>
   );
 }

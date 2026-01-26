@@ -64,7 +64,11 @@ export function ProfileCard({
 
         {/* Right: Avatar */}
         <Avatar className="w-20 h-20 shrink-0 ring-2 ring-border">
-          <AvatarImage src={profile.avatarUrl} alt={profile.displayName} />
+          <AvatarImage 
+            src={profile.avatarUrl} 
+            alt={profile.displayName}
+            onLoadingStatusChange={(status) => console.log('[ProfileCard] Avatar load status:', status, 'URL:', profile.avatarUrl)} 
+          />
           <AvatarFallback className="text-xl bg-secondary text-secondary-foreground">
             {profile.displayName.slice(0, 2).toUpperCase()}
           </AvatarFallback>

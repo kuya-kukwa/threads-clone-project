@@ -1,6 +1,7 @@
 /**
- * Thread Creation API Route
- * POST /api/threads
+ * Thread API Route
+ * GET /api/threads?userId=... - Get threads by user
+ * POST /api/threads - Create a new thread
  * 
  * Features:
  * - Rate limiting (10 posts per minute)
@@ -17,7 +18,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { createSessionClient } from '@/lib/appwriteServer';
-import { createThread, createThreadWithMedia } from '@/lib/services/threadService';
+import { createThread, createThreadWithMedia, getUserThreads } from '@/lib/services/threadService';
 import { rateLimit, RateLimitType } from '@/lib/middleware/rateLimit';
 import { threadCreateSchema } from '@/schemas/thread.schema';
 import { createRequestLogger } from '@/lib/logger/requestLogger';
@@ -30,11 +31,52 @@ export async function OPTIONS() {
     {
       headers: {
         'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Methods': 'POST, OPTIONS',
+        'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
         'Access-Control-Allow-Headers': 'Content-Type, Cookie',
       },
     }
   );
+}
+
+/**
+ * GET /api/threads?userId=...&cursor=...&limit=...
+ * Fetch threads by a specific user
+ */
+export async function GET(request: NextRequest) {
+  const logger = createRequestLogger(request);
+
+  try {
+    const { searchParams } = new URL(request.url);
+    const userId = searchParams.get('userId');
+    const cursor = searchParams.get('cursor') || undefined;
+    const limit = parseInt(searchParams.get('limit') || '20', 10);
+
+    if (!userId) {
+      return NextResponse.json(
+        { error: 'userId parameter is required' },
+        { status: 400 }
+      );
+    }
+
+    logger.debug('Fetching user threads', { userId, cursor, limit });
+
+    const result = await getUserThreads(userId, cursor, limit);
+
+    return NextResponse.json({
+      threads: result.threads,
+      nextCursor: result.nextCursor,
+      hasMore: result.hasMore,
+    });
+  } catch (error) {
+    logger.error('Failed to fetch user threads', {
+      error: getErrorMessage(error),
+    });
+
+    return NextResponse.json(
+      { error: 'Failed to fetch threads' },
+      { status: 500 }
+    );
+  }
 }
 
 export async function POST(request: NextRequest) {

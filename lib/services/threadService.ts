@@ -466,3 +466,100 @@ export async function getThreadById(threadId: string): Promise<ThreadWithAuthor 
     return null;
   }
 }
+
+/**
+ * Get threads by a specific user
+ * @param userId - User ID to fetch threads for
+ * @param cursor - Optional cursor for pagination
+ * @param limit - Number of threads to fetch
+ * @returns User threads with author data
+ */
+export async function getUserThreads(
+  userId: string,
+  cursor?: string,
+  limit: number = 20
+): Promise<{ threads: ThreadWithAuthor[]; nextCursor: string | null; hasMore: boolean }> {
+  try {
+    const validLimit = Math.min(Math.max(limit, 1), 50);
+
+    logger.debug({
+      msg: 'Fetching user threads',
+      userId,
+      cursor,
+      limit: validLimit,
+    });
+
+    // Build queries - only fetch parent threads by this user
+    const queries = [
+      Query.equal('authorId', userId),
+      Query.equal('parentThreadId', ''),
+      Query.orderDesc('createdAt'),
+      Query.limit(validLimit + 1),
+    ];
+
+    if (cursor) {
+      queries.push(Query.cursorAfter(cursor));
+    }
+
+    // Fetch threads
+    const threadsResult = await serverDatabases.listDocuments<Thread>(
+      APPWRITE_CONFIG.DATABASE_ID,
+      APPWRITE_CONFIG.COLLECTIONS.THREADS,
+      queries
+    );
+
+    const hasMore = threadsResult.documents.length > validLimit;
+    const threads = hasMore
+      ? threadsResult.documents.slice(0, validLimit)
+      : threadsResult.documents;
+
+    const nextCursor = hasMore && threads.length > 0
+      ? threads[threads.length - 1].$id
+      : null;
+
+    if (threads.length === 0) {
+      return { threads: [], nextCursor: null, hasMore: false };
+    }
+
+    // Fetch author profile
+    const authorsResult = await serverDatabases.listDocuments<UserProfile>(
+      APPWRITE_CONFIG.DATABASE_ID,
+      APPWRITE_CONFIG.COLLECTIONS.USERS,
+      [Query.equal('userId', userId)]
+    );
+
+    const author = authorsResult.documents[0];
+    if (!author) {
+      logger.warn({ msg: 'Author not found', userId });
+      return { threads: [], nextCursor: null, hasMore: false };
+    }
+
+    // Combine threads with author data
+    const threadsWithAuthors: ThreadWithAuthor[] = threads.map(thread => ({
+      ...thread,
+      content: thread.content || '',
+      imageId: thread.imageId || '',
+      imageUrl: thread.imageUrl || '',
+      altText: thread.altText || '',
+      replyCount: thread.replyCount ?? 0,
+      likeCount: thread.likeCount ?? 0,
+      author,
+    }));
+
+    logger.debug({
+      msg: 'User threads fetched',
+      userId,
+      threadCount: threadsWithAuthors.length,
+      hasMore,
+    });
+
+    return { threads: threadsWithAuthors, nextCursor, hasMore };
+  } catch (error) {
+    logger.error({
+      msg: 'Failed to fetch user threads',
+      userId,
+      error: error instanceof Error ? error.message : 'Unknown error',
+    });
+    throw error;
+  }
+}

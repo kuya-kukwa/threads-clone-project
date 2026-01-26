@@ -17,7 +17,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { ID } from 'node-appwrite';
+import { ID, Permission, Role } from 'node-appwrite';
 import { createSessionClient, serverStorage, serverDatabases } from '@/lib/appwriteServer';
 import { APPWRITE_CONFIG, SECURITY_CONFIG } from '@/lib/appwriteConfig';
 import { logger } from '@/lib/logger/logger';
@@ -55,16 +55,11 @@ function validateAvatarFile(file: File): { valid: boolean; error?: string } {
 }
 
 /**
- * Generate avatar preview URL from Appwrite Storage
+ * Generate avatar URL via our proxy API (bypasses Appwrite permission issues)
  */
 function getAvatarUrl(fileId: string): string {
-  const endpoint = process.env.NEXT_PUBLIC_APPWRITE_ENDPOINT;
-  const projectId = process.env.NEXT_PUBLIC_APPWRITE_PROJECT_ID;
-  const bucketId = APPWRITE_CONFIG.BUCKETS.AVATARS;
-  
-  // Return a preview URL with reasonable dimensions for avatars
-  // Using 400x400 as a good balance between quality and file size
-  return `${endpoint}/storage/buckets/${bucketId}/files/${fileId}/preview?project=${projectId}&width=400&height=400&gravity=center&quality=90`;
+  // Use our proxy API instead of direct Appwrite URL
+  return `/api/avatar/${fileId}`;
 }
 
 /**
@@ -191,17 +186,29 @@ export async function POST(request: NextRequest) {
     // Generate unique file ID
     const fileId = ID.unique();
 
-    // Upload new avatar
+    // Upload new avatar with public read permissions
     logger.debug({ msg: 'Uploading avatar', fileId, fileName: file.name, fileSize: file.size, requestId });
 
     await serverStorage.createFile(
       APPWRITE_CONFIG.BUCKETS.AVATARS,
       fileId,
-      file
+      file,
+      [
+        Permission.read(Role.any()), // Anyone can view the avatar
+        Permission.update(Role.user(currentUser.$id)), // Only owner can update
+        Permission.delete(Role.user(currentUser.$id)), // Only owner can delete
+      ]
     );
 
     // Generate avatar URL
     const avatarUrl = getAvatarUrl(fileId);
+
+    logger.info({
+      msg: 'Generated avatar URL',
+      fileId,
+      avatarUrl,
+      requestId,
+    });
 
     // Update user profile with new avatar URL
     await serverDatabases.updateDocument(
