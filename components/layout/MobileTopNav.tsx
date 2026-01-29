@@ -220,9 +220,9 @@ export function MobileTopNav({
       {/* Menu Overlay */}
       {showMenu && (
         <div className="fixed inset-0 z-50 md:hidden">
-          {/* Backdrop */}
+          {/* Backdrop - Dark overlay for better focus */}
           <div
-            className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+            className="absolute inset-0 bg-black/70 backdrop-blur-sm transition-opacity"
             onClick={() => setShowMenu(false)}
           />
 
@@ -287,9 +287,9 @@ export function MobileTopNav({
       {/* Search Overlay */}
       {showSearch && (
         <div className="fixed inset-0 z-50 md:hidden">
-          {/* Backdrop */}
+          {/* Backdrop - Dark overlay for better focus */}
           <div
-            className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+            className="absolute inset-0 bg-black/70 backdrop-blur-sm transition-opacity"
             onClick={handleCloseSearch}
           />
 
