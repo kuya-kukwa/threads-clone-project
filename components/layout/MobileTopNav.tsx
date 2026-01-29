@@ -392,20 +392,6 @@ export function MobileTopNav({
                   )}
                 </div>
               )}
-
-              {/* Empty state - no query */}
-              {!searchError && searchQuery.length === 0 && (
-                <div className="p-4">
-                  <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-3">
-                    Search Tips
-                  </p>
-                  <div className="space-y-2 text-sm text-muted-foreground">
-                    <p>• Search by username (e.g., @john)</p>
-                    <p>• Search by display name</p>
-                    <p>• Results update as you type</p>
-                  </div>
-                </div>
-              )}
             </div>
           </div>
         </div>

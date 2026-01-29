@@ -13,6 +13,7 @@
 import { useEffect, useState, useCallback, useRef } from 'react';
 import { ThreadCard, ThreadWithLikeStatus } from './ThreadCard';
 import { ThreadCardSkeleton } from '@/components/ui/skeletons';
+import { getSessionToken } from '@/lib/appwriteClient';
 
 interface FollowingFeedResponse {
   success: boolean;
@@ -40,8 +41,16 @@ export function FollowingFeed() {
       params.append('limit', '10');
       if (cursor) params.append('cursor', cursor);
 
+      // Get session token for authentication
+      const sessionToken = getSessionToken();
+      const headers: Record<string, string> = {};
+      if (sessionToken) {
+        headers['x-session-id'] = sessionToken;
+      }
+
       const response = await fetch(`/api/feed/following?${params}`, {
         credentials: 'include',
+        headers,
       });
 
       const data: FollowingFeedResponse = await response.json();
