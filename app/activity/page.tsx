@@ -6,8 +6,9 @@
  * Shows notifications and activity feed
  */
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { AuthGuard } from '@/components/auth/AuthGuard';
+import { ActivityListSkeleton } from '@/components/ui/skeletons';
 import { formatDistanceToNow } from 'date-fns';
 
 type TabType = 'all' | 'follows' | 'conversations' | 'mentions';
@@ -141,6 +142,18 @@ const mockActivities = {
 };
 
 function AllActivity() {
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    // Simulate loading - in real app, this would be an API call
+    const timer = setTimeout(() => setIsLoading(false), 500);
+    return () => clearTimeout(timer);
+  }, []);
+
+  if (isLoading) {
+    return <ActivityListSkeleton count={4} />;
+  }
+
   return (
     <ActivityList
       activities={mockActivities.all}
@@ -150,6 +163,17 @@ function AllActivity() {
 }
 
 function FollowsActivity() {
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setIsLoading(false), 400);
+    return () => clearTimeout(timer);
+  }, []);
+
+  if (isLoading) {
+    return <ActivityListSkeleton count={3} />;
+  }
+
   return (
     <ActivityList
       activities={mockActivities.follows}
@@ -159,6 +183,17 @@ function FollowsActivity() {
 }
 
 function ConversationsActivity() {
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setIsLoading(false), 400);
+    return () => clearTimeout(timer);
+  }, []);
+
+  if (isLoading) {
+    return <ActivityListSkeleton count={3} />;
+  }
+
   return (
     <ActivityList
       activities={mockActivities.conversations}
@@ -168,6 +203,17 @@ function ConversationsActivity() {
 }
 
 function MentionsActivity() {
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setIsLoading(false), 400);
+    return () => clearTimeout(timer);
+  }, []);
+
+  if (isLoading) {
+    return <ActivityListSkeleton count={3} />;
+  }
+
   return (
     <ActivityList
       activities={mockActivities.mentions}

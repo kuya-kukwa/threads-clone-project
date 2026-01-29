@@ -12,6 +12,11 @@ import { useCurrentUser, useAuth } from '@/hooks';
 import { ProfileCard } from '@/components/profile/ProfileCard';
 import { AuthGuard } from '@/components/auth/AuthGuard';
 import { UserProfile, Thread } from '@/types/appwrite';
+import { 
+  ProfileCardSkeleton, 
+  ProfileThreadsSkeleton, 
+  MediaGridSkeleton 
+} from '@/components/ui/skeletons';
 
 interface ProfilePageProps {
   params: Promise<{ id: string }>;
@@ -29,7 +34,9 @@ function ProfileContent({ userId }: { userId: string }) {
   const [showSettings, setShowSettings] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [threads, setThreads] = useState<Thread[]>([]);
+  const [replies, setReplies] = useState<Thread[]>([]);
   const [loadingThreads, setLoadingThreads] = useState(false);
+  const [loadingReplies, setLoadingReplies] = useState(false);
 
   const tabs: { id: TabType; label: string }[] = [
     { id: 'threads', label: 'Threads' },
@@ -89,6 +96,32 @@ function ProfileContent({ userId }: { userId: string }) {
     }
   }, [activeTab, profile, userId]);
 
+  // Fetch user's replies when replies tab is active
+  useEffect(() => {
+    const fetchUserReplies = async () => {
+      if (!profile) return;
+      setLoadingReplies(true);
+      try {
+        // Fetch user's replies (threads with parentThreadId)
+        const response = await fetch(`/api/profile/${userId}/replies`, {
+          credentials: 'include',
+        });
+        const data = await response.json();
+        if (data.success && data.replies) {
+          setReplies(data.replies);
+        }
+      } catch (err) {
+        console.error('Failed to fetch replies:', err);
+      } finally {
+        setLoadingReplies(false);
+      }
+    };
+
+    if (activeTab === 'replies' && profile) {
+      fetchUserReplies();
+    }
+  }, [activeTab, profile, userId]);
+
   const handleLogout = async () => {
     setIsLoggingOut(true);
     await logout();
@@ -102,8 +135,25 @@ function ProfileContent({ userId }: { userId: string }) {
       <div className="min-h-screen bg-background pb-20 md:pb-0">
         <div className="max-w-2xl mx-auto">
           <ProfileHeader isOwnProfile={false} onSettingsClick={() => {}} />
-          <div className="flex items-center justify-center py-20">
-            <div className="animate-spin w-8 h-8 border-2 border-primary border-t-transparent rounded-full" />
+          {/* Profile Card Skeleton */}
+          <div className="px-4 py-4">
+            <ProfileCardSkeleton />
+          </div>
+          {/* Tabs Skeleton */}
+          <div className="border-b border-border/50">
+            <div className="max-w-2xl mx-auto px-4">
+              <div className="flex">
+                {tabs.map((tab) => (
+                  <div key={tab.id} className="flex-1 py-3 flex justify-center">
+                    <div className="h-4 w-16 bg-secondary rounded animate-pulse" />
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+          {/* Content Skeleton */}
+          <div className="px-4 py-4">
+            <ProfileThreadsSkeleton count={3} />
           </div>
         </div>
       </div>
@@ -175,10 +225,7 @@ function ProfileContent({ userId }: { userId: string }) {
             <ThreadsTab threads={threads} loading={loadingThreads} />
           )}
           {activeTab === 'replies' && (
-            <EmptyTab
-              icon={<ReplyIcon className="w-8 h-8" />}
-              message="No replies yet"
-            />
+            <RepliesTab replies={replies} loading={loadingReplies} />
           )}
           {activeTab === 'media' && (
             <MediaTab threads={threads} loading={loadingThreads} />
@@ -240,11 +287,7 @@ function ThreadsTab({
   loading: boolean;
 }) {
   if (loading) {
-    return (
-      <div className="flex justify-center py-8">
-        <div className="animate-spin w-6 h-6 border-2 border-primary border-t-transparent rounded-full" />
-      </div>
-    );
+    return <ProfileThreadsSkeleton count={3} />;
   }
 
   if (threads.length === 0) {
@@ -313,11 +356,7 @@ function MediaTab({
   loading: boolean;
 }) {
   if (loading) {
-    return (
-      <div className="flex justify-center py-8">
-        <div className="animate-spin w-6 h-6 border-2 border-primary border-t-transparent rounded-full" />
-      </div>
-    );
+    return <MediaGridSkeleton />;
   }
 
   // Parse mediaUrls from JSON strings and flatten
@@ -359,6 +398,86 @@ function MediaTab({
           )}
         </div>
       ))}
+    </div>
+  );
+}
+
+function RepliesTab({
+  replies,
+  loading,
+}: {
+  replies: Thread[];
+  loading: boolean;
+}) {
+  if (loading) {
+    return <ProfileThreadsSkeleton count={3} />;
+  }
+
+  if (replies.length === 0) {
+    return (
+      <EmptyTab
+        icon={<ReplyIcon className="w-8 h-8" />}
+        message="No replies yet"
+      />
+    );
+  }
+
+  return (
+    <div className="space-y-4">
+      {replies.map((reply) => {
+        // Parse mediaUrls from JSON string
+        const mediaUrls: string[] = reply.mediaUrls
+          ? (JSON.parse(reply.mediaUrls) as string[])
+          : reply.imageUrl
+            ? [reply.imageUrl]
+            : [];
+
+        return (
+          <div
+            key={reply.$id}
+            className="p-4 rounded-xl bg-secondary/30 border border-border/50"
+          >
+            {/* Reply context */}
+            {reply.replyToUsername && (
+              <p className="text-xs text-muted-foreground mb-2">
+                Replying to <span className="text-primary">@{reply.replyToUsername}</span>
+              </p>
+            )}
+            <p className="text-sm">{reply.content}</p>
+            {mediaUrls.length > 0 && (
+              <div className="mt-2 flex gap-2">
+                {mediaUrls.slice(0, 3).map((url: string, i: number) => (
+                  <div
+                    key={i}
+                    className="w-16 h-16 rounded-lg bg-secondary overflow-hidden"
+                  >
+                    {url.includes('.mp4') || url.includes('.webm') ? (
+                      <video src={url} className="w-full h-full object-cover" />
+                    ) : (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        src={url}
+                        alt=""
+                        className="w-full h-full object-cover"
+                      />
+                    )}
+                  </div>
+                ))}
+                {mediaUrls.length > 3 && (
+                  <div className="w-16 h-16 rounded-lg bg-secondary flex items-center justify-center text-sm text-muted-foreground">
+                    +{mediaUrls.length - 3}
+                  </div>
+                )}
+              </div>
+            )}
+            {/* Engagement stats */}
+            <div className="flex gap-4 mt-2 text-xs text-muted-foreground">
+              <span>{reply.likeCount} likes</span>
+              <span>{reply.replyCount} replies</span>
+            </div>
+          </div>
+        );
+      })}
     </div>
   );
 }

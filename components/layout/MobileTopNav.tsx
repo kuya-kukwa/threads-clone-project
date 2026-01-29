@@ -4,25 +4,154 @@
  * Mobile Top Navigation Component
  * Shows hamburger menu (left) and search (right) on mobile
  * Only visible on mobile devices
+ * 
+ * Features:
+ * - Real-time user search with debouncing
+ * - Search by username or display name
+ * - Navigate to user profiles from search results
  */
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { SearchResultsSkeleton } from '@/components/ui/skeletons';
 
 type FeedTab = 'for-you' | 'following' | 'likes';
+
+interface SearchUser {
+  $id: string;
+  userId: string;
+  username: string;
+  displayName: string;
+  avatarUrl?: string;
+  bio?: string;
+}
 
 interface MobileTopNavProps {
   activeTab?: FeedTab;
   onTabChange?: (tab: FeedTab) => void;
 }
 
+/**
+ * Custom hook for debounced search
+ * Prevents excessive API calls during typing
+ */
+function useDebounce<T>(value: T, delay: number): T {
+  const [debouncedValue, setDebouncedValue] = useState<T>(value);
+
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedValue(value);
+    }, delay);
+
+    return () => {
+      clearTimeout(handler);
+    };
+  }, [value, delay]);
+
+  return debouncedValue;
+}
+
 export function MobileTopNav({
   activeTab = 'for-you',
   onTabChange,
 }: MobileTopNavProps) {
+  const router = useRouter();
   const [showMenu, setShowMenu] = useState(false);
   const [showSearch, setShowSearch] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [searchResults, setSearchResults] = useState<SearchUser[]>([]);
+  const [isSearching, setIsSearching] = useState(false);
+  const [searchError, setSearchError] = useState<string | null>(null);
+  const searchInputRef = useRef<HTMLInputElement>(null);
+  
+  // Debounce search query by 300ms for real-time feel without excessive API calls
+  const debouncedSearchQuery = useDebounce(searchQuery, 300);
+
+  /**
+   * Perform user search when debounced query changes
+   * Uses AbortController for request cancellation on new searches
+   */
+  const searchUsers = useCallback(async (query: string, signal: AbortSignal) => {
+    if (!query || query.length < 1) {
+      setSearchResults([]);
+      setSearchError(null);
+      return;
+    }
+
+    setIsSearching(true);
+    setSearchError(null);
+
+    try {
+      const response = await fetch(
+        `/api/search?q=${encodeURIComponent(query)}&limit=10`,
+        { 
+          signal,
+          credentials: 'include',
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error('Search request failed');
+      }
+
+      const data = await response.json();
+
+      if (data.success) {
+        setSearchResults(data.users || []);
+      } else {
+        setSearchError(data.error || 'Search failed');
+        setSearchResults([]);
+      }
+    } catch (error) {
+      // Ignore abort errors (user typed new query)
+      if (error instanceof Error && error.name === 'AbortError') {
+        return;
+      }
+      console.error('Search error:', error);
+      setSearchError('Failed to search. Please try again.');
+      setSearchResults([]);
+    } finally {
+      setIsSearching(false);
+    }
+  }, []);
+
+  // Effect to trigger search on debounced query change
+  useEffect(() => {
+    const abortController = new AbortController();
+    
+    if (debouncedSearchQuery) {
+      searchUsers(debouncedSearchQuery, abortController.signal);
+    } else {
+      setSearchResults([]);
+      setSearchError(null);
+    }
+
+    return () => {
+      abortController.abort();
+    };
+  }, [debouncedSearchQuery, searchUsers]);
+
+  // Focus input when search opens
+  useEffect(() => {
+    if (showSearch && searchInputRef.current) {
+      searchInputRef.current.focus();
+    }
+  }, [showSearch]);
+
+  // Clear search when closing
+  const handleCloseSearch = () => {
+    setShowSearch(false);
+    setSearchQuery('');
+    setSearchResults([]);
+    setSearchError(null);
+  };
+
+  // Navigate to user profile from search
+  const handleUserClick = (userId: string) => {
+    handleCloseSearch();
+    router.push(`/profile/${userId}`);
+  };
 
   // Add modal-open class when menu is open to hide bottom nav
   useEffect(() => {
@@ -158,7 +287,7 @@ export function MobileTopNav({
           {/* Backdrop */}
           <div
             className="absolute inset-0 bg-black/60 backdrop-blur-sm"
-            onClick={() => setShowSearch(false)}
+            onClick={handleCloseSearch}
           />
 
           {/* Search Panel - Slide from top */}
@@ -166,7 +295,7 @@ export function MobileTopNav({
             {/* Search Header */}
             <div className="flex items-center gap-3 h-14 px-4">
               <button
-                onClick={() => setShowSearch(false)}
+                onClick={handleCloseSearch}
                 className="p-2 -ml-2 rounded-lg hover:bg-secondary transition-colors"
               >
                 <ChevronLeftIcon className="w-5 h-5" />
@@ -174,33 +303,103 @@ export function MobileTopNav({
               <div className="flex-1 relative">
                 <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                 <input
+                  ref={searchInputRef}
                   type="text"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Search usernames..."
+                  placeholder="Search usernames or names..."
                   autoFocus
                   className="w-full bg-secondary border-0 rounded-full pl-10 pr-4 py-2 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary"
                 />
+                {/* Loading indicator */}
+                {isSearching && (
+                  <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                    <div className="w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+                  </div>
+                )}
               </div>
             </div>
 
             {/* Search Results */}
             <div className="max-h-[60vh] overflow-y-auto">
-              {searchQuery.length > 0 ? (
+              {/* Error state */}
+              {searchError && (
                 <div className="p-4">
-                  <p className="text-sm text-muted-foreground text-center py-8">
-                    Search for &quot;{searchQuery}&quot;
+                  <p className="text-sm text-red-500 text-center py-4">
+                    {searchError}
                   </p>
-                  {/* TODO: Implement user search results */}
                 </div>
-              ) : (
+              )}
+
+              {/* Results */}
+              {!searchError && searchQuery.length > 0 && (
+                <div className="py-2">
+                  {isSearching && searchResults.length === 0 ? (
+                    <>
+                      <p className="px-4 py-2 text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                        Searching...
+                      </p>
+                      <SearchResultsSkeleton count={4} />
+                    </>
+                  ) : searchResults.length > 0 ? (
+                    <>
+                      <p className="px-4 py-2 text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                        Users
+                      </p>
+                      <div className="space-y-1 px-2">
+                        {searchResults.map((user) => (
+                          <button
+                            key={user.$id}
+                            onClick={() => handleUserClick(user.userId)}
+                            className="w-full flex items-center gap-3 px-3 py-3 rounded-xl hover:bg-secondary/50 transition-colors text-left"
+                          >
+                            {/* Avatar */}
+                            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-accent flex-shrink-0 overflow-hidden">
+                              {user.avatarUrl ? (
+                                // eslint-disable-next-line @next/next/no-img-element
+                                <img
+                                  src={user.avatarUrl}
+                                  alt={user.displayName}
+                                  className="w-full h-full object-cover"
+                                />
+                              ) : (
+                                <div className="w-full h-full flex items-center justify-center text-white font-medium text-sm">
+                                  {user.displayName[0]?.toUpperCase() || user.username[0]?.toUpperCase()}
+                                </div>
+                              )}
+                            </div>
+                            {/* User Info */}
+                            <div className="flex-1 min-w-0">
+                              <p className="font-semibold text-sm truncate">
+                                {user.displayName}
+                              </p>
+                              <p className="text-xs text-muted-foreground truncate">
+                                @{user.username}
+                              </p>
+                            </div>
+                          </button>
+                        ))}
+                      </div>
+                    </>
+                  ) : (
+                    <p className="text-sm text-muted-foreground text-center py-8">
+                      No users found for &quot;{searchQuery}&quot;
+                    </p>
+                  )}
+                </div>
+              )}
+
+              {/* Empty state - no query */}
+              {!searchError && searchQuery.length === 0 && (
                 <div className="p-4">
                   <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-3">
-                    Recent Searches
+                    Search Tips
                   </p>
-                  <p className="text-sm text-muted-foreground text-center py-8">
-                    No recent searches
-                  </p>
+                  <div className="space-y-2 text-sm text-muted-foreground">
+                    <p>• Search by username (e.g., @john)</p>
+                    <p>• Search by display name</p>
+                    <p>• Results update as you type</p>
+                  </div>
                 </div>
               )}
             </div>
