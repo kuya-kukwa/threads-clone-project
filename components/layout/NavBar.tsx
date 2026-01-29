@@ -10,6 +10,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useCurrentUser } from '@/hooks';
 import { useState, useEffect, useCallback } from 'react';
+import { getSessionToken } from '@/lib/appwriteClient';
 
 export function NavBar() {
   const { user } = useCurrentUser();
@@ -19,7 +20,7 @@ export function NavBar() {
   // Fetch unread notification count
   const fetchUnreadCount = useCallback(async () => {
     try {
-      const sessionId = localStorage.getItem('sessionId');
+      const sessionId = getSessionToken();
       if (!sessionId) return;
 
       const response = await fetch('/api/notifications/count', {

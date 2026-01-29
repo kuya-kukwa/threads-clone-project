@@ -18,6 +18,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useCurrentUser } from '@/hooks';
 import { useState, useEffect, useRef, useCallback } from 'react';
+import { getSessionToken } from '@/lib/appwriteClient';
 
 interface NavItem {
   id: string;
@@ -73,7 +74,7 @@ export function BottomNav() {
   // Fetch unread notification count
   const fetchUnreadCount = useCallback(async () => {
     try {
-      const sessionId = localStorage.getItem('sessionId');
+      const sessionId = getSessionToken();
       if (!sessionId) return;
 
       const response = await fetch('/api/notifications/count', {

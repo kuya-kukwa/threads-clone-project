@@ -14,6 +14,7 @@ import { ActivityListSkeleton } from '@/components/ui/skeletons';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { formatDistanceToNow } from 'date-fns';
 import { NotificationWithActor, NotificationType } from '@/types/appwrite';
+import { getSessionToken } from '@/lib/appwriteClient';
 
 type TabType = 'all' | 'follows' | 'replies' | 'mentions';
 
@@ -28,7 +29,7 @@ async function fetchNotifications(
   hasMore: boolean;
   unreadCount: number;
 }> {
-  const sessionId = localStorage.getItem('sessionId');
+  const sessionId = getSessionToken();
   if (!sessionId) throw new Error('Not authenticated');
 
   const params = new URLSearchParams();
@@ -54,7 +55,7 @@ async function markNotificationAsRead(
   notificationId?: string,
   all?: boolean,
 ): Promise<void> {
-  const sessionId = localStorage.getItem('sessionId');
+  const sessionId = getSessionToken();
   if (!sessionId) throw new Error('Not authenticated');
 
   const response = await fetch('/api/notifications', {
