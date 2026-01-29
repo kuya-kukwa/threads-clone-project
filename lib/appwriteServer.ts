@@ -37,12 +37,18 @@ export function createSessionClient(sessionOrRequest: string | NextRequest) {
   if (typeof sessionOrRequest === 'string') {
     session = sessionOrRequest;
   } else {
-    // Extract session from request cookies
-    const sessionCookie = sessionOrRequest.cookies.get('appwrite_session');
-    if (!sessionCookie?.value) {
-      throw new Error('No session found');
+    // Try to extract session from request header first (for API calls)
+    const sessionHeader = sessionOrRequest.headers.get('x-session-id');
+    if (sessionHeader) {
+      session = sessionHeader;
+    } else {
+      // Fall back to cookies (for SSR/middleware)
+      const sessionCookie = sessionOrRequest.cookies.get('appwrite_session');
+      if (!sessionCookie?.value) {
+        throw new Error('No session found');
+      }
+      session = sessionCookie.value;
     }
-    session = sessionCookie.value;
   }
   
   const client = new Client()

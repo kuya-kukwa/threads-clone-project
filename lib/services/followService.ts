@@ -100,10 +100,15 @@ export class FollowService {
         followId: follow.$id,
       });
 
-      // Create notification for followed user (async, don't await)
-      NotificationService.notifyFollow(followingId, followerId).catch(
-        (err) => logger.error({ msg: 'Failed to create follow notification', error: err })
-      );
+      // Create notification for followed user (async, non-blocking, fail-safe)
+      try {
+        NotificationService.notifyFollow(followingId, followerId).catch(
+          (err) => logger.error({ msg: 'Failed to create follow notification', error: err })
+        );
+      } catch (notifError) {
+        // Don't let notification errors affect the follow operation
+        logger.error({ msg: 'Notification service error (follow)', error: notifError });
+      }
 
       return { success: true, follow };
     } catch (error) {

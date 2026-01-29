@@ -274,15 +274,20 @@ export async function POST(
       requestId,
     });
 
-    // Create notification for parent thread author (async, don't await)
-    NotificationService.notifyReply(
-      parentThread.authorId,
-      userId,
-      parentThreadId,
-      sanitizedContent
-    ).catch((err) =>
-      logger.error({ msg: 'Failed to create reply notification', error: err })
-    );
+    // Create notification for parent thread author (async, non-blocking, fail-safe)
+    try {
+      NotificationService.notifyReply(
+        parentThread.authorId,
+        userId,
+        parentThreadId,
+        sanitizedContent
+      ).catch((err) =>
+        logger.error({ msg: 'Failed to create reply notification', error: err })
+      );
+    } catch (notifError) {
+      // Don't let notification errors affect the reply operation
+      logger.error({ msg: 'Notification service error (reply)', error: notifError });
+    }
 
     return NextResponse.json(
       {

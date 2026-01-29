@@ -109,10 +109,15 @@ export class LikeService {
         likeId: like.$id,
       });
 
-      // Create notification for thread author (async, don't await)
-      NotificationService.notifyLike(thread.authorId, userId, threadId).catch(
-        (err) => logger.error({ msg: 'Failed to create like notification', error: err })
-      );
+      // Create notification for thread author (async, non-blocking, fail-safe)
+      try {
+        NotificationService.notifyLike(thread.authorId, userId, threadId).catch(
+          (err) => logger.error({ msg: 'Failed to create like notification', error: err })
+        );
+      } catch (notifError) {
+        // Don't let notification errors affect the like operation
+        logger.error({ msg: 'Notification service error (like)', error: notifError });
+      }
 
       return { success: true, like };
     } catch (error) {
