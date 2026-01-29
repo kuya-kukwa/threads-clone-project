@@ -17,7 +17,13 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useCurrentUser } from '@/hooks';
-import { useState, useEffect, useRef, useCallback, startTransition } from 'react';
+import {
+  useState,
+  useEffect,
+  useRef,
+  useCallback,
+  startTransition,
+} from 'react';
 import { logger } from '@/lib/logger/logger';
 import { getSessionToken } from '@/lib/appwriteClient';
 
