@@ -1,6 +1,6 @@
 /**
  * Skeleton Loading Components
- * 
+ *
  * Reusable skeleton components for consistent loading states
  * across the application. Follows the app's design patterns.
  */
@@ -17,23 +17,23 @@ export function ThreadCardSkeleton() {
       <div className="flex gap-3">
         {/* Avatar */}
         <Skeleton className="w-10 h-10 rounded-full flex-shrink-0" />
-        
+
         <div className="flex-1 space-y-3">
           {/* Header - name and time */}
           <div className="flex items-center gap-2">
             <Skeleton className="h-4 w-24" />
             <Skeleton className="h-3 w-16" />
           </div>
-          
+
           {/* Content lines */}
           <div className="space-y-2">
             <Skeleton className="h-4 w-full" />
             <Skeleton className="h-4 w-4/5" />
           </div>
-          
+
           {/* Media placeholder (randomly show or not) */}
           <Skeleton className="h-48 w-full rounded-xl" />
-          
+
           {/* Action buttons */}
           <div className="flex gap-4 pt-2">
             <Skeleton className="h-8 w-16 rounded-lg" />
@@ -80,19 +80,19 @@ export function ProfileCardSkeleton() {
         </div>
         <Skeleton className="w-20 h-20 rounded-full" />
       </div>
-      
+
       {/* Bio */}
       <div className="space-y-2">
         <Skeleton className="h-4 w-full" />
         <Skeleton className="h-4 w-4/5" />
       </div>
-      
+
       {/* Stats */}
       <div className="flex gap-4">
         <Skeleton className="h-4 w-20" />
         <Skeleton className="h-4 w-20" />
       </div>
-      
+
       {/* Action button */}
       <Skeleton className="h-10 w-full rounded-lg" />
     </div>
@@ -111,7 +111,7 @@ export function ActivityItemSkeleton() {
         <Skeleton className="w-11 h-11 rounded-full" />
         <Skeleton className="absolute -bottom-0.5 -right-0.5 w-5 h-5 rounded-full" />
       </div>
-      
+
       {/* Content */}
       <div className="flex-1 space-y-2">
         <div className="flex gap-2">
@@ -121,7 +121,7 @@ export function ActivityItemSkeleton() {
         <Skeleton className="h-3 w-full" />
         <Skeleton className="h-3 w-16" />
       </div>
-      
+
       {/* Action button */}
       <Skeleton className="h-8 w-16 rounded-lg flex-shrink-0" />
     </div>
@@ -137,7 +137,7 @@ export function SearchResultSkeleton() {
     <div className="flex items-center gap-3 px-3 py-3">
       {/* Avatar */}
       <Skeleton className="w-10 h-10 rounded-full flex-shrink-0" />
-      
+
       {/* User info */}
       <div className="flex-1 space-y-1.5">
         <Skeleton className="h-4 w-28" />

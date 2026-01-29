@@ -12,10 +12,10 @@ import { useCurrentUser, useAuth } from '@/hooks';
 import { ProfileCard } from '@/components/profile/ProfileCard';
 import { AuthGuard } from '@/components/auth/AuthGuard';
 import { UserProfile, Thread } from '@/types/appwrite';
-import { 
-  ProfileCardSkeleton, 
-  ProfileThreadsSkeleton, 
-  MediaGridSkeleton 
+import {
+  ProfileCardSkeleton,
+  ProfileThreadsSkeleton,
+  MediaGridSkeleton,
 } from '@/components/ui/skeletons';
 
 interface ProfilePageProps {
@@ -440,7 +440,8 @@ function RepliesTab({
             {/* Reply context */}
             {reply.replyToUsername && (
               <p className="text-xs text-muted-foreground mb-2">
-                Replying to <span className="text-primary">@{reply.replyToUsername}</span>
+                Replying to{' '}
+                <span className="text-primary">@{reply.replyToUsername}</span>
               </p>
             )}
             <p className="text-sm">{reply.content}</p>

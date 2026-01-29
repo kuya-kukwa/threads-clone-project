@@ -4,7 +4,7 @@
  * Mobile Top Navigation Component
  * Shows hamburger menu (left) and search (right) on mobile
  * Only visible on mobile devices
- * 
+ *
  * Features:
  * - Real-time user search with debouncing
  * - Search by username or display name
@@ -64,7 +64,7 @@ export function MobileTopNav({
   const [isSearching, setIsSearching] = useState(false);
   const [searchError, setSearchError] = useState<string | null>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
-  
+
   // Debounce search query by 300ms for real-time feel without excessive API calls
   const debouncedSearchQuery = useDebounce(searchQuery, 300);
 
@@ -72,54 +72,57 @@ export function MobileTopNav({
    * Perform user search when debounced query changes
    * Uses AbortController for request cancellation on new searches
    */
-  const searchUsers = useCallback(async (query: string, signal: AbortSignal) => {
-    if (!query || query.length < 1) {
-      setSearchResults([]);
-      setSearchError(null);
-      return;
-    }
-
-    setIsSearching(true);
-    setSearchError(null);
-
-    try {
-      const response = await fetch(
-        `/api/search?q=${encodeURIComponent(query)}&limit=10`,
-        { 
-          signal,
-          credentials: 'include',
-        }
-      );
-
-      if (!response.ok) {
-        throw new Error('Search request failed');
-      }
-
-      const data = await response.json();
-
-      if (data.success) {
-        setSearchResults(data.users || []);
-      } else {
-        setSearchError(data.error || 'Search failed');
+  const searchUsers = useCallback(
+    async (query: string, signal: AbortSignal) => {
+      if (!query || query.length < 1) {
         setSearchResults([]);
-      }
-    } catch (error) {
-      // Ignore abort errors (user typed new query)
-      if (error instanceof Error && error.name === 'AbortError') {
+        setSearchError(null);
         return;
       }
-      console.error('Search error:', error);
-      setSearchError('Failed to search. Please try again.');
-      setSearchResults([]);
-    } finally {
-      setIsSearching(false);
-    }
-  }, []);
+
+      setIsSearching(true);
+      setSearchError(null);
+
+      try {
+        const response = await fetch(
+          `/api/search?q=${encodeURIComponent(query)}&limit=10`,
+          {
+            signal,
+            credentials: 'include',
+          },
+        );
+
+        if (!response.ok) {
+          throw new Error('Search request failed');
+        }
+
+        const data = await response.json();
+
+        if (data.success) {
+          setSearchResults(data.users || []);
+        } else {
+          setSearchError(data.error || 'Search failed');
+          setSearchResults([]);
+        }
+      } catch (error) {
+        // Ignore abort errors (user typed new query)
+        if (error instanceof Error && error.name === 'AbortError') {
+          return;
+        }
+        console.error('Search error:', error);
+        setSearchError('Failed to search. Please try again.');
+        setSearchResults([]);
+      } finally {
+        setIsSearching(false);
+      }
+    },
+    [],
+  );
 
   // Effect to trigger search on debounced query change
   useEffect(() => {
     const abortController = new AbortController();
-    
+
     if (debouncedSearchQuery) {
       searchUsers(debouncedSearchQuery, abortController.signal);
     } else {
@@ -364,7 +367,8 @@ export function MobileTopNav({
                                 />
                               ) : (
                                 <div className="w-full h-full flex items-center justify-center text-white font-medium text-sm">
-                                  {user.displayName[0]?.toUpperCase() || user.username[0]?.toUpperCase()}
+                                  {user.displayName[0]?.toUpperCase() ||
+                                    user.username[0]?.toUpperCase()}
                                 </div>
                               )}
                             </div>
