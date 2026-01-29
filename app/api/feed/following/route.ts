@@ -72,13 +72,21 @@ export async function GET(request: NextRequest) {
       isLiked: likeMap.get(thread.$id) || false,
     }));
 
-    return NextResponse.json({
-      success: true,
-      threads: threadsWithLikeStatus,
-      nextCursor,
-      hasMore,
-      followingCount,
-    });
+    return NextResponse.json(
+      {
+        success: true,
+        threads: threadsWithLikeStatus,
+        nextCursor,
+        hasMore,
+        followingCount,
+      },
+      {
+        headers: {
+          // Personalized feed - private cache only, shorter duration
+          'Cache-Control': 'private, max-age=15, stale-while-revalidate=30',
+        },
+      }
+    );
   } catch (error) {
     logger.error({
       msg: 'Following feed error',

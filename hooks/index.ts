@@ -6,3 +6,5 @@
 
 export { useCurrentUser } from './useCurrentUser';
 export { useAuth } from './useAuth';
+export { useOptimisticAuth, useMaybeAuthenticated } from './useOptimisticAuth';
+export { useFeed, clearFeedCache } from './useFeed';

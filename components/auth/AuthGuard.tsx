@@ -51,7 +51,7 @@ export function AuthGuard({
 
       const timer = setTimeout(() => {
         setHasWaitedForSession(true);
-      }, 800); // Increased wait time for production network latency
+      }, 200); // Reduced from 800ms for faster UX
       return () => clearTimeout(timer);
     }
 

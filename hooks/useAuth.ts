@@ -47,8 +47,8 @@ export function useAuth() {
       const user = await account.get();
       logger.debug({ msg: 'useAuth: User retrieved', userId: user.$id });
       
-      // Extended delay to ensure session is stored (important for mobile)
-      await new Promise(resolve => setTimeout(resolve, 200));
+      // Brief delay to ensure session is stored
+      await new Promise(resolve => setTimeout(resolve, 50));
       
       // Determine redirect URL
       let redirectUrl = '/feed';
@@ -117,9 +117,9 @@ export function useAuth() {
         return { success: false, error: result.error || 'Registration failed' };
       }
 
-      // Wait for user propagation before creating session
+      // Brief wait for user propagation before creating session
       logger.debug({ msg: 'useAuth: User created, waiting for propagation' });
-      await new Promise(resolve => setTimeout(resolve, 500));
+      await new Promise(resolve => setTimeout(resolve, 200));
       
       // Create session directly client-side (no separate API call needed)
       logger.debug({ msg: 'useAuth: Creating client session' });
@@ -130,8 +130,8 @@ export function useAuth() {
       const user = await account.get();
       logger.debug({ msg: 'useAuth: User retrieved', userId: user.$id });
       
-      // Extended delay to ensure session is stored (important for mobile)
-      await new Promise(resolve => setTimeout(resolve, 300));
+      // Brief delay to ensure session is stored
+      await new Promise(resolve => setTimeout(resolve, 100));
       
       logger.debug({ msg: 'useAuth: Registration complete, redirecting to /feed' });
       // Force a hard navigation to ensure session is recognized
@@ -176,8 +176,6 @@ export function useAuth() {
       
       const result = await AuthService.logout();
       if (result.success) {
-        // Give Appwrite time to clear the session cookie
-        await new Promise(resolve => setTimeout(resolve, 100));
         // Hard redirect to ensure session is cleared
         window.location.href = '/login';
       }

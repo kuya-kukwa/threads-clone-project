@@ -13,9 +13,9 @@ import { Models } from 'appwrite';
 import { AuthService } from '@/lib/services/authService';
 import { logger } from '@/lib/logger/logger';
 
-// Max retries for session check (helps with mobile network delays)
-const MAX_RETRIES = 2;
-const RETRY_DELAY_MS = 500;
+// Reduced retry settings for faster response
+const MAX_RETRIES = 1;
+const RETRY_DELAY_MS = 200;
 
 export function useCurrentUser() {
   const [user, setUser] = useState<Models.User<Models.Preferences> | null>(null);
