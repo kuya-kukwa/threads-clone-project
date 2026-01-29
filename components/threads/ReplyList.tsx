@@ -18,6 +18,7 @@ import { useState, useEffect, useCallback, useMemo } from 'react';
 import { ThreadWithAuthor } from '@/types/appwrite';
 import { ReplyItem } from './ReplyItem';
 import { Button } from '@/components/ui/button';
+import { logger } from '@/lib/logger/logger';
 import { Skeleton } from '@/components/ui/skeleton';
 
 interface ReplyListProps {
@@ -93,7 +94,7 @@ export function ReplyList({
         setNextCursor(newCursor);
         setHasMore(more);
       } catch (err) {
-        console.error('Error fetching replies:', err);
+        logger.error({ msg: 'Error fetching replies', threadId, error: err });
         setError(err instanceof Error ? err.message : 'Failed to load replies');
       } finally {
         setLoading(false);

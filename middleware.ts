@@ -11,6 +11,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { generateRequestId } from './lib/utils';
+import { logger } from './lib/logger/logger';
 
 /**
  * Add security headers to response
@@ -88,7 +89,9 @@ function checkCsrfProtection(request: NextRequest): boolean {
     const hasToken = Boolean(csrfHeader);
     const isForm = Boolean(isFormSubmission);
     if (!hasToken && !isForm) {
-      console.log('[CSRF] Missing token for:', request.nextUrl.pathname, {
+      logger.debug({
+        msg: 'CSRF: Missing token',
+        pathname: request.nextUrl.pathname,
         method: request.method,
         hasCSRFHeader: hasToken,
         isFormSubmission: isForm,
@@ -111,7 +114,7 @@ function hasAppwriteSession(request: NextRequest): boolean {
   // Log all cookies in development for debugging
   if (process.env.NODE_ENV === 'development') {
     const allCookies = request.cookies.getAll();
-    console.log('[Session Check] All cookies:', allCookies.map(c => c.name));
+    logger.debug({ msg: 'Session Check: All cookies', cookies: allCookies.map(c => c.name) });
   }
   
   // Primary session cookie format
@@ -223,7 +226,7 @@ export async function middleware(request: NextRequest) {
   // Log request in development
   if (process.env.NODE_ENV === 'development') {
     const duration = Date.now() - startTime;
-    console.log(`[${requestId}] ${request.method} ${pathname} - ${duration}ms`);
+    logger.debug({ msg: 'Middleware request', requestId, method: request.method, pathname, duration });
   }
   
   return response;

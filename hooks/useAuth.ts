@@ -144,7 +144,8 @@ export function useAuth() {
       // Enhanced error handling for production
       if (process.env.NODE_ENV === 'production') {
         debugSessionState();
-        console.error('[Registration Error]', {
+        logger.error({
+          msg: 'Registration error',
           error: errorMsg,
           isNetwork: isNetworkError(error),
           isAuth: isAuthError(error),

@@ -53,16 +53,6 @@ export function AvatarUpload({
   // Show preview during upload, then current avatar
   const displayUrl = previewUrl || currentAvatarUrl;
 
-  // Debug logging
-  console.log(
-    '[AvatarUpload] displayUrl:',
-    displayUrl,
-    'previewUrl:',
-    previewUrl,
-    'currentAvatarUrl:',
-    currentAvatarUrl,
-  );
-
   /**
    * Validate file before upload
    */
@@ -110,14 +100,11 @@ export function AvatarUpload({
 
         const result = await response.json();
 
-        console.log('[AvatarUpload] API Response:', result);
-
         if (!response.ok || !result.success) {
           throw new Error(result.error || 'Upload failed');
         }
 
         const avatarUrl = result.data.avatarUrl;
-        console.log('[AvatarUpload] Avatar URL received:', avatarUrl);
 
         setUploadState('success');
         onUploadSuccess(avatarUrl);

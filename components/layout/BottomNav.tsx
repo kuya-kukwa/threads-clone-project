@@ -17,7 +17,8 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useCurrentUser } from '@/hooks';
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback, startTransition } from 'react';
+import { logger } from '@/lib/logger/logger';
 import { getSessionToken } from '@/lib/appwriteClient';
 
 interface NavItem {
@@ -86,10 +87,12 @@ export function BottomNav() {
 
       if (response.ok) {
         const data = await response.json();
-        setUnreadCount(data.count || 0);
+        startTransition(() => {
+          setUnreadCount(data.count || 0);
+        });
       }
     } catch (error) {
-      console.error('Failed to fetch notification count:', error);
+      logger.warn({ msg: 'Failed to fetch notification count', error });
     }
   }, []);
 
@@ -108,7 +111,9 @@ export function BottomNav() {
   // Reset count when visiting activity page
   useEffect(() => {
     if (pathname === '/activity') {
-      setUnreadCount(0);
+      startTransition(() => {
+        setUnreadCount(0);
+      });
     }
   }, [pathname]);
 

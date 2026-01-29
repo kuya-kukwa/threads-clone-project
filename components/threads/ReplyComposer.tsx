@@ -27,6 +27,7 @@ import { useCurrentUser } from '@/hooks/useCurrentUser';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { SECURITY_CONFIG } from '@/lib/appwriteConfig';
+import { logger } from '@/lib/logger/logger';
 import { getSessionToken } from '@/lib/appwriteClient';
 
 // Loading spinner icon
@@ -195,7 +196,7 @@ export const ReplyComposer = forwardRef<
       setReplyTo(null);
       onReplyCreated?.();
     } catch (err) {
-      console.error('Error posting reply:', err);
+      logger.error({ msg: 'Error posting reply', threadId, error: err });
       setError(err instanceof Error ? err.message : 'Failed to post reply');
     } finally {
       setIsSubmitting(false);

@@ -54,7 +54,8 @@ export async function safeFetch(
 
     // Log response details in production for debugging
     if (process.env.NODE_ENV === 'production') {
-      console.log('[API Response]', {
+      logger.debug({
+        msg: 'API Response',
         url,
         status: response.status,
         statusText: response.statusText,
@@ -76,7 +77,8 @@ export async function safeFetch(
 
     // Log detailed error in production
     if (process.env.NODE_ENV === 'production') {
-      console.error('[API Error]', {
+      logger.error({
+        msg: 'API Error',
         ...errorInfo,
         duration,
         userAgent: navigator?.userAgent,
@@ -105,7 +107,8 @@ export async function handleApiResponse<T>(response: Response): Promise<T> {
 
     // Log production errors
     if (process.env.NODE_ENV === 'production') {
-      console.error('[API Error Response]', {
+      logger.error({
+        msg: 'API Error Response',
         status: response.status,
         statusText: response.statusText,
         url: response.url,

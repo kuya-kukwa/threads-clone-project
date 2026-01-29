@@ -64,9 +64,7 @@ export function AuthGuard({
       // Debug session state before redirect
       if (process.env.NODE_ENV === 'production') {
         debugSessionState();
-        console.log(
-          '[AuthGuard] Redirecting to login - no valid session found',
-        );
+        logger.debug({ msg: 'AuthGuard: Redirecting to login - no valid session found' });
       }
 
       const currentPath = window.location.pathname;

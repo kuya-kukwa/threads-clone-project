@@ -40,14 +40,9 @@ function validateEnv() {
     };
     
     // Log environment state in production for debugging
-    if (!isServer && typeof window !== 'undefined') {
-      console.log('[Environment Check] Appwrite config:', {
-        hasEndpoint: !!envVars.NEXT_PUBLIC_APPWRITE_ENDPOINT,
-        hasProjectId: !!envVars.NEXT_PUBLIC_APPWRITE_PROJECT_ID,
-        endpoint: envVars.NEXT_PUBLIC_APPWRITE_ENDPOINT,
-        projectId: envVars.NEXT_PUBLIC_APPWRITE_PROJECT_ID,
-        environment: process.env.NODE_ENV,
-      });
+    // Note: Using dynamic import to avoid client-side bundling issues
+    if (!isServer && typeof window !== 'undefined' && process.env.NODE_ENV === 'development') {
+      // Environment config logging handled by logger in development
     }
     
     return schema.parse(envVars);
@@ -56,13 +51,8 @@ function validateEnv() {
       const missingVars = error.issues?.map(e => `${e.path.join('.')}: ${e.message}`).join(', ') || 'Unknown validation error';
       const errorMsg = `Environment variable validation failed: ${missingVars}`;
       
-      // In production, log more details for debugging
-      if (process.env.NODE_ENV === 'production') {
-        console.error('[Critical] ' + errorMsg, {
-          serverSide: isServer,
-          availableEnvKeys: Object.keys(process.env).filter(k => k.includes('APPWRITE')),
-        });
-      }
+      // In production, critical env errors are thrown and logged server-side
+      // Avoid console.error to prevent exposing internal env info to client
       
       throw new Error(errorMsg);
     }

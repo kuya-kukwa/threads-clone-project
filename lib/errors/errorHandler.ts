@@ -15,6 +15,7 @@ import {
   BadRequestError,
 } from './AppError';
 import { ValidationError } from './ValidationError';
+import { logger } from '../logger/logger';
 
 /**
  * Standard error response shape
@@ -95,10 +96,11 @@ export function handleApiError(
 ): NextResponse<ErrorResponse> {
   const appError = normalizeError(error);
 
-  // Log the error (in production, this would go to a logging service)
+  // Log the error
   if (process.env.NODE_ENV === 'production') {
     // Only log message in production (no stack traces)
-    console.error('[API Error]', {
+    logger.error({
+      msg: 'API Error',
       code: appError.code,
       message: appError.message,
       statusCode: appError.statusCode,
@@ -107,7 +109,8 @@ export function handleApiError(
     });
   } else {
     // Full error details in development
-    console.error('[API Error]', {
+    logger.error({
+      msg: 'API Error',
       ...appError.toJSON(),
       requestId,
     });
@@ -152,9 +155,9 @@ export function handleClientError(error: unknown): {
 } {
   const appError = normalizeError(error);
 
-  // Log to console in development
+  // Log in development
   if (process.env.NODE_ENV === 'development') {
-    console.error('[Client Error]', appError.toJSON());
+    logger.error({ msg: 'Client Error', ...appError.toJSON() });
   }
 
   return {

@@ -42,7 +42,7 @@ export function getSessionToken(): string | null {
   try {
     // Check if we're in a browser environment
     if (typeof window === 'undefined') {
-      console.warn('[Appwrite] getSessionToken called on server');
+      logger.warn({ msg: 'getSessionToken called on server' });
       return null;
     }
     
@@ -64,7 +64,7 @@ export function getSessionToken(): string | null {
     logger.debug({ msg: 'No session key found in cookieFallback', keys: Object.keys(sessionData) });
     return null;
   } catch (error) {
-    console.error('[Appwrite] Failed to get session token:', error);
+    logger.error({ msg: 'Failed to get session token', error });
     return null;
   }
 }
@@ -76,7 +76,8 @@ export function getSessionToken(): string | null {
 export function debugSessionState(): void {
   if (typeof window === 'undefined') return;
   
-  console.log('[Appwrite Debug] Session state:', {
+  logger.debug({
+    msg: 'Session state debug',
     hasCookieFallback: !!localStorage.getItem('cookieFallback'),
     cookieKeys: (() => {
       try {

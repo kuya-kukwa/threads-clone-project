@@ -10,16 +10,7 @@ import { profileUpdateSchema } from '@/schemas/profile.schema';
 import { UserProfile } from '@/types/appwrite';
 import { logger } from '@/lib/logger/logger';
 import { Query } from 'node-appwrite';
-
-/**
- * Sanitize user input (prevent XSS)
- */
-function sanitizeInput(input: string): string {
-  return input
-    .trim()
-    .replace(/[<>]/g, '') // Remove angle brackets
-    .slice(0, 500); // Hard limit on input length
-}
+import { sanitizeInput } from '@/lib/utils';
 
 /**
  * GET /api/profile/[id]

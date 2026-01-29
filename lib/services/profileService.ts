@@ -9,16 +9,8 @@ import { serverDatabases } from '../appwriteServer';
 import { APPWRITE_CONFIG } from '../appwriteConfig';
 import { UserProfile } from '@/types/appwrite';
 import { ProfileUpdateInput } from '@/schemas/profile.schema';
-
-/**
- * Sanitize user input (prevent XSS)
- */
-function sanitizeInput(input: string): string {
-  return input
-    .trim()
-    .replace(/[<>]/g, '') // Remove angle brackets
-    .slice(0, 500); // Hard limit on input length
-}
+import { sanitizeInput } from '@/lib/utils';
+import { logger } from '@/lib/logger/logger';
 
 export class ProfileService {
   /**
@@ -34,7 +26,7 @@ export class ProfileService {
       
       return response.documents[0] || null;
     } catch (error: unknown) {
-      console.error('Get profile error:', error);
+      logger.error({ msg: 'Get profile by userId error', userId, error: error instanceof Error ? error.message : 'Unknown error' });
       return null;
     }
   }
@@ -52,7 +44,7 @@ export class ProfileService {
       
       return response.documents[0] || null;
     } catch (error: unknown) {
-      console.error('Get profile error:', error);
+      logger.error({ msg: 'Get profile by username error', username, error: error instanceof Error ? error.message : 'Unknown error' });
       return null;
     }
   }
@@ -85,7 +77,7 @@ export class ProfileService {
       return { success: true, profile };
     } catch (error: unknown) {
       const errorMessage = error instanceof Error ? error.message : 'Profile update failed';
-      console.error('Update profile error:', error);
+      logger.error({ msg: 'Update profile error', profileId, error: errorMessage });
       return { success: false, error: errorMessage };
     }
   }

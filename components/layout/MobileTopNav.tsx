@@ -15,6 +15,7 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { SearchResultsSkeleton } from '@/components/ui/skeletons';
+import { logger } from '@/lib/logger/logger';
 
 type FeedTab = 'for-you' | 'following' | 'likes';
 
@@ -109,7 +110,7 @@ export function MobileTopNav({
         if (error instanceof Error && error.name === 'AbortError') {
           return;
         }
-        console.error('Search error:', error);
+        logger.warn({ msg: 'Search error', error });
         setSearchError('Failed to search. Please try again.');
         setSearchResults([]);
       } finally {
