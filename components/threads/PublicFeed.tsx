@@ -25,6 +25,7 @@ import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { getErrorMessage } from '@/lib/errors';
 import { logger } from '@/lib/logger/logger';
+import { getSessionToken } from '@/lib/appwriteClient';
 
 interface PublicFeedProps {
   initialThreads?: ThreadWithLikeStatus[];
@@ -71,7 +72,17 @@ export function PublicFeed({
       }
       params.append('limit', '20');
 
-      const response = await fetch(`/api/feed?${params.toString()}`);
+      // Include session token to get like status
+      const sessionToken = getSessionToken();
+      const headers: Record<string, string> = {};
+      if (sessionToken) {
+        headers['x-session-id'] = sessionToken;
+      }
+
+      const response = await fetch(`/api/feed?${params.toString()}`, {
+        credentials: 'include',
+        headers,
+      });
       const data: FeedResponse = await response.json();
 
       if (!data.success) {

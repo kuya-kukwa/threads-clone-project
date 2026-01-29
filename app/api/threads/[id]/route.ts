@@ -11,12 +11,13 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { serverDatabases } from '@/lib/appwriteServer';
+import { serverDatabases, createSessionClient } from '@/lib/appwriteServer';
 import { APPWRITE_CONFIG } from '@/lib/appwriteConfig';
 import { Thread, ThreadWithAuthor, UserProfile } from '@/types/appwrite';
 import { threadIdSchema } from '@/schemas/thread.schema';
 import { logger } from '@/lib/logger/logger';
 import { Query } from 'node-appwrite';
+import { LikeService } from '@/lib/services/likeService';
 
 export const dynamic = 'force-dynamic';
 
@@ -107,6 +108,19 @@ export async function GET(
       author,
     };
 
+    // Try to get like status if user is authenticated
+    let isLiked = false;
+    try {
+      const { account } = await createSessionClient(request);
+      const user = await account.get();
+      if (user) {
+        const likeStatus = await LikeService.hasUserLikedThread(user.$id, thread.$id);
+        isLiked = likeStatus.liked;
+      }
+    } catch {
+      // User not authenticated, continue without like status
+    }
+
     logger.info({
       msg: 'Thread fetched successfully',
       threadId: id,
@@ -119,7 +133,7 @@ export async function GET(
     return NextResponse.json(
       {
         success: true,
-        data: threadWithAuthor,
+        data: { ...threadWithAuthor, isLiked },
         requestId,
       },
       { status: 200 }

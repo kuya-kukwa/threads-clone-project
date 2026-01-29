@@ -11,6 +11,7 @@ import { UserProfile } from '@/types/appwrite';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { EditProfileForm } from './EditProfileForm';
+import { getSessionToken } from '@/lib/appwriteClient';
 
 interface ProfileCardProps {
   profile: UserProfile;
@@ -33,9 +34,16 @@ export function ProfileCard({
 
   const fetchFollowStatus = useCallback(async () => {
     try {
+      const sessionToken = getSessionToken();
+      const headers: Record<string, string> = {};
+      if (sessionToken) {
+        headers['x-session-id'] = sessionToken;
+      }
+
       const response = await fetch(`/api/profile/${profile.$id}/follow`, {
         method: 'GET',
         credentials: 'include',
+        headers,
       });
       const data = await response.json();
 
@@ -53,9 +61,16 @@ export function ProfileCard({
 
   const fetchFollowCounts = useCallback(async () => {
     try {
+      const sessionToken = getSessionToken();
+      const headers: Record<string, string> = {};
+      if (sessionToken) {
+        headers['x-session-id'] = sessionToken;
+      }
+
       const response = await fetch(`/api/profile/${profile.$id}/follow`, {
         method: 'GET',
         credentials: 'include',
+        headers,
       });
       const data = await response.json();
 
@@ -93,12 +108,20 @@ export function ProfileCard({
     );
 
     try {
+      const sessionToken = getSessionToken();
+      const headers: Record<string, string> = {
+        'Content-Type': 'application/json',
+        'X-CSRF-Token': 'true',
+      };
+      
+      if (sessionToken) {
+        headers['x-session-id'] = sessionToken;
+      }
+
       const response = await fetch(`/api/profile/${profile.$id}/follow`, {
         method: 'POST',
         credentials: 'include',
-        headers: {
-          'X-CSRF-Token': 'true',
-        },
+        headers,
       });
 
       const data = await response.json();

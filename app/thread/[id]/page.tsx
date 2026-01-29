@@ -27,6 +27,7 @@ import { ReplyList } from '@/components/threads/ReplyList';
 import { ThreadWithAuthor } from '@/types/appwrite';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
+import { getSessionToken } from '@/lib/appwriteClient';
 
 interface ThreadDetailPageProps {
   params: Promise<{ id: string }>;
@@ -48,7 +49,17 @@ function ThreadDetailContent({ threadId }: { threadId: string }) {
       setError(null);
       setNotFound(false);
 
-      const response = await fetch(`/api/threads/${threadId}`);
+      // Include session token to get like status
+      const sessionToken = getSessionToken();
+      const headers: Record<string, string> = {};
+      if (sessionToken) {
+        headers['x-session-id'] = sessionToken;
+      }
+
+      const response = await fetch(`/api/threads/${threadId}`, {
+        credentials: 'include',
+        headers,
+      });
       const data = await response.json();
 
       if (!response.ok) {

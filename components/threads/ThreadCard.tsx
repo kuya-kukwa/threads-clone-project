@@ -26,6 +26,7 @@ import { formatDistanceToNow } from 'date-fns';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useMemo, useState, useRef, useCallback, TouchEvent } from 'react';
+import { getSessionToken } from '@/lib/appwriteClient';
 
 export interface ThreadWithLikeStatus extends ThreadWithAuthor {
   isLiked?: boolean;
@@ -133,12 +134,20 @@ export function ThreadCard({ thread }: ThreadCardProps) {
     setLikeCount((prev) => (wasLiked ? Math.max(prev - 1, 0) : prev + 1));
 
     try {
+      const sessionToken = getSessionToken();
+      const headers: Record<string, string> = {
+        'Content-Type': 'application/json',
+        'X-CSRF-Token': 'true',
+      };
+      
+      if (sessionToken) {
+        headers['x-session-id'] = sessionToken;
+      }
+
       const response = await fetch(`/api/threads/${thread.$id}/like`, {
         method: 'POST',
         credentials: 'include',
-        headers: {
-          'X-CSRF-Token': 'true',
-        },
+        headers,
       });
 
       const data = await response.json();
