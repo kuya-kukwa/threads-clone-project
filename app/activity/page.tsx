@@ -21,7 +21,7 @@ type TabType = 'all' | 'follows' | 'replies' | 'mentions';
 async function fetchNotifications(
   type?: NotificationType,
   cursor?: string,
-  limit: number = 20
+  limit: number = 20,
 ): Promise<{
   notifications: NotificationWithActor[];
   nextCursor: string | null;
@@ -52,7 +52,7 @@ async function fetchNotifications(
 
 async function markNotificationAsRead(
   notificationId?: string,
-  all?: boolean
+  all?: boolean,
 ): Promise<void> {
   const sessionId = localStorage.getItem('sessionId');
   if (!sessionId) throw new Error('Not authenticated');
@@ -139,13 +139,22 @@ export default function ActivityPage() {
             <NotificationsList onUnreadCountChange={setUnreadCount} />
           )}
           {activeTab === 'follows' && (
-            <NotificationsList type="follow" onUnreadCountChange={setUnreadCount} />
+            <NotificationsList
+              type="follow"
+              onUnreadCountChange={setUnreadCount}
+            />
           )}
           {activeTab === 'replies' && (
-            <NotificationsList type="reply" onUnreadCountChange={setUnreadCount} />
+            <NotificationsList
+              type="reply"
+              onUnreadCountChange={setUnreadCount}
+            />
           )}
           {activeTab === 'mentions' && (
-            <NotificationsList type="mention" onUnreadCountChange={setUnreadCount} />
+            <NotificationsList
+              type="mention"
+              onUnreadCountChange={setUnreadCount}
+            />
           )}
         </div>
       </div>
@@ -158,54 +167,68 @@ interface NotificationsListProps {
   onUnreadCountChange?: (count: number) => void;
 }
 
-function NotificationsList({ type, onUnreadCountChange }: NotificationsListProps) {
+function NotificationsList({
+  type,
+  onUnreadCountChange,
+}: NotificationsListProps) {
   const router = useRouter();
-  const [notifications, setNotifications] = useState<NotificationWithActor[]>([]);
+  const [notifications, setNotifications] = useState<NotificationWithActor[]>(
+    [],
+  );
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [hasMore, setHasMore] = useState(false);
   const [nextCursor, setNextCursor] = useState<string | null>(null);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
 
-  const loadNotifications = useCallback(async (cursor?: string) => {
-    try {
-      if (cursor) {
-        setIsLoadingMore(true);
-      } else {
-        setIsLoading(true);
-      }
-      setError(null);
+  const loadNotifications = useCallback(
+    async (cursor?: string) => {
+      try {
+        if (cursor) {
+          setIsLoadingMore(true);
+        } else {
+          setIsLoading(true);
+        }
+        setError(null);
 
-      const data = await fetchNotifications(type, cursor);
-      
-      if (cursor) {
-        setNotifications((prev) => [...prev, ...data.notifications]);
-      } else {
-        setNotifications(data.notifications);
-        onUnreadCountChange?.(data.unreadCount);
+        const data = await fetchNotifications(type, cursor);
+
+        if (cursor) {
+          setNotifications((prev) => [...prev, ...data.notifications]);
+        } else {
+          setNotifications(data.notifications);
+          onUnreadCountChange?.(data.unreadCount);
+        }
+
+        setNextCursor(data.nextCursor);
+        setHasMore(data.hasMore);
+      } catch (err) {
+        setError(
+          err instanceof Error ? err.message : 'Failed to load notifications',
+        );
+      } finally {
+        setIsLoading(false);
+        setIsLoadingMore(false);
       }
-      
-      setNextCursor(data.nextCursor);
-      setHasMore(data.hasMore);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load notifications');
-    } finally {
-      setIsLoading(false);
-      setIsLoadingMore(false);
-    }
-  }, [type, onUnreadCountChange]);
+    },
+    [type, onUnreadCountChange],
+  );
 
   useEffect(() => {
     loadNotifications();
   }, [loadNotifications]);
 
-  const handleNotificationClick = async (notification: NotificationWithActor) => {
+  const handleNotificationClick = async (
+    notification: NotificationWithActor,
+  ) => {
     // Mark as read if unread
     if (!notification.read) {
       try {
         await markNotificationAsRead(notification.$id);
         setNotifications((prev) =>
-          prev.map((n) => (n.$id === notification.$id ? { ...n, read: true } : n))
+          prev.map((n) =>
+            n.$id === notification.$id ? { ...n, read: true } : n,
+          ),
         );
       } catch (error) {
         console.error('Failed to mark as read:', error);
@@ -336,7 +359,7 @@ function NotificationItem({ notification, onClick }: NotificationItemProps) {
         </Avatar>
         <div
           className={`absolute -bottom-0.5 -right-0.5 w-5 h-5 rounded-full flex items-center justify-center ${getActivityIconBg(
-            notification.type
+            notification.type,
           )}`}
         >
           {getActivityIcon(notification.type)}
@@ -370,7 +393,9 @@ function NotificationItem({ notification, onClick }: NotificationItemProps) {
           </p>
         )}
         <p className="text-xs text-muted-foreground mt-1">
-          {formatDistanceToNow(new Date(notification.createdAt), { addSuffix: true })}
+          {formatDistanceToNow(new Date(notification.createdAt), {
+            addSuffix: true,
+          })}
         </p>
       </div>
 

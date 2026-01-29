@@ -97,10 +97,10 @@ export function BottomNav() {
     if (!user) return;
 
     fetchUnreadCount();
-    
+
     // Poll every 30 seconds
     const interval = setInterval(fetchUnreadCount, 30000);
-    
+
     return () => clearInterval(interval);
   }, [user, fetchUnreadCount]);
 
