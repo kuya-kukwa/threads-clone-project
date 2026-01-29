@@ -23,7 +23,7 @@ export function ProfileCard({
 }: ProfileCardProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [profile, setProfile] = useState(initialProfile);
-  
+
   // Follow state
   const [isFollowing, setIsFollowing] = useState(false);
   const [followersCount, setFollowersCount] = useState(0);
@@ -38,7 +38,7 @@ export function ProfileCard({
         credentials: 'include',
       });
       const data = await response.json();
-      
+
       if (data.success) {
         setIsFollowing(data.following);
         setFollowersCount(data.followersCount);
@@ -58,7 +58,7 @@ export function ProfileCard({
         credentials: 'include',
       });
       const data = await response.json();
-      
+
       if (data.success) {
         setFollowersCount(data.followersCount);
         setFollowingCount(data.followingCount);
@@ -82,13 +82,15 @@ export function ProfileCard({
 
   const handleFollowClick = async () => {
     if (isFollowLoading) return;
-    
+
     setIsFollowLoading(true);
-    
+
     // Optimistic update
     const wasFollowing = isFollowing;
     setIsFollowing(!wasFollowing);
-    setFollowersCount((prev) => (wasFollowing ? Math.max(prev - 1, 0) : prev + 1));
+    setFollowersCount((prev) =>
+      wasFollowing ? Math.max(prev - 1, 0) : prev + 1,
+    );
 
     try {
       const response = await fetch(`/api/profile/${profile.$id}/follow`, {
@@ -101,7 +103,9 @@ export function ProfileCard({
       if (!data.success) {
         // Revert on failure
         setIsFollowing(wasFollowing);
-        setFollowersCount((prev) => (wasFollowing ? prev + 1 : Math.max(prev - 1, 0)));
+        setFollowersCount((prev) =>
+          wasFollowing ? prev + 1 : Math.max(prev - 1, 0),
+        );
         console.error('Follow failed:', data.error);
       } else {
         // Sync with server response
@@ -111,7 +115,9 @@ export function ProfileCard({
     } catch (error) {
       // Revert on error
       setIsFollowing(wasFollowing);
-      setFollowersCount((prev) => (wasFollowing ? prev + 1 : Math.max(prev - 1, 0)));
+      setFollowersCount((prev) =>
+        wasFollowing ? prev + 1 : Math.max(prev - 1, 0),
+      );
       console.error('Follow error:', error);
     } finally {
       setIsFollowLoading(false);
@@ -187,10 +193,16 @@ export function ProfileCard({
       {followStatusLoaded && (
         <div className="flex items-center gap-4 mt-3 text-sm text-muted-foreground">
           <span>
-            <span className="font-semibold text-foreground">{followersCount}</span> followers
+            <span className="font-semibold text-foreground">
+              {followersCount}
+            </span>{' '}
+            followers
           </span>
           <span>
-            <span className="font-semibold text-foreground">{followingCount}</span> following
+            <span className="font-semibold text-foreground">
+              {followingCount}
+            </span>{' '}
+            following
           </span>
         </div>
       )}
@@ -216,13 +228,27 @@ export function ProfileCard({
           {isFollowLoading ? (
             <span className="flex items-center gap-2">
               <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24">
-                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
-                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                <circle
+                  className="opacity-25"
+                  cx="12"
+                  cy="12"
+                  r="10"
+                  stroke="currentColor"
+                  strokeWidth="4"
+                  fill="none"
+                />
+                <path
+                  className="opacity-75"
+                  fill="currentColor"
+                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                />
               </svg>
               {isFollowing ? 'Unfollowing...' : 'Following...'}
             </span>
+          ) : isFollowing ? (
+            'Following'
           ) : (
-            isFollowing ? 'Following' : 'Follow'
+            'Follow'
           )}
         </Button>
       )}

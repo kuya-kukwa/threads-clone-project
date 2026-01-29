@@ -122,11 +122,11 @@ export function ThreadCard({ thread }: ThreadCardProps) {
   // Handle like button click
   const handleLikeClick = async (e?: React.MouseEvent) => {
     e?.stopPropagation();
-    
+
     if (isLiking) return;
-    
+
     setIsLiking(true);
-    
+
     // Optimistic update
     const wasLiked = isLiked;
     setIsLiked(!wasLiked);
@@ -265,17 +265,21 @@ function ActionButton({
   return (
     <button
       className={`flex items-center gap-1.5 transition-colors p-2 rounded-full ${
-        isActive 
-          ? 'text-red-500 hover:text-red-600' 
+        isActive
+          ? 'text-red-500 hover:text-red-600'
           : 'text-muted-foreground hover:text-primary hover:bg-primary/10'
       } ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
       aria-label={label}
       onClick={onClick}
       disabled={isLoading}
     >
-      <span className={`w-5 h-5 ${isLoading ? 'animate-pulse' : ''}`}>{icon}</span>
+      <span className={`w-5 h-5 ${isLoading ? 'animate-pulse' : ''}`}>
+        {icon}
+      </span>
       {count !== undefined && count > 0 && (
-        <span className={`text-xs ${isActive ? 'text-red-500' : ''}`}>{count}</span>
+        <span className={`text-xs ${isActive ? 'text-red-500' : ''}`}>
+          {count}
+        </span>
       )}
     </button>
   );

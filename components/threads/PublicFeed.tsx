@@ -37,7 +37,8 @@ export function PublicFeed({
   initialNextCursor = null,
   initialHasMore = false,
 }: PublicFeedProps) {
-  const [threads, setThreads] = useState<ThreadWithLikeStatus[]>(initialThreads);
+  const [threads, setThreads] =
+    useState<ThreadWithLikeStatus[]>(initialThreads);
   const [nextCursor, setNextCursor] = useState<string | null>(
     initialNextCursor,
   );
