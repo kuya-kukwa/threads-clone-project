@@ -13,6 +13,7 @@ import { serverDatabases } from '@/lib/appwriteServer';
 import { APPWRITE_CONFIG } from '@/lib/appwriteConfig';
 import { Like, Thread } from '@/types/appwrite';
 import { logger } from '@/lib/logger/logger';
+import { NotificationService } from './notificationService';
 
 export class LikeService {
   /**
@@ -107,6 +108,11 @@ export class LikeService {
         threadId,
         likeId: like.$id,
       });
+
+      // Create notification for thread author (async, don't await)
+      NotificationService.notifyLike(thread.authorId, userId, threadId).catch(
+        (err) => logger.error({ msg: 'Failed to create like notification', error: err })
+      );
 
       return { success: true, like };
     } catch (error) {

@@ -3,16 +3,59 @@
 /**
  * Navigation Bar Component
  * Minimal top navigation - just logo centered
- * Desktop shows horizontal nav icons
+ * Desktop shows horizontal nav icons with notification badge
  */
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useCurrentUser } from '@/hooks';
+import { useState, useEffect, useCallback } from 'react';
 
 export function NavBar() {
   const { user } = useCurrentUser();
   const pathname = usePathname();
+  const [unreadCount, setUnreadCount] = useState(0);
+
+  // Fetch unread notification count
+  const fetchUnreadCount = useCallback(async () => {
+    try {
+      const sessionId = localStorage.getItem('sessionId');
+      if (!sessionId) return;
+
+      const response = await fetch('/api/notifications/count', {
+        headers: {
+          'x-session-id': sessionId,
+          'x-csrf-token': 'true',
+        },
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setUnreadCount(data.count || 0);
+      }
+    } catch (error) {
+      console.error('Failed to fetch notification count:', error);
+    }
+  }, []);
+
+  // Fetch count on mount and periodically
+  useEffect(() => {
+    if (!user) return;
+
+    fetchUnreadCount();
+    
+    // Poll every 30 seconds
+    const interval = setInterval(fetchUnreadCount, 30000);
+    
+    return () => clearInterval(interval);
+  }, [user, fetchUnreadCount]);
+
+  // Reset count when visiting activity page
+  useEffect(() => {
+    if (pathname === '/activity') {
+      setUnreadCount(0);
+    }
+  }, [pathname]);
 
   // Don't show on auth pages
   const isAuthPage =
@@ -48,6 +91,7 @@ export function NavBar() {
                   <NavLink
                     href="/activity"
                     active={pathname.startsWith('/activity')}
+                    badge={unreadCount}
                   >
                     <ActivityIcon />
                   </NavLink>
@@ -89,21 +133,28 @@ function NavLink({
   href,
   active,
   children,
+  badge,
 }: {
   href: string;
   active: boolean;
   children: React.ReactNode;
+  badge?: number;
 }) {
   return (
     <Link
       href={href}
-      className={`p-3 rounded-lg transition-colors ${
+      className={`relative p-3 rounded-lg transition-colors ${
         active
           ? 'text-foreground bg-secondary'
           : 'text-muted-foreground hover:text-foreground hover:bg-secondary/50'
       }`}
     >
       {children}
+      {badge && badge > 0 && (
+        <span className="absolute top-1 right-1 min-w-[16px] h-4 px-1 flex items-center justify-center text-[10px] font-bold text-white bg-red-500 rounded-full">
+          {badge > 99 ? '99+' : badge}
+        </span>
+      )}
     </Link>
   );
 }

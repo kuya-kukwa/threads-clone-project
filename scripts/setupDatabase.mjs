@@ -122,6 +122,30 @@ const COLLECTIONS = {
       { key: 'followingId_index', type: 'key', attributes: ['followingId'], orders: ['ASC'] },
     ],
   },
+  notifications: {
+    id: 'notifications',
+    name: 'Notifications',
+    permissions: [
+      Permission.read(Role.users()),
+      Permission.create(Role.users()),
+      Permission.update(Role.users()),
+      Permission.delete(Role.users()),
+    ],
+    documentSecurity: true,
+    attributes: [
+      { key: 'recipientId', type: 'string', size: 255, required: true },
+      { key: 'actorId', type: 'string', size: 255, required: true },
+      { key: 'type', type: 'string', size: 50, required: true }, // 'like', 'follow', 'reply', 'mention'
+      { key: 'threadId', type: 'string', size: 255, required: false, default: '' },
+      { key: 'message', type: 'string', size: 500, required: false, default: '' },
+      { key: 'read', type: 'boolean', required: false, default: false },
+      { key: 'createdAt', type: 'string', size: 255, required: true },
+    ],
+    indexes: [
+      { key: 'recipientId_createdAt_index', type: 'key', attributes: ['recipientId', 'createdAt'], orders: ['ASC', 'DESC'] },
+      { key: 'recipientId_read_index', type: 'key', attributes: ['recipientId', 'read'], orders: ['ASC', 'ASC'] },
+    ],
+  },
 };
 
 async function wait(ms) {
@@ -158,6 +182,14 @@ async function createCollection(collectionConfig) {
             undefined,
             attr.default
           );
+        } else if (attr.type === 'boolean') {
+          await databases.createBooleanAttribute(
+            DATABASE_ID,
+            id,
+            attr.key,
+            attr.required,
+            attr.default
+          );
         }
         console.log(`   ✓ Created attribute: ${attr.key}`);
         await wait(500);
@@ -171,7 +203,7 @@ async function createCollection(collectionConfig) {
     }
     
     console.log(`   ⏳ Waiting for attributes to be ready...`);
-    await wait(3000);
+    await wait(5000);
     
     for (const index of indexes) {
       try {

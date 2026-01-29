@@ -14,6 +14,7 @@ import { serverDatabases } from '@/lib/appwriteServer';
 import { APPWRITE_CONFIG } from '@/lib/appwriteConfig';
 import { Follow, UserProfile, Thread, ThreadWithAuthor } from '@/types/appwrite';
 import { logger } from '@/lib/logger/logger';
+import { NotificationService } from './notificationService';
 
 export class FollowService {
   /**
@@ -98,6 +99,11 @@ export class FollowService {
         followingId,
         followId: follow.$id,
       });
+
+      // Create notification for followed user (async, don't await)
+      NotificationService.notifyFollow(followingId, followerId).catch(
+        (err) => logger.error({ msg: 'Failed to create follow notification', error: err })
+      );
 
       return { success: true, follow };
     } catch (error) {

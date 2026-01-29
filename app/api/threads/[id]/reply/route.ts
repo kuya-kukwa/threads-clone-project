@@ -27,6 +27,7 @@ import { sanitizeThreadContent } from '@/lib/services/threadService';
 import { sanitizeInput } from '@/lib/utils';
 import { getImagePreviewUrl } from '@/lib/services/imageService';
 import { logger } from '@/lib/logger/logger';
+import { NotificationService } from '@/lib/services/notificationService';
 
 export const dynamic = 'force-dynamic';
 
@@ -272,6 +273,16 @@ export async function POST(
       authorId: userId,
       requestId,
     });
+
+    // Create notification for parent thread author (async, don't await)
+    NotificationService.notifyReply(
+      parentThread.authorId,
+      userId,
+      parentThreadId,
+      sanitizedContent
+    ).catch((err) =>
+      logger.error({ msg: 'Failed to create reply notification', error: err })
+    );
 
     return NextResponse.json(
       {

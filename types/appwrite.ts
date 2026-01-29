@@ -92,6 +92,33 @@ export interface Follow extends Models.Document {
 }
 
 /**
+ * Notification Types
+ */
+export type NotificationType = 'like' | 'follow' | 'reply' | 'mention';
+
+/**
+ * Notification Document
+ * Represents a notification for a user
+ */
+export interface Notification extends Models.Document {
+  recipientId: string; // User who receives the notification
+  actorId: string; // User who triggered the notification
+  type: NotificationType; // Type of notification
+  threadId?: string; // Related thread (for likes, replies, mentions)
+  message?: string; // Optional custom message
+  read: boolean; // Whether notification has been read
+  createdAt: string; // ISO timestamp
+}
+
+/**
+ * Notification with populated actor data
+ */
+export interface NotificationWithActor extends Notification {
+  actor: UserProfile;
+  thread?: Thread;
+}
+
+/**
  * Thread with populated author data
  * Used in feed displays
  */

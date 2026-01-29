@@ -2,26 +2,95 @@
 
 /**
  * Activity Page
- * Tabs: All, Follows, Conversations, Mentions
- * Shows notifications and activity feed
+ * Tabs: All, Follows, Replies, Mentions
+ * Shows real notifications from the API
  */
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
+import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { AuthGuard } from '@/components/auth/AuthGuard';
 import { ActivityListSkeleton } from '@/components/ui/skeletons';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { formatDistanceToNow } from 'date-fns';
+import { NotificationWithActor, NotificationType } from '@/types/appwrite';
 
-type TabType = 'all' | 'follows' | 'conversations' | 'mentions';
+type TabType = 'all' | 'follows' | 'replies' | 'mentions';
+
+// API client helper
+async function fetchNotifications(
+  type?: NotificationType,
+  cursor?: string,
+  limit: number = 20
+): Promise<{
+  notifications: NotificationWithActor[];
+  nextCursor: string | null;
+  hasMore: boolean;
+  unreadCount: number;
+}> {
+  const sessionId = localStorage.getItem('sessionId');
+  if (!sessionId) throw new Error('Not authenticated');
+
+  const params = new URLSearchParams();
+  if (type) params.set('type', type);
+  if (cursor) params.set('cursor', cursor);
+  params.set('limit', limit.toString());
+
+  const response = await fetch(`/api/notifications?${params}`, {
+    headers: {
+      'x-session-id': sessionId,
+      'x-csrf-token': 'true',
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error('Failed to fetch notifications');
+  }
+
+  return response.json();
+}
+
+async function markNotificationAsRead(
+  notificationId?: string,
+  all?: boolean
+): Promise<void> {
+  const sessionId = localStorage.getItem('sessionId');
+  if (!sessionId) throw new Error('Not authenticated');
+
+  const response = await fetch('/api/notifications', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-session-id': sessionId,
+      'x-csrf-token': 'true',
+    },
+    body: JSON.stringify(all ? { all: true } : { notificationId }),
+  });
+
+  if (!response.ok) {
+    throw new Error('Failed to mark notification as read');
+  }
+}
 
 export default function ActivityPage() {
   const [activeTab, setActiveTab] = useState<TabType>('all');
+  const [unreadCount, setUnreadCount] = useState(0);
 
   const tabs: { id: TabType; label: string }[] = [
     { id: 'all', label: 'All' },
     { id: 'follows', label: 'Follows' },
-    { id: 'conversations', label: 'Conversations' },
+    { id: 'replies', label: 'Replies' },
     { id: 'mentions', label: 'Mentions' },
   ];
+
+  const handleMarkAllRead = async () => {
+    try {
+      await markNotificationAsRead(undefined, true);
+      setUnreadCount(0);
+    } catch (error) {
+      console.error('Failed to mark all as read:', error);
+    }
+  };
 
   return (
     <AuthGuard>
@@ -29,9 +98,17 @@ export default function ActivityPage() {
         {/* Header with tabs */}
         <div className="sticky top-0 md:top-12 z-40 bg-background border-b border-border/50">
           <div className="max-w-2xl mx-auto px-4">
-            {/* Title */}
-            <div className="py-3">
+            {/* Title with mark all read */}
+            <div className="py-3 flex items-center justify-between">
               <h1 className="text-lg font-semibold">Activity</h1>
+              {unreadCount > 0 && (
+                <button
+                  onClick={handleMarkAllRead}
+                  className="text-sm text-primary hover:underline"
+                >
+                  Mark all as read
+                </button>
+              )}
             </div>
 
             {/* Tabs - scrollable on mobile */}
@@ -58,184 +135,133 @@ export default function ActivityPage() {
 
         {/* Content */}
         <div className="max-w-2xl mx-auto px-4 py-4">
-          {activeTab === 'all' && <AllActivity />}
-          {activeTab === 'follows' && <FollowsActivity />}
-          {activeTab === 'conversations' && <ConversationsActivity />}
-          {activeTab === 'mentions' && <MentionsActivity />}
+          {activeTab === 'all' && (
+            <NotificationsList onUnreadCountChange={setUnreadCount} />
+          )}
+          {activeTab === 'follows' && (
+            <NotificationsList type="follow" onUnreadCountChange={setUnreadCount} />
+          )}
+          {activeTab === 'replies' && (
+            <NotificationsList type="reply" onUnreadCountChange={setUnreadCount} />
+          )}
+          {activeTab === 'mentions' && (
+            <NotificationsList type="mention" onUnreadCountChange={setUnreadCount} />
+          )}
         </div>
       </div>
     </AuthGuard>
   );
 }
 
-// Mock data - in real app, fetch from API
-const mockActivities = {
-  all: [
-    {
-      id: '1',
-      type: 'like',
-      user: { name: 'John Doe', avatar: null },
-      action: 'liked your thread',
-      time: new Date(Date.now() - 5 * 60000),
-      preview: 'This is an amazing post about...',
-    },
-    {
-      id: '2',
-      type: 'follow',
-      user: { name: 'Jane Smith', avatar: null },
-      action: 'started following you',
-      time: new Date(Date.now() - 30 * 60000),
-    },
-    {
-      id: '3',
-      type: 'reply',
-      user: { name: 'Alex Johnson', avatar: null },
-      action: 'replied to your thread',
-      time: new Date(Date.now() - 2 * 3600000),
-      preview: 'Great point! I think...',
-    },
-    {
-      id: '4',
-      type: 'mention',
-      user: { name: 'Sam Wilson', avatar: null },
-      action: 'mentioned you',
-      time: new Date(Date.now() - 5 * 3600000),
-      preview: 'Hey @you check this out!',
-    },
-  ],
-  follows: [
-    {
-      id: '1',
-      type: 'follow',
-      user: { name: 'Jane Smith', avatar: null },
-      action: 'started following you',
-      time: new Date(Date.now() - 30 * 60000),
-    },
-    {
-      id: '2',
-      type: 'follow',
-      user: { name: 'Mike Brown', avatar: null },
-      action: 'started following you',
-      time: new Date(Date.now() - 2 * 86400000),
-    },
-  ],
-  conversations: [
-    {
-      id: '1',
-      type: 'reply',
-      user: { name: 'Alex Johnson', avatar: null },
-      action: 'replied to your thread',
-      time: new Date(Date.now() - 2 * 3600000),
-      preview: 'Great point! I think...',
-    },
-  ],
-  mentions: [
-    {
-      id: '1',
-      type: 'mention',
-      user: { name: 'Sam Wilson', avatar: null },
-      action: 'mentioned you',
-      time: new Date(Date.now() - 5 * 3600000),
-      preview: 'Hey @you check this out!',
-    },
-  ],
-};
-
-function AllActivity() {
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    // Simulate loading - in real app, this would be an API call
-    const timer = setTimeout(() => setIsLoading(false), 500);
-    return () => clearTimeout(timer);
-  }, []);
-
-  if (isLoading) {
-    return <ActivityListSkeleton count={4} />;
-  }
-
-  return (
-    <ActivityList
-      activities={mockActivities.all}
-      emptyMessage="No activity yet"
-    />
-  );
+interface NotificationsListProps {
+  type?: NotificationType;
+  onUnreadCountChange?: (count: number) => void;
 }
 
-function FollowsActivity() {
+function NotificationsList({ type, onUnreadCountChange }: NotificationsListProps) {
+  const router = useRouter();
+  const [notifications, setNotifications] = useState<NotificationWithActor[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [hasMore, setHasMore] = useState(false);
+  const [nextCursor, setNextCursor] = useState<string | null>(null);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
+
+  const loadNotifications = useCallback(async (cursor?: string) => {
+    try {
+      if (cursor) {
+        setIsLoadingMore(true);
+      } else {
+        setIsLoading(true);
+      }
+      setError(null);
+
+      const data = await fetchNotifications(type, cursor);
+      
+      if (cursor) {
+        setNotifications((prev) => [...prev, ...data.notifications]);
+      } else {
+        setNotifications(data.notifications);
+        onUnreadCountChange?.(data.unreadCount);
+      }
+      
+      setNextCursor(data.nextCursor);
+      setHasMore(data.hasMore);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to load notifications');
+    } finally {
+      setIsLoading(false);
+      setIsLoadingMore(false);
+    }
+  }, [type, onUnreadCountChange]);
 
   useEffect(() => {
-    const timer = setTimeout(() => setIsLoading(false), 400);
-    return () => clearTimeout(timer);
-  }, []);
+    loadNotifications();
+  }, [loadNotifications]);
+
+  const handleNotificationClick = async (notification: NotificationWithActor) => {
+    // Mark as read if unread
+    if (!notification.read) {
+      try {
+        await markNotificationAsRead(notification.$id);
+        setNotifications((prev) =>
+          prev.map((n) => (n.$id === notification.$id ? { ...n, read: true } : n))
+        );
+      } catch (error) {
+        console.error('Failed to mark as read:', error);
+      }
+    }
+
+    // Navigate based on notification type
+    if (notification.type === 'follow') {
+      router.push(`/profile/${notification.actorId}`);
+    } else if (notification.threadId) {
+      router.push(`/thread/${notification.threadId}`);
+    }
+  };
+
+  const getEmptyMessage = () => {
+    switch (type) {
+      case 'follow':
+        return 'No new followers';
+      case 'reply':
+        return 'No replies yet';
+      case 'mention':
+        return 'No mentions yet';
+      default:
+        return 'No activity yet';
+    }
+  };
 
   if (isLoading) {
-    return <ActivityListSkeleton count={3} />;
+    return <ActivityListSkeleton count={5} />;
   }
 
-  return (
-    <ActivityList
-      activities={mockActivities.follows}
-      emptyMessage="No new followers"
-    />
-  );
-}
-
-function ConversationsActivity() {
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    const timer = setTimeout(() => setIsLoading(false), 400);
-    return () => clearTimeout(timer);
-  }, []);
-
-  if (isLoading) {
-    return <ActivityListSkeleton count={3} />;
+  if (error) {
+    return (
+      <div className="flex flex-col items-center justify-center py-16 text-center">
+        <div className="w-16 h-16 rounded-full bg-destructive/10 flex items-center justify-center mb-4">
+          <BellIcon className="w-8 h-8 text-destructive" />
+        </div>
+        <h3 className="text-lg font-medium mb-1">Error loading activity</h3>
+        <p className="text-sm text-muted-foreground mb-4">{error}</p>
+        <button
+          onClick={() => loadNotifications()}
+          className="px-4 py-2 text-sm font-medium rounded-lg bg-primary text-primary-foreground hover:bg-primary/90"
+        >
+          Try again
+        </button>
+      </div>
+    );
   }
 
-  return (
-    <ActivityList
-      activities={mockActivities.conversations}
-      emptyMessage="No conversations yet"
-    />
-  );
-}
-
-function MentionsActivity() {
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    const timer = setTimeout(() => setIsLoading(false), 400);
-    return () => clearTimeout(timer);
-  }, []);
-
-  if (isLoading) {
-    return <ActivityListSkeleton count={3} />;
-  }
-
-  return (
-    <ActivityList
-      activities={mockActivities.mentions}
-      emptyMessage="No mentions yet"
-    />
-  );
-}
-
-function ActivityList({
-  activities,
-  emptyMessage,
-}: {
-  activities: typeof mockActivities.all;
-  emptyMessage: string;
-}) {
-  if (activities.length === 0) {
+  if (notifications.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-16 text-center">
         <div className="w-16 h-16 rounded-full bg-secondary flex items-center justify-center mb-4">
           <BellIcon className="w-8 h-8 text-muted-foreground" />
         </div>
-        <h3 className="text-lg font-medium mb-1">{emptyMessage}</h3>
+        <h3 className="text-lg font-medium mb-1">{getEmptyMessage()}</h3>
         <p className="text-sm text-muted-foreground">
           When there&apos;s activity, you&apos;ll see it here
         </p>
@@ -245,52 +271,124 @@ function ActivityList({
 
   return (
     <div className="space-y-1">
-      {activities.map((activity) => (
-        <button
-          key={activity.id}
-          className="w-full flex items-start gap-3 p-3 rounded-xl hover:bg-secondary/50 transition-colors text-left"
-        >
-          {/* Avatar with type indicator */}
-          <div className="relative flex-shrink-0">
-            <div className="w-11 h-11 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center text-white font-medium">
-              {activity.user.name[0]}
-            </div>
-            <div
-              className={`absolute -bottom-0.5 -right-0.5 w-5 h-5 rounded-full flex items-center justify-center ${getActivityIconBg(activity.type)}`}
-            >
-              {getActivityIcon(activity.type)}
-            </div>
-          </div>
-
-          {/* Content */}
-          <div className="flex-1 min-w-0">
-            <p className="text-sm">
-              <span className="font-semibold">{activity.user.name}</span>{' '}
-              <span className="text-muted-foreground">{activity.action}</span>
-            </p>
-            {activity.preview && (
-              <p className="text-sm text-muted-foreground truncate mt-0.5">
-                {activity.preview}
-              </p>
-            )}
-            <p className="text-xs text-muted-foreground mt-1">
-              {formatDistanceToNow(activity.time, { addSuffix: true })}
-            </p>
-          </div>
-
-          {/* Follow back button for follows */}
-          {activity.type === 'follow' && (
-            <button className="flex-shrink-0 px-4 py-1.5 text-sm font-medium rounded-lg bg-secondary hover:bg-secondary/80 transition-colors">
-              Follow
-            </button>
-          )}
-        </button>
+      {notifications.map((notification) => (
+        <NotificationItem
+          key={notification.$id}
+          notification={notification}
+          onClick={() => handleNotificationClick(notification)}
+        />
       ))}
+
+      {hasMore && (
+        <div className="py-4 flex justify-center">
+          <button
+            onClick={() => loadNotifications(nextCursor || undefined)}
+            disabled={isLoadingMore}
+            className="px-6 py-2 text-sm font-medium rounded-lg bg-secondary hover:bg-secondary/80 transition-colors disabled:opacity-50"
+          >
+            {isLoadingMore ? 'Loading...' : 'Load more'}
+          </button>
+        </div>
+      )}
     </div>
   );
 }
 
-function getActivityIconBg(type: string) {
+interface NotificationItemProps {
+  notification: NotificationWithActor;
+  onClick: () => void;
+}
+
+function NotificationItem({ notification, onClick }: NotificationItemProps) {
+  const actor = notification.actor;
+  const actorName = actor?.displayName || actor?.username || 'Unknown User';
+  const actorInitial = actorName[0]?.toUpperCase() || '?';
+
+  const getActionText = () => {
+    switch (notification.type) {
+      case 'like':
+        return 'liked your thread';
+      case 'follow':
+        return 'started following you';
+      case 'reply':
+        return 'replied to your thread';
+      case 'mention':
+        return 'mentioned you';
+      default:
+        return 'interacted with you';
+    }
+  };
+
+  return (
+    <button
+      onClick={onClick}
+      className={`w-full flex items-start gap-3 p-3 rounded-xl hover:bg-secondary/50 transition-colors text-left ${
+        !notification.read ? 'bg-primary/5' : ''
+      }`}
+    >
+      {/* Avatar with type indicator */}
+      <div className="relative flex-shrink-0">
+        <Avatar className="w-11 h-11">
+          <AvatarImage src={actor?.avatarUrl || undefined} alt={actorName} />
+          <AvatarFallback className="bg-gradient-to-br from-primary to-accent text-white font-medium">
+            {actorInitial}
+          </AvatarFallback>
+        </Avatar>
+        <div
+          className={`absolute -bottom-0.5 -right-0.5 w-5 h-5 rounded-full flex items-center justify-center ${getActivityIconBg(
+            notification.type
+          )}`}
+        >
+          {getActivityIcon(notification.type)}
+        </div>
+        {/* Unread indicator */}
+        {!notification.read && (
+          <div className="absolute -top-0.5 -left-0.5 w-2.5 h-2.5 rounded-full bg-primary" />
+        )}
+      </div>
+
+      {/* Content */}
+      <div className="flex-1 min-w-0">
+        <p className="text-sm">
+          <Link
+            href={`/profile/${notification.actorId}`}
+            onClick={(e) => e.stopPropagation()}
+            className="font-semibold hover:underline"
+          >
+            {actorName}
+          </Link>{' '}
+          <span className="text-muted-foreground">{getActionText()}</span>
+        </p>
+        {notification.message && (
+          <p className="text-sm text-muted-foreground truncate mt-0.5">
+            {notification.message}
+          </p>
+        )}
+        {notification.thread && (
+          <p className="text-sm text-muted-foreground truncate mt-0.5">
+            {notification.thread.content?.slice(0, 100)}
+          </p>
+        )}
+        <p className="text-xs text-muted-foreground mt-1">
+          {formatDistanceToNow(new Date(notification.createdAt), { addSuffix: true })}
+        </p>
+      </div>
+
+      {/* Follow back button for follows */}
+      {notification.type === 'follow' && (
+        <Link
+          href={`/profile/${notification.actorId}`}
+          onClick={(e) => e.stopPropagation()}
+          className="flex-shrink-0 px-4 py-1.5 text-sm font-medium rounded-lg bg-secondary hover:bg-secondary/80 transition-colors"
+        >
+          View
+        </Link>
+      )}
+    </button>
+  );
+}
+
+function getActivityIconBg(type: NotificationType) {
   switch (type) {
     case 'like':
       return 'bg-red-500';
@@ -305,7 +403,7 @@ function getActivityIconBg(type: string) {
   }
 }
 
-function getActivityIcon(type: string) {
+function getActivityIcon(type: NotificationType) {
   const iconClass = 'w-3 h-3 text-white';
   switch (type) {
     case 'like':

@@ -11,12 +11,13 @@
  * - Glass morphism backdrop
  * - Safe area support for notched devices
  * - Hide on scroll behavior
+ * - Notification badge on Activity tab
  */
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useCurrentUser } from '@/hooks';
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 
 interface NavItem {
   id: string;
@@ -65,8 +66,50 @@ export function BottomNav() {
   const { user, isLoading } = useCurrentUser();
   const [isVisible, setIsVisible] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [unreadCount, setUnreadCount] = useState(0);
   const lastScrollY = useRef(0);
   const ticking = useRef(false);
+
+  // Fetch unread notification count
+  const fetchUnreadCount = useCallback(async () => {
+    try {
+      const sessionId = localStorage.getItem('sessionId');
+      if (!sessionId) return;
+
+      const response = await fetch('/api/notifications/count', {
+        headers: {
+          'x-session-id': sessionId,
+          'x-csrf-token': 'true',
+        },
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setUnreadCount(data.count || 0);
+      }
+    } catch (error) {
+      console.error('Failed to fetch notification count:', error);
+    }
+  }, []);
+
+  // Fetch count on mount and periodically
+  useEffect(() => {
+    if (!user) return;
+
+    fetchUnreadCount();
+    
+    // Poll every 30 seconds
+    const interval = setInterval(fetchUnreadCount, 30000);
+    
+    return () => clearInterval(interval);
+  }, [user, fetchUnreadCount]);
+
+  // Reset count when visiting activity page
+  useEffect(() => {
+    if (pathname === '/activity') {
+      setUnreadCount(0);
+    }
+  }, [pathname]);
 
   // Listen for modal-open class on body to hide nav
   useEffect(() => {
@@ -193,7 +236,15 @@ export function BottomNav() {
                 aria-label={item.label}
                 aria-current={active ? 'page' : undefined}
               >
-                <Icon className="w-6 h-6" active={active} />
+                <div className="relative">
+                  <Icon className="w-6 h-6" active={active} />
+                  {/* Notification badge for Activity tab */}
+                  {item.id === 'activity' && unreadCount > 0 && (
+                    <span className="absolute -top-1 -right-1 min-w-[16px] h-4 px-1 flex items-center justify-center text-[10px] font-bold text-white bg-red-500 rounded-full">
+                      {unreadCount > 99 ? '99+' : unreadCount}
+                    </span>
+                  )}
+                </div>
                 <span className="text-[10px] mt-0.5 font-medium">
                   {item.label}
                 </span>

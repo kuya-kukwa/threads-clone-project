@@ -98,6 +98,7 @@ export const APPWRITE_CONFIG = {
     THREADS: 'threads',
     LIKES: 'likes',
     FOLLOWS: 'follows',
+    NOTIFICATIONS: 'notifications',
   },
   
   // Storage buckets
