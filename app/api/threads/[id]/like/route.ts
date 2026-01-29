@@ -100,10 +100,17 @@ export async function POST(
     logger.error({
       msg: 'Like toggle error',
       error: error instanceof Error ? error.message : 'Unknown error',
+      stack: error instanceof Error ? error.stack : undefined,
     });
 
     return NextResponse.json(
-      { success: false, error: 'Failed to toggle like' },
+      { 
+        success: false, 
+        error: 'Failed to toggle like',
+        details: process.env.NODE_ENV === 'development' 
+          ? (error instanceof Error ? error.message : 'Unknown error')
+          : undefined,
+      },
       { status: 500 }
     );
   }

@@ -121,10 +121,17 @@ export async function POST(
     logger.error({
       msg: 'Follow toggle error',
       error: error instanceof Error ? error.message : 'Unknown error',
+      stack: error instanceof Error ? error.stack : undefined,
     });
 
     return NextResponse.json(
-      { success: false, error: 'Failed to toggle follow' },
+      { 
+        success: false, 
+        error: 'Failed to toggle follow',
+        details: process.env.NODE_ENV === 'development' 
+          ? (error instanceof Error ? error.message : 'Unknown error')
+          : undefined,
+      },
       { status: 500 }
     );
   }

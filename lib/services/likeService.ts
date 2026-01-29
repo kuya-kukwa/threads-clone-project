@@ -82,6 +82,15 @@ export class LikeService {
         }
       );
 
+      logger.info({
+        msg: 'Like document created',
+        userId,
+        threadId,
+        likeId: like.$id,
+        databaseId: APPWRITE_CONFIG.DATABASE_ID,
+        collectionId: APPWRITE_CONFIG.COLLECTIONS.LIKES,
+      });
+
       // Update thread like count (denormalized)
       await serverDatabases.updateDocument(
         APPWRITE_CONFIG.DATABASE_ID,
@@ -89,7 +98,6 @@ export class LikeService {
         threadId,
         {
           likeCount: (thread.likeCount || 0) + 1,
-          updatedAt: new Date().toISOString(),
         }
       );
 
@@ -150,7 +158,6 @@ export class LikeService {
         threadId,
         {
           likeCount: Math.max((thread.likeCount || 0) - 1, 0),
-          updatedAt: new Date().toISOString(),
         }
       );
 
