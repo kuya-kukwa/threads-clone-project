@@ -40,7 +40,7 @@ export function ProfileCard({
         headers['x-session-id'] = sessionToken;
       }
 
-      const response = await fetch(`/api/profile/${profile.$id}/follow`, {
+      const response = await fetch(`/api/profile/${profile.userId}/follow`, {
         method: 'GET',
         credentials: 'include',
         headers,
@@ -57,7 +57,7 @@ export function ProfileCard({
     } finally {
       setFollowStatusLoaded(true);
     }
-  }, [profile.$id]);
+  }, [profile.userId]);
 
   const fetchFollowCounts = useCallback(async () => {
     try {
@@ -67,7 +67,7 @@ export function ProfileCard({
         headers['x-session-id'] = sessionToken;
       }
 
-      const response = await fetch(`/api/profile/${profile.$id}/follow`, {
+      const response = await fetch(`/api/profile/${profile.userId}/follow`, {
         method: 'GET',
         credentials: 'include',
         headers,
@@ -83,7 +83,7 @@ export function ProfileCard({
     } finally {
       setFollowStatusLoaded(true);
     }
-  }, [profile.$id]);
+  }, [profile.userId]);
 
   // Fetch follow status on mount
   useEffect(() => {
@@ -118,7 +118,7 @@ export function ProfileCard({
         headers['x-session-id'] = sessionToken;
       }
 
-      const response = await fetch(`/api/profile/${profile.$id}/follow`, {
+      const response = await fetch(`/api/profile/${profile.userId}/follow`, {
         method: 'POST',
         credentials: 'include',
         headers,

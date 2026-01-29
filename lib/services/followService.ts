@@ -282,11 +282,19 @@ export class FollowService {
       // Get list of users the current user follows
       const followingIds = await this.getFollowingIds(userId, 100);
 
+      logger.info({
+        msg: 'Following feed - fetching following IDs',
+        userId,
+        followingCount: followingIds.length,
+        followingIds: followingIds.slice(0, 5), // Log first 5 for debugging
+      });
+
       if (followingIds.length === 0) {
         return { threads: [], nextCursor: null, hasMore: false, followingCount: 0 };
       }
 
-      // Build query for threads
+      // Build query for threads from followed users
+      // Use Query.contains for array matching if Query.equal doesn't work properly
       const queries: string[] = [
         Query.equal('authorId', followingIds),
         Query.equal('parentThreadId', ''), // Only top-level threads, not replies
@@ -298,12 +306,24 @@ export class FollowService {
         queries.push(Query.cursorAfter(cursor));
       }
 
+      logger.debug({
+        msg: 'Following feed - executing query',
+        queriesCount: queries.length,
+        followingIdsCount: followingIds.length,
+      });
+
       // Fetch threads
       const response = await serverDatabases.listDocuments<Thread>(
         APPWRITE_CONFIG.DATABASE_ID,
         APPWRITE_CONFIG.COLLECTIONS.THREADS,
         queries
       );
+
+      logger.info({
+        msg: 'Following feed - raw response',
+        totalDocuments: response.total,
+        returnedDocuments: response.documents.length,
+      });
 
       // Determine pagination
       const hasMore = response.documents.length > limit;
