@@ -5,6 +5,7 @@
  */
 
 import { Client, Account, Databases, Storage, Users } from 'node-appwrite';
+import { NextRequest } from 'next/server';
 
 // Server-only environment variables - accessed directly
 const ENDPOINT = process.env.NEXT_PUBLIC_APPWRITE_ENDPOINT!;
@@ -28,8 +29,22 @@ export const serverUsers = new Users(serverClient);
 /**
  * Helper to create a session-specific client for server actions
  * This respects user permissions and session context
+ * @param sessionOrRequest - Either a session string or a NextRequest object
  */
-export function createSessionClient(session: string) {
+export function createSessionClient(sessionOrRequest: string | NextRequest) {
+  let session: string;
+  
+  if (typeof sessionOrRequest === 'string') {
+    session = sessionOrRequest;
+  } else {
+    // Extract session from request cookies
+    const sessionCookie = sessionOrRequest.cookies.get('appwrite_session');
+    if (!sessionCookie?.value) {
+      throw new Error('No session found');
+    }
+    session = sessionCookie.value;
+  }
+  
   const client = new Client()
     .setEndpoint(ENDPOINT)
     .setProject(PROJECT_ID)

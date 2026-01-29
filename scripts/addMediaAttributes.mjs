@@ -88,7 +88,6 @@ async function main() {
   console.log('📝 Adding new attributes...\n');
 
   let successCount = 0;
-  let skipCount = 0;
   let failCount = 0;
 
   for (const attr of newAttributes) {

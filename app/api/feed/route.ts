@@ -6,6 +6,7 @@
  * - Cursor-based pagination
  * - Public access (no auth required)
  * - Returns threads with author data
+ * - Includes like status if user is authenticated
  * 
  * Query Parameters:
  * - cursor: Optional cursor for pagination (thread ID)
@@ -14,8 +15,10 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { getPublicFeed } from '@/lib/services/threadService';
+import { LikeService } from '@/lib/services/likeService';
 import { feedPaginationSchema } from '@/schemas/thread.schema';
 import { createRequestLogger } from '@/lib/logger/requestLogger';
+import { createSessionClient } from '@/lib/appwriteServer';
 import { getErrorMessage } from '@/lib/errors';
 
 export async function OPTIONS() {
@@ -73,10 +76,31 @@ export async function GET(request: NextRequest) {
       hasMore,
     });
 
+    // Try to get current user for like status
+    let userId: string | null = null;
+    try {
+      const { account } = await createSessionClient(request);
+      const user = await account.get();
+      userId = user.$id;
+    } catch {
+      // User not authenticated, continue without like status
+    }
+
+    // Add like status if user is authenticated
+    let threadsWithLikeStatus = threads;
+    if (userId) {
+      const threadIds = threads.map((t) => t.$id);
+      const likeMap = await LikeService.getUserLikeStatusBatch(userId, threadIds);
+      threadsWithLikeStatus = threads.map((thread) => ({
+        ...thread,
+        isLiked: likeMap.get(thread.$id) || false,
+      }));
+    }
+
     return NextResponse.json(
       {
         success: true,
-        threads,
+        threads: threadsWithLikeStatus,
         nextCursor,
         hasMore,
       },

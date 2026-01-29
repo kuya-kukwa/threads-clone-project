@@ -10,6 +10,7 @@
  * - Loading states
  * - Empty state
  * - Error handling
+ * - Like status integration
  *
  * Performance:
  * - No refetch loops
@@ -18,15 +19,15 @@
  */
 
 import { useState, useEffect } from 'react';
-import { ThreadWithAuthor, FeedResponse } from '@/types/appwrite';
-import { ThreadCard } from './ThreadCard';
+import { FeedResponse } from '@/types/appwrite';
+import { ThreadCard, ThreadWithLikeStatus } from './ThreadCard';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { getErrorMessage } from '@/lib/errors';
 import { logger } from '@/lib/logger/logger';
 
 interface PublicFeedProps {
-  initialThreads?: ThreadWithAuthor[];
+  initialThreads?: ThreadWithLikeStatus[];
   initialNextCursor?: string | null;
   initialHasMore?: boolean;
 }
@@ -36,7 +37,7 @@ export function PublicFeed({
   initialNextCursor = null,
   initialHasMore = false,
 }: PublicFeedProps) {
-  const [threads, setThreads] = useState<ThreadWithAuthor[]>(initialThreads);
+  const [threads, setThreads] = useState<ThreadWithLikeStatus[]>(initialThreads);
   const [nextCursor, setNextCursor] = useState<string | null>(
     initialNextCursor,
   );

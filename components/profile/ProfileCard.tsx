@@ -2,11 +2,11 @@
 
 /**
  * Profile Card Component
- * Displays user profile with edit capability
+ * Displays user profile with edit capability and follow functionality
  * Follows mobile-first architecture with dark theme
  */
 
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { UserProfile } from '@/types/appwrite';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -23,6 +23,100 @@ export function ProfileCard({
 }: ProfileCardProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [profile, setProfile] = useState(initialProfile);
+  
+  // Follow state
+  const [isFollowing, setIsFollowing] = useState(false);
+  const [followersCount, setFollowersCount] = useState(0);
+  const [followingCount, setFollowingCount] = useState(0);
+  const [isFollowLoading, setIsFollowLoading] = useState(false);
+  const [followStatusLoaded, setFollowStatusLoaded] = useState(false);
+
+  const fetchFollowStatus = useCallback(async () => {
+    try {
+      const response = await fetch(`/api/profile/${profile.$id}/follow`, {
+        method: 'GET',
+        credentials: 'include',
+      });
+      const data = await response.json();
+      
+      if (data.success) {
+        setIsFollowing(data.following);
+        setFollowersCount(data.followersCount);
+        setFollowingCount(data.followingCount);
+      }
+    } catch (error) {
+      console.error('Failed to fetch follow status:', error);
+    } finally {
+      setFollowStatusLoaded(true);
+    }
+  }, [profile.$id]);
+
+  const fetchFollowCounts = useCallback(async () => {
+    try {
+      const response = await fetch(`/api/profile/${profile.$id}/follow`, {
+        method: 'GET',
+        credentials: 'include',
+      });
+      const data = await response.json();
+      
+      if (data.success) {
+        setFollowersCount(data.followersCount);
+        setFollowingCount(data.followingCount);
+      }
+    } catch (error) {
+      console.error('Failed to fetch follow counts:', error);
+    } finally {
+      setFollowStatusLoaded(true);
+    }
+  }, [profile.$id]);
+
+  // Fetch follow status on mount
+  useEffect(() => {
+    if (!isOwnProfile) {
+      fetchFollowStatus();
+    } else {
+      // For own profile, just fetch the counts
+      fetchFollowCounts();
+    }
+  }, [isOwnProfile, fetchFollowStatus, fetchFollowCounts]);
+
+  const handleFollowClick = async () => {
+    if (isFollowLoading) return;
+    
+    setIsFollowLoading(true);
+    
+    // Optimistic update
+    const wasFollowing = isFollowing;
+    setIsFollowing(!wasFollowing);
+    setFollowersCount((prev) => (wasFollowing ? Math.max(prev - 1, 0) : prev + 1));
+
+    try {
+      const response = await fetch(`/api/profile/${profile.$id}/follow`, {
+        method: 'POST',
+        credentials: 'include',
+      });
+
+      const data = await response.json();
+
+      if (!data.success) {
+        // Revert on failure
+        setIsFollowing(wasFollowing);
+        setFollowersCount((prev) => (wasFollowing ? prev + 1 : Math.max(prev - 1, 0)));
+        console.error('Follow failed:', data.error);
+      } else {
+        // Sync with server response
+        setIsFollowing(data.following);
+        setFollowersCount(data.followersCount);
+      }
+    } catch (error) {
+      // Revert on error
+      setIsFollowing(wasFollowing);
+      setFollowersCount((prev) => (wasFollowing ? prev + 1 : Math.max(prev - 1, 0)));
+      console.error('Follow error:', error);
+    } finally {
+      setIsFollowLoading(false);
+    }
+  };
 
   const handleEditSuccess = (updatedProfile: UserProfile) => {
     setProfile(updatedProfile);
@@ -89,6 +183,18 @@ export function ProfileCard({
         </p>
       )}
 
+      {/* Followers/Following stats */}
+      {followStatusLoaded && (
+        <div className="flex items-center gap-4 mt-3 text-sm text-muted-foreground">
+          <span>
+            <span className="font-semibold text-foreground">{followersCount}</span> followers
+          </span>
+          <span>
+            <span className="font-semibold text-foreground">{followingCount}</span> following
+          </span>
+        </div>
+      )}
+
       {/* Action button */}
       {isOwnProfile ? (
         <Button
@@ -100,10 +206,24 @@ export function ProfileCard({
         </Button>
       ) : (
         <Button
-          variant="default"
-          className="w-full mt-4 h-10 text-sm font-medium"
+          onClick={handleFollowClick}
+          variant={isFollowing ? 'outline' : 'default'}
+          className={`w-full mt-4 h-10 text-sm font-medium ${
+            isFollowing ? 'border-border hover:bg-secondary' : ''
+          } ${isFollowLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
+          disabled={isFollowLoading}
         >
-          Follow
+          {isFollowLoading ? (
+            <span className="flex items-center gap-2">
+              <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+              </svg>
+              {isFollowing ? 'Unfollowing...' : 'Following...'}
+            </span>
+          ) : (
+            isFollowing ? 'Following' : 'Follow'
+          )}
         </Button>
       )}
     </div>

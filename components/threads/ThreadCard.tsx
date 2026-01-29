@@ -10,6 +10,7 @@
  * - Subtle glass backdrop instead of black
  * - Play/pause overlay for videos
  * - Professional animations
+ * - Like/unlike functionality
  */
 
 import { ThreadWithAuthor, MediaItem as MediaItemType } from '@/types/appwrite';
@@ -26,15 +27,19 @@ import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useMemo, useState, useRef, useCallback, TouchEvent } from 'react';
 
+export interface ThreadWithLikeStatus extends ThreadWithAuthor {
+  isLiked?: boolean;
+}
+
 interface ThreadCardProps {
-  thread: ThreadWithAuthor;
+  thread: ThreadWithLikeStatus;
 }
 
 /**
  * Parse media from thread document
  * Handles both new multi-media format and legacy single image format
  */
-function parseThreadMedia(thread: ThreadWithAuthor): MediaItemType[] {
+function parseThreadMedia(thread: ThreadWithLikeStatus): MediaItemType[] {
   const media: MediaItemType[] = [];
 
   // Try to parse new multi-media format first
@@ -84,6 +89,9 @@ export function ThreadCard({ thread }: ThreadCardProps) {
   const { author, content, createdAt } = thread;
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState(0);
+  const [isLiked, setIsLiked] = useState(thread.isLiked || false);
+  const [likeCount, setLikeCount] = useState(thread.likeCount || 0);
+  const [isLiking, setIsLiking] = useState(false);
 
   // Parse media items
   const mediaItems = useMemo(() => parseThreadMedia(thread), [thread]);
@@ -109,6 +117,47 @@ export function ThreadCard({ thread }: ThreadCardProps) {
   const handleCommentClick = (e?: React.MouseEvent) => {
     e?.stopPropagation();
     router.push(`/thread/${thread.$id}`);
+  };
+
+  // Handle like button click
+  const handleLikeClick = async (e?: React.MouseEvent) => {
+    e?.stopPropagation();
+    
+    if (isLiking) return;
+    
+    setIsLiking(true);
+    
+    // Optimistic update
+    const wasLiked = isLiked;
+    setIsLiked(!wasLiked);
+    setLikeCount((prev) => (wasLiked ? Math.max(prev - 1, 0) : prev + 1));
+
+    try {
+      const response = await fetch(`/api/threads/${thread.$id}/like`, {
+        method: 'POST',
+        credentials: 'include',
+      });
+
+      const data = await response.json();
+
+      if (!data.success) {
+        // Revert on failure
+        setIsLiked(wasLiked);
+        setLikeCount((prev) => (wasLiked ? prev + 1 : Math.max(prev - 1, 0)));
+        console.error('Like failed:', data.error);
+      } else {
+        // Sync with server response
+        setIsLiked(data.liked);
+        setLikeCount(data.likeCount);
+      }
+    } catch (error) {
+      // Revert on error
+      setIsLiked(wasLiked);
+      setLikeCount((prev) => (wasLiked ? prev + 1 : Math.max(prev - 1, 0)));
+      console.error('Like error:', error);
+    } finally {
+      setIsLiking(false);
+    }
   };
 
   return (
@@ -163,9 +212,12 @@ export function ThreadCard({ thread }: ThreadCardProps) {
             {/* Action buttons */}
             <div className="flex items-center gap-6 mt-3 -ml-2">
               <ActionButton
-                icon={<HeartIcon />}
+                icon={<HeartIcon filled={isLiked} />}
                 label="Like"
-                count={thread.likeCount || 0}
+                count={likeCount}
+                onClick={handleLikeClick}
+                isActive={isLiked}
+                isLoading={isLiking}
               />
               <ActionButton
                 icon={<CommentIcon />}
@@ -200,21 +252,30 @@ function ActionButton({
   label,
   count,
   onClick,
+  isActive,
+  isLoading,
 }: {
   icon: React.ReactNode;
   label: string;
   count?: number;
   onClick?: (e?: React.MouseEvent) => void;
+  isActive?: boolean;
+  isLoading?: boolean;
 }) {
   return (
     <button
-      className="flex items-center gap-1.5 text-muted-foreground hover:text-primary transition-colors p-2 rounded-full hover:bg-primary/10"
+      className={`flex items-center gap-1.5 transition-colors p-2 rounded-full ${
+        isActive 
+          ? 'text-red-500 hover:text-red-600' 
+          : 'text-muted-foreground hover:text-primary hover:bg-primary/10'
+      } ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
       aria-label={label}
       onClick={onClick}
+      disabled={isLoading}
     >
-      <span className="w-5 h-5">{icon}</span>
+      <span className={`w-5 h-5 ${isLoading ? 'animate-pulse' : ''}`}>{icon}</span>
       {count !== undefined && count > 0 && (
-        <span className="text-xs">{count}</span>
+        <span className={`text-xs ${isActive ? 'text-red-500' : ''}`}>{count}</span>
       )}
     </button>
   );
@@ -787,10 +848,10 @@ function VideoIcon({ className }: { className?: string }) {
   );
 }
 
-function HeartIcon() {
+function HeartIcon({ filled = false }: { filled?: boolean }) {
   return (
     <svg
-      fill="none"
+      fill={filled ? 'currentColor' : 'none'}
       stroke="currentColor"
       viewBox="0 0 24 24"
       strokeWidth={1.5}

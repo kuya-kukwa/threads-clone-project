@@ -86,7 +86,8 @@ export function AvatarUpload({
    * Upload file to server
    */
   const uploadFile = useCallback(
-    async (file: File, localPreviewUrl: string) => {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    async (file: File, _localPreviewUrl: string) => {
       setUploadState('uploading');
       setError(null);
 
