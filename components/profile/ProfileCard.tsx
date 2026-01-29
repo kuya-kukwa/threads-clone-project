@@ -113,7 +113,7 @@ export function ProfileCard({
         'Content-Type': 'application/json',
         'X-CSRF-Token': 'true',
       };
-      
+
       if (sessionToken) {
         headers['x-session-id'] = sessionToken;
       }
