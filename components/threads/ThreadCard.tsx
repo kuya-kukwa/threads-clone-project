@@ -136,6 +136,9 @@ export function ThreadCard({ thread }: ThreadCardProps) {
       const response = await fetch(`/api/threads/${thread.$id}/like`, {
         method: 'POST',
         credentials: 'include',
+        headers: {
+          'X-CSRF-Token': 'true',
+        },
       });
 
       const data = await response.json();

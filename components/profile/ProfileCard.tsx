@@ -96,6 +96,9 @@ export function ProfileCard({
       const response = await fetch(`/api/profile/${profile.$id}/follow`, {
         method: 'POST',
         credentials: 'include',
+        headers: {
+          'X-CSRF-Token': 'true',
+        },
       });
 
       const data = await response.json();
