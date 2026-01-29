@@ -526,7 +526,7 @@ function SettingsModal({
       />
 
       {/* Modal */}
-      <div className="relative w-full max-w-md bg-card border border-border rounded-t-2xl md:rounded-2xl overflow-hidden animate-slide-up">
+      <div className="relative w-full max-w-md bg-[#1a1a1a] border border-border rounded-t-2xl md:rounded-2xl overflow-hidden animate-slide-up">
         <div className="p-4 border-b border-border">
           <div className="flex items-center justify-between">
             <h2 className="text-lg font-semibold">Settings</h2>

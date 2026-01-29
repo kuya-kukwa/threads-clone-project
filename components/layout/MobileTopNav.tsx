@@ -227,7 +227,7 @@ export function MobileTopNav({
           />
 
           {/* Menu Panel - Slide from left */}
-          <div className="absolute top-0 left-0 bottom-0 w-72 bg-background border-r border-border animate-slide-in-left">
+          <div className="absolute top-0 left-0 bottom-0 w-72 bg-[#121212] border-r border-border animate-slide-in-left">
             {/* Menu Header */}
             <div className="flex items-center justify-between h-14 px-4 border-b border-border/50">
               <span className="text-lg font-semibold">Menu</span>
@@ -294,7 +294,7 @@ export function MobileTopNav({
           />
 
           {/* Search Panel - Slide from top */}
-          <div className="absolute top-0 left-0 right-0 bg-background border-b border-border animate-slide-in-top">
+          <div className="absolute top-0 left-0 right-0 bg-[#121212] border-b border-border animate-slide-in-top">
             {/* Search Header */}
             <div className="flex items-center gap-3 h-14 px-4">
               <button
