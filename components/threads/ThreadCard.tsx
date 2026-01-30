@@ -12,7 +12,9 @@
  * - Professional animations
  * - Like/unlike functionality
  * 
- * Refactored: Uses sub-components for better maintainability
+ * Performance Patterns (like Threads/Twitter):
+ * - Prefetches thread detail on hover/pointer down
+ * - Uses sub-components for better maintainability
  * - MediaGallery: Swipeable media carousel
  * - MediaLightbox: Full-screen media viewer
  * - LikeButton: Like/unlike with optimistic updates
@@ -23,7 +25,8 @@ import { ThreadWithAuthor, MediaItem as MediaItemType } from '@/types/appwrite';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { formatDistanceToNow } from 'date-fns';
 import { useRouter } from 'next/navigation';
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useCallback } from 'react';
+import { usePrefetchThread } from '@/hooks';
 
 // Import sub-components
 import { SwipeableMediaGallery } from './MediaGallery';
@@ -95,6 +98,9 @@ export function ThreadCard({ thread }: ThreadCardProps) {
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState(0);
 
+  // Prefetch thread detail on hover/pointer down for instant navigation
+  const { prefetchProps } = usePrefetchThread(thread.$id);
+
   // Parse media items
   const mediaItems = useMemo(() => parseThreadMedia(thread), [thread]);
 
@@ -116,14 +122,23 @@ export function ThreadCard({ thread }: ThreadCardProps) {
   };
 
   // Handle comment button click - navigate to thread detail (comment section)
-  const handleCommentClick = (e?: React.MouseEvent) => {
+  const handleCommentClick = useCallback((e?: React.MouseEvent) => {
     e?.stopPropagation();
     router.push(`/thread/${thread.$id}`);
-  };
+  }, [router, thread.$id]);
+
+  // Handle card click - navigate to thread detail
+  const handleCardClick = useCallback(() => {
+    router.push(`/thread/${thread.$id}`);
+  }, [router, thread.$id]);
 
   return (
     <>
-      <article className="border-b border-border/50 p-4 hover:bg-card/50 transition-colors animate-fade-in">
+      <article 
+        className="border-b border-border/50 p-4 hover:bg-card/50 transition-colors animate-fade-in cursor-pointer"
+        onClick={handleCardClick}
+        {...prefetchProps}
+      >
         <div className="flex gap-3">
           {/* Avatar */}
           <Avatar className="w-10 h-10 flex-shrink-0 ring-2 ring-border/50">

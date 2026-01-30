@@ -22,7 +22,7 @@ import { useState, useEffect } from 'react';
 import { FeedResponse } from '@/types/appwrite';
 import { ThreadCard, ThreadWithLikeStatus } from './ThreadCard';
 import { Button } from '@/components/ui/button';
-import { Skeleton } from '@/components/ui/skeleton';
+import { FeedSkeleton } from '@/components/skeletons';
 import { getErrorMessage } from '@/lib/errors';
 import { logger } from '@/lib/logger/logger';
 import { getSessionToken } from '@/lib/appwriteClient';
@@ -121,22 +121,9 @@ export function PublicFeed({
     }
   };
 
-  // Initial loading state
+  // Initial loading state - use professional skeleton
   if (isInitialLoading) {
-    return (
-      <div className="space-y-4 p-4">
-        {[...Array(3)].map((_, i) => (
-          <div key={i} className="flex gap-3">
-            <Skeleton className="w-10 h-10 rounded-full flex-shrink-0" />
-            <div className="flex-1 space-y-2">
-              <Skeleton className="h-4 w-1/3" />
-              <Skeleton className="h-4 w-full" />
-              <Skeleton className="h-4 w-2/3" />
-            </div>
-          </div>
-        ))}
-      </div>
-    );
+    return <FeedSkeleton count={5} />;
   }
 
   // Empty state

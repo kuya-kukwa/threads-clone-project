@@ -130,6 +130,23 @@ export async function GET(
       ? replies[replies.length - 1].$id
       : null;
 
+    // If no replies, return early with empty array
+    if (replies.length === 0) {
+      return NextResponse.json(
+        {
+          success: true,
+          data: {
+            replies: [],
+            nextCursor: null,
+            hasMore: false,
+            total: 0,
+          },
+          requestId,
+        },
+        { status: 200 }
+      );
+    }
+
     // Fetch author profiles for all replies
     const authorIds = [...new Set(replies.map((r) => r.authorId))];
     const authorsResult = await serverDatabases.listDocuments<UserProfile>(
