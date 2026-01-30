@@ -11,7 +11,7 @@
  * - Play/pause overlay for videos
  * - Professional animations
  * - Like/unlike functionality
- * 
+ *
  * Performance Patterns (like Threads/Twitter):
  * - Prefetches thread detail on hover/pointer down
  * - Uses sub-components for better maintainability
@@ -122,10 +122,13 @@ export function ThreadCard({ thread }: ThreadCardProps) {
   };
 
   // Handle comment button click - navigate to thread detail (comment section)
-  const handleCommentClick = useCallback((e?: React.MouseEvent) => {
-    e?.stopPropagation();
-    router.push(`/thread/${thread.$id}`);
-  }, [router, thread.$id]);
+  const handleCommentClick = useCallback(
+    (e?: React.MouseEvent) => {
+      e?.stopPropagation();
+      router.push(`/thread/${thread.$id}`);
+    },
+    [router, thread.$id],
+  );
 
   // Handle card click - navigate to thread detail
   const handleCardClick = useCallback(() => {
@@ -134,7 +137,7 @@ export function ThreadCard({ thread }: ThreadCardProps) {
 
   return (
     <>
-      <article 
+      <article
         className="border-b border-border/50 p-4 hover:bg-card/50 transition-colors animate-fade-in cursor-pointer"
         onClick={handleCardClick}
         {...prefetchProps}
@@ -162,7 +165,7 @@ export function ThreadCard({ thread }: ThreadCardProps) {
                 @{author.username}
               </span>
               <span className="text-xs text-muted-foreground flex-shrink-0">
-                 {timeAgo}
+                {timeAgo}
               </span>
             </div>
 

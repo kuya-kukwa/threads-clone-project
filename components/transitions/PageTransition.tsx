@@ -2,10 +2,10 @@
 
 /**
  * Page Transition Component
- * 
+ *
  * Creates smooth SPA-like transitions between pages.
  * Pattern: Header/footer never unmount, only content swaps.
- * 
+ *
  * Features:
  * - No white flash between pages
  * - Content fades in/out smoothly
@@ -29,7 +29,9 @@ interface PageTransitionProps {
 export function PageTransition({ children, className }: PageTransitionProps) {
   const pathname = usePathname();
   const [displayChildren, setDisplayChildren] = useState(children);
-  const [transitionState, setTransitionState] = useState<'idle' | 'exiting' | 'entering'>('idle');
+  const [transitionState, setTransitionState] = useState<
+    'idle' | 'exiting' | 'entering'
+  >('idle');
   const isFirstRender = useRef(true);
 
   useEffect(() => {
@@ -79,7 +81,7 @@ export function PageTransition({ children, className }: PageTransitionProps) {
         transitionState === 'exiting' && 'opacity-0 translate-y-1',
         transitionState === 'entering' && 'opacity-100 translate-y-0',
         transitionState === 'idle' && 'opacity-100 translate-y-0',
-        className
+        className,
       )}
     >
       {displayChildren}
@@ -108,7 +110,7 @@ export function FadeTransition({ children, className }: PageTransitionProps) {
       className={cn(
         'transition-opacity duration-200 ease-out',
         mounted ? 'opacity-100' : 'opacity-0',
-        className
+        className,
       )}
     >
       {children}
@@ -119,7 +121,10 @@ export function FadeTransition({ children, className }: PageTransitionProps) {
 /**
  * Slide up transition - for content appearing from bottom
  */
-export function SlideUpTransition({ children, className }: PageTransitionProps) {
+export function SlideUpTransition({
+  children,
+  className,
+}: PageTransitionProps) {
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
@@ -136,7 +141,7 @@ export function SlideUpTransition({ children, className }: PageTransitionProps) 
       className={cn(
         'transition-all duration-200 ease-out',
         mounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4',
-        className
+        className,
       )}
     >
       {children}
@@ -167,13 +172,16 @@ export function StaggerChildren({
 
   useEffect(() => {
     const timeouts: NodeJS.Timeout[] = [];
-    
+
     children.forEach((_, index) => {
-      const timeout = setTimeout(() => {
-        startTransition(() => {
-          setVisibleCount(index + 1);
-        });
-      }, initialDelay + index * staggerDelay);
+      const timeout = setTimeout(
+        () => {
+          startTransition(() => {
+            setVisibleCount(index + 1);
+          });
+        },
+        initialDelay + index * staggerDelay,
+      );
       timeouts.push(timeout);
     });
 
@@ -189,7 +197,7 @@ export function StaggerChildren({
             'transition-all duration-200 ease-out',
             index < visibleCount
               ? 'opacity-100 translate-y-0'
-              : 'opacity-0 translate-y-2'
+              : 'opacity-0 translate-y-2',
           )}
         >
           {child}
@@ -210,10 +218,14 @@ interface ContentSwapProps {
   className?: string;
 }
 
-export function ContentSwap({ contentKey, children, className }: ContentSwapProps) {
-  const [items, setItems] = useState<Array<{ key: string; content: ReactNode }>>([
-    { key: contentKey, content: children },
-  ]);
+export function ContentSwap({
+  contentKey,
+  children,
+  className,
+}: ContentSwapProps) {
+  const [items, setItems] = useState<
+    Array<{ key: string; content: ReactNode }>
+  >([{ key: contentKey, content: children }]);
   const [activeKey, setActiveKey] = useState(contentKey);
   const prevContentKeyRef = useRef(contentKey);
 
@@ -263,7 +275,7 @@ export function ContentSwap({ contentKey, children, className }: ContentSwapProp
             'transition-all duration-200 ease-out',
             item.key === activeKey
               ? 'opacity-100 relative'
-              : 'opacity-0 absolute inset-0 pointer-events-none'
+              : 'opacity-0 absolute inset-0 pointer-events-none',
           )}
         >
           {item.content}
@@ -308,13 +320,13 @@ export function AnimatePresence({
           setShouldRender(true);
         });
       }, 0);
-      
+
       const animateTimer = setTimeout(() => {
         startTransition(() => {
           setIsAnimating(true);
         });
       }, 16); // One frame delay
-      
+
       return () => {
         clearTimeout(renderTimer);
         clearTimeout(animateTimer);
@@ -339,7 +351,7 @@ export function AnimatePresence({
       className={cn(
         'transition-all ease-out',
         isAnimating ? 'opacity-100 scale-100' : 'opacity-0 scale-95',
-        className
+        className,
       )}
       style={{ transitionDuration: `${duration}ms` }}
     >

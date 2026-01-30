@@ -2,23 +2,23 @@
 
 /**
  * Streaming Components
- * 
+ *
  * React Suspense boundaries for streaming content like big social apps.
  * Pattern: Load content in layers, never block the whole page.
- * 
+ *
  * 1. Page shell (instant)
- * 2. Main content (fast) 
+ * 2. Main content (fast)
  * 3. Replies/comments (lazy)
  * 4. Media (deferred)
  */
 
 import { Suspense, ReactNode, ComponentType, lazy } from 'react';
-import { 
-  FeedSkeleton, 
-  ThreadDetailSkeleton, 
+import {
+  FeedSkeleton,
+  ThreadDetailSkeleton,
   ProfileHeaderSkeleton,
   ReplyListSkeleton,
-  ThreadCardSkeleton
+  ThreadCardSkeleton,
 } from '@/components/skeletons';
 
 interface StreamingBoundaryProps {
@@ -31,10 +31,10 @@ interface StreamingBoundaryProps {
 /**
  * Generic streaming boundary
  */
-export function StreamingBoundary({ 
-  children, 
+export function StreamingBoundary({
+  children,
   fallback,
-  suspenseKey 
+  suspenseKey,
 }: StreamingBoundaryProps) {
   return (
     <Suspense key={suspenseKey} fallback={fallback}>
@@ -68,7 +68,11 @@ export function ThreadStreamingBoundary({ children }: { children: ReactNode }) {
 /**
  * Profile streaming boundary
  */
-export function ProfileStreamingBoundary({ children }: { children: ReactNode }) {
+export function ProfileStreamingBoundary({
+  children,
+}: {
+  children: ReactNode;
+}) {
   return (
     <StreamingBoundary fallback={<ProfileHeaderSkeleton />}>
       {children}
@@ -79,7 +83,11 @@ export function ProfileStreamingBoundary({ children }: { children: ReactNode }) 
 /**
  * Replies streaming boundary - loads after main thread
  */
-export function RepliesStreamingBoundary({ children }: { children: ReactNode }) {
+export function RepliesStreamingBoundary({
+  children,
+}: {
+  children: ReactNode;
+}) {
   return (
     <StreamingBoundary fallback={<ReplyListSkeleton count={3} />}>
       {children}
@@ -90,7 +98,11 @@ export function RepliesStreamingBoundary({ children }: { children: ReactNode }) 
 /**
  * Single thread card boundary
  */
-export function ThreadCardStreamingBoundary({ children }: { children: ReactNode }) {
+export function ThreadCardStreamingBoundary({
+  children,
+}: {
+  children: ReactNode;
+}) {
   return (
     <StreamingBoundary fallback={<ThreadCardSkeleton />}>
       {children}
@@ -110,7 +122,11 @@ interface DeferredProps {
   placeholder?: ReactNode;
 }
 
-export function Deferred({ children, delay = 0, placeholder = null }: DeferredProps) {
+export function Deferred({
+  children,
+  delay = 0,
+  placeholder = null,
+}: DeferredProps) {
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
@@ -184,7 +200,7 @@ export function ProgressiveLoad<T>({
  */
 export function createLazyComponent<P extends object>(
   importFn: () => Promise<{ default: ComponentType<P> }>,
-  fallback: ReactNode = null
+  fallback: ReactNode = null,
 ): ComponentType<P> {
   const LazyComponent = lazy(importFn);
 
@@ -244,7 +260,7 @@ export function LazyWhenVisible({
           }
         });
       },
-      { rootMargin, threshold }
+      { rootMargin, threshold },
     );
 
     observer.observe(element);
@@ -274,11 +290,7 @@ interface LazyMediaProps {
 
 export function LazyMedia({ children, placeholder }: LazyMediaProps) {
   return (
-    <LazyWhenVisible 
-      fallback={placeholder} 
-      rootMargin="100px"
-      keepMounted
-    >
+    <LazyWhenVisible fallback={placeholder} rootMargin="100px" keepMounted>
       {children}
     </LazyWhenVisible>
   );
