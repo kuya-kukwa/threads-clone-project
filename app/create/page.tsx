@@ -259,7 +259,9 @@ export default function CreatePage() {
                   alt={userProfile?.displayName || user?.name || 'User'}
                 />
                 <AvatarFallback className="bg-gradient-to-br from-primary to-accent text-white font-semibold text-lg">
-                  {(userProfile?.displayName || user?.name || 'U')[0]?.toUpperCase()}
+                  {(userProfile?.displayName ||
+                    user?.name ||
+                    'U')[0]?.toUpperCase()}
                 </AvatarFallback>
               </Avatar>
               {/* Thread line */}
