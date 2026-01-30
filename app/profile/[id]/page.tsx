@@ -263,7 +263,7 @@ function ProfileHeader({
   }
 
   return (
-    <div className="sticky top-0 z-40 bg-background">
+    <div className="bg-background">
       <div className="max-w-2xl mx-auto px-4">
         <div className="flex items-center justify-end h-12">
           <button

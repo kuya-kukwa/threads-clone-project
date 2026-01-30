@@ -12,6 +12,8 @@ import Link from 'next/link';
 import { AuthGuard } from '@/components/auth/AuthGuard';
 import { useCurrentUser } from '@/hooks';
 import { getSessionToken } from '@/lib/appwriteClient';
+import { UserProfile } from '@/types/appwrite';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
 const MAX_CHARS = 500;
 const MAX_FILES = 4; // Maximum 4 media files per post
@@ -20,6 +22,7 @@ const MAX_FILE_SIZE = 50 * 1024 * 1024; // 50MB
 export default function CreatePage() {
   const router = useRouter();
   const { user } = useCurrentUser();
+  const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [content, setContent] = useState('');
   const [mediaFiles, setMediaFiles] = useState<File[]>([]);
   const [mediaPreviews, setMediaPreviews] = useState<
@@ -33,6 +36,24 @@ export default function CreatePage() {
 
   const charsRemaining = MAX_CHARS - content.length;
   const canPost = content.trim().length > 0 || mediaFiles.length > 0;
+
+  // Fetch user profile to get avatar
+  useEffect(() => {
+    if (user?.$id) {
+      fetch(`/api/profile/${user.$id}`, {
+        credentials: 'include',
+      })
+        .then((res) => res.json())
+        .then((data) => {
+          if (data.success && data.profile) {
+            setUserProfile(data.profile);
+          }
+        })
+        .catch((err) => {
+          console.error('Failed to fetch user profile:', err);
+        });
+    }
+  }, [user?.$id]);
 
   // Auto-resize textarea
   useEffect(() => {
@@ -201,7 +222,7 @@ export default function CreatePage() {
     <AuthGuard>
       <div className="min-h-screen bg-background flex flex-col pb-20 md:pb-0">
         {/* Header */}
-        <div className="sticky top-0 z-50 bg-background border-b border-border/50">
+        <div className="sticky top-0 z-50 bg-[#121212] border-b border-border/50">
           <div className="max-w-2xl mx-auto px-4">
             <div className="flex items-center justify-between h-14">
               <Link
@@ -232,9 +253,15 @@ export default function CreatePage() {
           <div className="flex gap-3">
             {/* User avatar with thread line */}
             <div className="flex flex-col items-center">
-              <div className="w-11 h-11 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center text-white font-semibold text-lg shrink-0">
-                {user?.name?.[0]?.toUpperCase() || 'U'}
-              </div>
+              <Avatar className="w-11 h-11 flex-shrink-0 ring-2 ring-border/50">
+                <AvatarImage
+                  src={userProfile?.avatarUrl || undefined}
+                  alt={userProfile?.displayName || user?.name || 'User'}
+                />
+                <AvatarFallback className="bg-gradient-to-br from-primary to-accent text-white font-semibold text-lg">
+                  {(userProfile?.displayName || user?.name || 'U')[0]?.toUpperCase()}
+                </AvatarFallback>
+              </Avatar>
               {/* Thread line */}
               <div className="w-0.5 flex-1 min-h-[40px] bg-border/40 mt-2 rounded-full" />
             </div>
@@ -243,7 +270,7 @@ export default function CreatePage() {
             <div className="flex-1 min-w-0 pt-1">
               {/* Username */}
               <p className="text-base font-semibold text-foreground">
-                {user?.name || 'User'}
+                {userProfile?.displayName || user?.name || 'User'}
               </p>
 
               {/* Textarea */}
