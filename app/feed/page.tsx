@@ -44,7 +44,7 @@ function FeedContent() {
     avatarUrl?: string;
     displayName?: string;
   } | null>(null);
-  
+
   // Modal composer state
   const [showComposer, setShowComposer] = useState(false);
   const [composerContent, setComposerContent] = useState('');
@@ -230,7 +230,7 @@ function FeedContent() {
 
       {/* Desktop Create Post Modal */}
       <Dialog open={showComposer} onOpenChange={setShowComposer}>
-        <DialogContent 
+        <DialogContent
           className="bg-[#181818] border-border/30 p-0 max-w-[620px] rounded-2xl"
           showCloseButton={false}
         >
@@ -285,7 +285,9 @@ function FeedContent() {
                 <textarea
                   ref={textareaRef}
                   value={composerContent}
-                  onChange={(e) => setComposerContent(e.target.value.slice(0, MAX_CHARS))}
+                  onChange={(e) =>
+                    setComposerContent(e.target.value.slice(0, MAX_CHARS))
+                  }
                   placeholder="What's new?"
                   className="w-full bg-transparent text-[15px] text-foreground placeholder:text-muted-foreground resize-none outline-none min-h-[24px]"
                   rows={1}
@@ -324,7 +326,9 @@ function FeedContent() {
                     'U')[0]?.toUpperCase()}
                 </AvatarFallback>
               </Avatar>
-              <span className="text-muted-foreground text-[15px]">Add to thread</span>
+              <span className="text-muted-foreground text-[15px]">
+                Add to thread
+              </span>
             </div>
           </div>
 
@@ -382,7 +386,13 @@ function MoreHorizontalIcon({ className }: { className?: string }) {
 
 function DraftsIcon({ className }: { className?: string }) {
   return (
-    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+    <svg
+      className={className}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={2}
+    >
       <rect x="3" y="3" width="18" height="18" rx="2" />
       <path d="M9 3v18" />
     </svg>
@@ -391,7 +401,13 @@ function DraftsIcon({ className }: { className?: string }) {
 
 function ImageIcon({ className }: { className?: string }) {
   return (
-    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5}>
+    <svg
+      className={className}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={1.5}
+    >
       <rect x="3" y="3" width="18" height="18" rx="2" />
       <circle cx="8.5" cy="8.5" r="1.5" />
       <path d="M21 15l-5-5L5 21" />
@@ -401,27 +417,69 @@ function ImageIcon({ className }: { className?: string }) {
 
 function GifIcon({ className }: { className?: string }) {
   return (
-    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5}>
+    <svg
+      className={className}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={1.5}
+    >
       <rect x="2" y="4" width="20" height="16" rx="2" />
-      <text x="12" y="14" textAnchor="middle" fontSize="6" fill="currentColor" stroke="none" fontWeight="bold">GIF</text>
+      <text
+        x="12"
+        y="14"
+        textAnchor="middle"
+        fontSize="6"
+        fill="currentColor"
+        stroke="none"
+        fontWeight="bold"
+      >
+        GIF
+      </text>
     </svg>
   );
 }
 
 function EmojiIcon({ className }: { className?: string }) {
   return (
-    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5}>
+    <svg
+      className={className}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={1.5}
+    >
       <circle cx="12" cy="12" r="10" />
       <path d="M8 14s1.5 2 4 2 4-2 4-2" />
-      <line x1="9" y1="9" x2="9.01" y2="9" strokeWidth={2} strokeLinecap="round" />
-      <line x1="15" y1="9" x2="15.01" y2="9" strokeWidth={2} strokeLinecap="round" />
+      <line
+        x1="9"
+        y1="9"
+        x2="9.01"
+        y2="9"
+        strokeWidth={2}
+        strokeLinecap="round"
+      />
+      <line
+        x1="15"
+        y1="9"
+        x2="15.01"
+        y2="9"
+        strokeWidth={2}
+        strokeLinecap="round"
+      />
     </svg>
   );
 }
 
 function HashIcon({ className }: { className?: string }) {
   return (
-    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5}>
+    <svg
+      className={className}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={1.5}
+    >
       <line x1="4" y1="9" x2="20" y2="9" />
       <line x1="4" y1="15" x2="20" y2="15" />
       <line x1="10" y1="3" x2="8" y2="21" />
@@ -432,7 +490,13 @@ function HashIcon({ className }: { className?: string }) {
 
 function PollIcon({ className }: { className?: string }) {
   return (
-    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5}>
+    <svg
+      className={className}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={1.5}
+    >
       <rect x="3" y="3" width="18" height="18" rx="2" />
       <line x1="7" y1="8" x2="17" y2="8" />
       <line x1="7" y1="12" x2="14" y2="12" />
@@ -443,7 +507,13 @@ function PollIcon({ className }: { className?: string }) {
 
 function LocationIcon({ className }: { className?: string }) {
   return (
-    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5}>
+    <svg
+      className={className}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={1.5}
+    >
       <path d="M12 21s-8-7.5-8-12a8 8 0 1 1 16 0c0 4.5-8 12-8 12z" />
       <circle cx="12" cy="9" r="3" />
     </svg>
@@ -452,7 +522,13 @@ function LocationIcon({ className }: { className?: string }) {
 
 function ReplyOptionsIcon({ className }: { className?: string }) {
   return (
-    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5}>
+    <svg
+      className={className}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={1.5}
+    >
       <circle cx="12" cy="12" r="10" />
       <path d="M12 8v4M12 16h.01" />
     </svg>
