@@ -171,7 +171,7 @@ export function ThreadCard({ thread }: ThreadCardProps) {
 
             {/* Thread content - only render if has content */}
             {content && content.trim().length > 0 && (
-              <div className="text-sm whitespace-pre-wrap break-words mb-3 text-foreground/90 leading-relaxed">
+              <div className="text-sm whitespace-pre-wrap break-words mb-2 text-foreground/90 leading-relaxed">
                 {content}
               </div>
             )}
@@ -179,7 +179,7 @@ export function ThreadCard({ thread }: ThreadCardProps) {
             {/* Media Gallery - TikTok Style Swipeable */}
             {mediaItems.length > 0 && (
               <div
-                className={content && content.trim().length > 0 ? '' : 'mt-1'}
+                className={`-mx-4 px-4 sm:mx-0 sm:px-0 ${content && content.trim().length > 0 ? '' : 'mt-1'}`}
               >
                 <SwipeableMediaGallery
                   items={mediaItems}
