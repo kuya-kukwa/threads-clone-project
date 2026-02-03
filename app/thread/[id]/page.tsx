@@ -121,9 +121,9 @@ function ThreadDetailContent({ threadId }: { threadId: string }) {
   // Error state - only show after we've tried loading and have a non-recoverable error
   if (error && !loading) {
     return (
-      <div className="min-h-screen bg-background pb-20 md:pb-0">
+      <div className="min-h-screen bg-background pb-20 lg:pb-0">
         {/* Header - Mobile */}
-        <div className="sticky top-0 z-40 bg-[#121212] border-b border-border/50 md:hidden">
+        <div className="sticky top-0 z-40 bg-black border-b border-border/30 lg:hidden">
           <div className="flex items-center h-12 px-4">
             <button
               onClick={() => router.back()}
@@ -161,82 +161,84 @@ function ThreadDetailContent({ threadId }: { threadId: string }) {
 
   // Main layout - always render immediately for smooth transitions
   return (
-    <div className="min-h-screen bg-background pb-20 md:pb-0">
-      {/* Header - Mobile */}
-      <div className="sticky top-0 z-40 bg-[#121212] border-b border-border/50 md:hidden">
-        <div className="flex items-center h-12 px-4">
-          <button
-            onClick={() => router.back()}
-            className="p-2 -ml-2 rounded-lg hover:bg-secondary transition-colors"
-            aria-label="Back"
-          >
-            <ChevronLeftIcon className="w-5 h-5" />
-          </button>
-          <h1 className="text-lg font-semibold ml-2">Thread</h1>
-        </div>
-      </div>
-
-      {/* Header - Desktop */}
-      <div className="hidden md:block sticky top-12 z-40 bg-background border-b border-border/50">
-        <div className="max-w-2xl mx-auto px-4 py-3 flex items-center gap-3">
-          <button
-            onClick={() => router.back()}
-            className="p-2 -ml-2 rounded-lg hover:bg-secondary transition-colors"
-            aria-label="Back"
-          >
-            <ChevronLeftIcon className="w-5 h-5" />
-          </button>
-          <h1 className="text-xl font-semibold">Thread</h1>
-        </div>
-      </div>
-
-      {/* Content */}
-      <div className="max-w-2xl mx-auto">
-        {/* Original Thread - Show skeleton while loading, then thread content */}
-        <div className="border-b border-border/50">
-          {loading ? (
-            <ThreadSkeleton />
-          ) : notFound ? (
-            <div className="p-8 text-center">
-              <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-secondary flex items-center justify-center">
-                <SearchOffIcon className="w-8 h-8 text-muted-foreground" />
-              </div>
-              <h2 className="text-xl font-semibold mb-2">Thread Not Found</h2>
-              <p className="text-muted-foreground mb-4">
-                This thread doesn&apos;t exist or has been deleted.
-              </p>
-              <Button
-                onClick={() => router.push('/feed')}
-                variant="default"
-                size="sm"
-              >
-                Back to Feed
-              </Button>
-            </div>
-          ) : thread ? (
-            <ThreadCard thread={thread} />
-          ) : null}
-        </div>
-
-        {/* Reply Composer - Only show when thread is loaded */}
-        {thread && (
-          <div className="border-b border-border/50">
-            <ReplyComposer
-              ref={replyComposerRef}
-              threadId={threadId}
-              onReplyCreated={handleReplyCreated}
-            />
+    <div className="min-h-screen bg-background pb-20 lg:pb-0">
+      <div className="max-w-[640px] mx-auto lg:border-x lg:border-border/30 lg:min-h-screen">
+        {/* Header - Mobile */}
+        <div className="sticky top-0 z-40 bg-black lg:hidden border-b border-border/30">
+          <div className="flex items-center h-12 px-4">
+            <button
+              onClick={() => router.back()}
+              className="p-2 -ml-2 rounded-lg hover:bg-secondary transition-colors"
+              aria-label="Back"
+            >
+              <ChevronLeftIcon className="w-5 h-5" />
+            </button>
+            <h1 className="text-lg font-semibold ml-2">Thread</h1>
           </div>
-        )}
+        </div>
 
-        {/* Replies List - Only show when thread is loaded */}
-        {thread && (
-          <ReplyList
-            threadId={threadId}
-            refreshTrigger={replyRefreshTrigger}
-            onReplyToComment={handleReplyToComment}
-          />
-        )}
+        {/* Header - Desktop */}
+        <div className="hidden lg:block sticky top-0 z-40 bg-background">
+          <div className="px-4 py-3 flex items-center gap-3">
+            <button
+              onClick={() => router.back()}
+              className="p-2 -ml-2 rounded-lg hover:bg-secondary transition-colors"
+              aria-label="Back"
+            >
+              <ChevronLeftIcon className="w-5 h-5" />
+            </button>
+            <h1 className="text-xl font-semibold">Thread</h1>
+          </div>
+        </div>
+
+        {/* Content */}
+        <div>
+          {/* Original Thread - Show skeleton while loading, then thread content */}
+          <div className="border-b border-border/50">
+            {loading ? (
+              <ThreadSkeleton />
+            ) : notFound ? (
+              <div className="p-8 text-center">
+                <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-secondary flex items-center justify-center">
+                  <SearchOffIcon className="w-8 h-8 text-muted-foreground" />
+                </div>
+                <h2 className="text-xl font-semibold mb-2">Thread Not Found</h2>
+                <p className="text-muted-foreground mb-4">
+                  This thread doesn&apos;t exist or has been deleted.
+                </p>
+                <Button
+                  onClick={() => router.push('/feed')}
+                  variant="default"
+                  size="sm"
+                >
+                  Back to Feed
+                </Button>
+              </div>
+            ) : thread ? (
+              <ThreadCard thread={thread} />
+            ) : null}
+          </div>
+
+          {/* Reply Composer - Only show when thread is loaded */}
+          {thread && (
+            <div className="border-b border-border/50">
+              <ReplyComposer
+                ref={replyComposerRef}
+                threadId={threadId}
+                onReplyCreated={handleReplyCreated}
+              />
+            </div>
+          )}
+
+          {/* Replies List - Only show when thread is loaded */}
+          {thread && (
+            <ReplyList
+              threadId={threadId}
+              refreshTrigger={replyRefreshTrigger}
+              onReplyToComment={handleReplyToComment}
+            />
+          )}
+        </div>
       </div>
     </div>
   );

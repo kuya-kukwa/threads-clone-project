@@ -23,80 +23,82 @@ export default function MessagesPage() {
 
   return (
     <AuthGuard>
-      <div className="min-h-screen bg-background pb-20 md:pb-0">
-        {/* Header with search and filter */}
-        <div className="sticky top-0 md:top-12 z-40 bg-[#121212] border-b border-border/50">
-          <div className="max-w-2xl mx-auto px-4">
-            {/* Title row with icons */}
-            <div className="flex items-center justify-between py-3">
-              <h1 className="text-lg font-semibold">Messages</h1>
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={() => setShowSearch(!showSearch)}
-                  className="p-2 rounded-lg hover:bg-secondary transition-colors"
-                  aria-label="Search messages"
-                >
-                  <SearchIcon className="w-5 h-5 text-muted-foreground" />
-                </button>
-                <button
-                  className="p-2 rounded-lg hover:bg-secondary transition-colors"
-                  aria-label="Filter messages"
-                >
-                  <FilterIcon className="w-5 h-5 text-muted-foreground" />
-                </button>
-              </div>
-            </div>
-
-            {/* Search bar - collapsible */}
-            {showSearch && (
-              <div className="pb-3">
-                <div className="relative">
-                  <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                  <input
-                    type="text"
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    placeholder="Search messages..."
-                    className="w-full bg-secondary border-0 rounded-lg pl-9 pr-4 py-2 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary"
-                  />
+      <div className="min-h-screen bg-background pb-20 lg:pb-0">
+        <div className="max-w-[640px] mx-auto lg:border-x lg:border-border/30 lg:min-h-screen">
+          {/* Header with search and filter */}
+          <div className="sticky top-0 z-40 bg-black">
+            <div className="px-4">
+              {/* Title row with icons */}
+              <div className="flex items-center justify-between py-3">
+                <h1 className="text-lg font-semibold">Messages</h1>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => setShowSearch(!showSearch)}
+                    className="p-2 rounded-lg hover:bg-secondary transition-colors"
+                    aria-label="Search messages"
+                  >
+                    <SearchIcon className="w-5 h-5 text-muted-foreground" />
+                  </button>
+                  <button
+                    className="p-2 rounded-lg hover:bg-secondary transition-colors"
+                    aria-label="Filter messages"
+                  >
+                    <FilterIcon className="w-5 h-5 text-muted-foreground" />
+                  </button>
                 </div>
               </div>
-            )}
 
-            {/* Tabs */}
-            <div className="flex gap-1">
-              {tabs.map((tab) => (
-                <button
-                  key={tab.id}
-                  onClick={() => setActiveTab(tab.id)}
-                  className={`flex-1 py-3 text-sm font-medium transition-colors relative ${
-                    activeTab === tab.id
-                      ? 'text-foreground'
-                      : 'text-muted-foreground hover:text-foreground'
-                  }`}
-                >
-                  {tab.label}
-                  {tab.id === 'requests' && (
-                    <span className="ml-1.5 px-1.5 py-0.5 text-xs bg-primary/20 text-primary rounded-full">
-                      3
-                    </span>
-                  )}
-                  {activeTab === tab.id && (
-                    <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-foreground rounded-full" />
-                  )}
-                </button>
-              ))}
+              {/* Search bar - collapsible */}
+              {showSearch && (
+                <div className="pb-3">
+                  <div className="relative">
+                    <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                    <input
+                      type="text"
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      placeholder="Search messages..."
+                      className="w-full bg-secondary border-0 rounded-lg pl-9 pr-4 py-2 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary"
+                    />
+                  </div>
+                </div>
+              )}
+
+              {/* Tabs */}
+              <div className="flex gap-1 border-b border-border/50">
+                {tabs.map((tab) => (
+                  <button
+                    key={tab.id}
+                    onClick={() => setActiveTab(tab.id)}
+                    className={`flex-1 py-3 text-sm font-medium transition-colors relative ${
+                      activeTab === tab.id
+                        ? 'text-foreground'
+                        : 'text-muted-foreground hover:text-foreground'
+                    }`}
+                  >
+                    {tab.label}
+                    {tab.id === 'requests' && (
+                      <span className="ml-1.5 px-1.5 py-0.5 text-xs bg-primary/20 text-primary rounded-full">
+                        3
+                      </span>
+                    )}
+                    {activeTab === tab.id && (
+                      <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-foreground rounded-full" />
+                    )}
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
-        </div>
 
-        {/* Content */}
-        <div className="max-w-2xl mx-auto px-4 py-4">
-          {activeTab === 'inbox' ? (
-            <InboxContent searchQuery={searchQuery} />
-          ) : (
-            <RequestsContent searchQuery={searchQuery} />
-          )}
+          {/* Content */}
+          <div className="px-4 py-4">
+            {activeTab === 'inbox' ? (
+              <InboxContent searchQuery={searchQuery} />
+            ) : (
+              <RequestsContent searchQuery={searchQuery} />
+            )}
+          </div>
         </div>
       </div>
     </AuthGuard>

@@ -2,11 +2,12 @@
 
 /**
  * Activity Page
- * Tabs: All, Follows, Replies, Mentions
+ * Tabs: All, Follows, Replies, Mentions, Quotes, Reposts
  * Shows real notifications from the API
+ * Desktop has dropdown menu, mobile has scrollable tabs
  */
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { AuthGuard } from '@/components/auth/AuthGuard';
@@ -16,7 +17,13 @@ import { formatDistanceToNow } from 'date-fns';
 import { NotificationWithActor, NotificationType } from '@/types/appwrite';
 import { getSessionToken } from '@/lib/appwriteClient';
 
-type TabType = 'all' | 'follows' | 'replies' | 'mentions';
+type TabType =
+  | 'all'
+  | 'follows'
+  | 'replies'
+  | 'mentions'
+  | 'quotes'
+  | 'reposts';
 
 // API client helper
 async function fetchNotifications(
@@ -76,13 +83,36 @@ async function markNotificationAsRead(
 export default function ActivityPage() {
   const [activeTab, setActiveTab] = useState<TabType>('all');
   const [unreadCount, setUnreadCount] = useState(0);
+  const [showDropdown, setShowDropdown] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
   const tabs: { id: TabType; label: string }[] = [
     { id: 'all', label: 'All' },
     { id: 'follows', label: 'Follows' },
     { id: 'replies', label: 'Replies' },
     { id: 'mentions', label: 'Mentions' },
+    { id: 'quotes', label: 'Quotes' },
+    { id: 'reposts', label: 'Reposts' },
   ];
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node)
+      ) {
+        setShowDropdown(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const handleTabChange = (tab: TabType) => {
+    setActiveTab(tab);
+    setShowDropdown(false);
+  };
 
   const handleMarkAllRead = async () => {
     try {
@@ -95,10 +125,86 @@ export default function ActivityPage() {
 
   return (
     <AuthGuard>
-      <div className="min-h-screen bg-background pb-20 md:pb-0">
-        {/* Header with tabs */}
-        <div className="sticky top-0 md:top-12 z-40 bg-[#121212] border-b border-border/50">
-          <div className="max-w-2xl mx-auto px-4">
+      <div className="min-h-screen bg-background pb-20 lg:pb-0">
+        {/* Desktop Content Container with borders */}
+        <div className="hidden lg:block max-w-[640px] mx-auto border-x border-border/30 min-h-screen">
+          {/* Desktop Header with dropdown */}
+          <div className="sticky top-0 z-40 bg-background">
+            <div
+              className="flex items-center justify-center h-14 relative"
+              ref={dropdownRef}
+            >
+              {/* Activity dropdown trigger */}
+              <button
+                onClick={() => setShowDropdown(!showDropdown)}
+                className="flex items-center gap-1.5 text-[15px] font-medium hover:opacity-80 transition-opacity"
+              >
+                {tabs.find((t) => t.id === activeTab)?.label || 'Activity'}
+                <ChevronDownIcon className="w-4 h-4 text-muted-foreground" />
+              </button>
+
+              {/* More button */}
+              <button className="absolute right-4 p-2 rounded-full hover:bg-secondary/50 transition-colors">
+                <MoreHorizontalIcon className="w-5 h-5 text-muted-foreground" />
+              </button>
+
+              {/* Dropdown Menu */}
+              {showDropdown && (
+                <div className="absolute top-full left-1/2 -translate-x-1/2 mt-2 w-48 bg-[#181818] border border-border/50 rounded-2xl shadow-xl overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200 z-50">
+                  <div className="py-2">
+                    {tabs.map((tab) => (
+                      <button
+                        key={tab.id}
+                        onClick={() => handleTabChange(tab.id)}
+                        className="w-full flex items-center justify-between px-4 py-2.5 hover:bg-secondary/50 transition-colors"
+                      >
+                        <span
+                          className={`text-[15px] ${activeTab === tab.id ? 'font-medium' : ''}`}
+                        >
+                          {tab.label}
+                        </span>
+                        {activeTab === tab.id && (
+                          <CheckIcon className="w-5 h-5" />
+                        )}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Desktop Content */}
+          <div className="px-4 py-4">
+            {activeTab === 'all' && (
+              <NotificationsList onUnreadCountChange={setUnreadCount} />
+            )}
+            {activeTab === 'follows' && (
+              <NotificationsList
+                type="follow"
+                onUnreadCountChange={setUnreadCount}
+              />
+            )}
+            {activeTab === 'replies' && (
+              <NotificationsList
+                type="reply"
+                onUnreadCountChange={setUnreadCount}
+              />
+            )}
+            {activeTab === 'mentions' && (
+              <NotificationsList
+                type="mention"
+                onUnreadCountChange={setUnreadCount}
+              />
+            )}
+            {activeTab === 'quotes' && <EmptyState message="No quotes yet" />}
+            {activeTab === 'reposts' && <EmptyState message="No reposts yet" />}
+          </div>
+        </div>
+
+        {/* Mobile Header with tabs */}
+        <div className="lg:hidden sticky top-0 z-40 bg-black border-b border-border/30">
+          <div className="max-w-[640px] mx-auto px-4">
             {/* Title with mark all read */}
             <div className="py-3 flex items-center justify-between">
               <h1 className="text-lg font-semibold">Activity</h1>
@@ -118,7 +224,7 @@ export default function ActivityPage() {
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
-                  className={`flex-shrink-0 py-3 px-4 text-sm font-medium transition-colors relative ${
+                  className={`shrink-0 py-3 px-4 text-sm font-medium transition-colors relative ${
                     activeTab === tab.id
                       ? 'text-foreground'
                       : 'text-muted-foreground hover:text-foreground'
@@ -134,8 +240,8 @@ export default function ActivityPage() {
           </div>
         </div>
 
-        {/* Content */}
-        <div className="max-w-2xl mx-auto px-4 py-4">
+        {/* Mobile Content */}
+        <div className="lg:hidden max-w-[640px] mx-auto px-4 py-4">
           {activeTab === 'all' && (
             <NotificationsList onUnreadCountChange={setUnreadCount} />
           )}
@@ -157,6 +263,8 @@ export default function ActivityPage() {
               onUnreadCountChange={setUnreadCount}
             />
           )}
+          {activeTab === 'quotes' && <EmptyState message="No quotes yet" />}
+          {activeTab === 'reposts' && <EmptyState message="No reposts yet" />}
         </div>
       </div>
     </AuthGuard>
@@ -523,5 +631,70 @@ function AtIcon({ className }: { className?: string }) {
         d="M16.5 12a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0zm0 0c0 1.657 1.007 3 2.25 3S21 13.657 21 12a9 9 0 10-2.636 6.364M16.5 12V8.25"
       />
     </svg>
+  );
+}
+
+function ChevronDownIcon({ className }: { className?: string }) {
+  return (
+    <svg
+      className={className}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={2}
+    >
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M19.5 8.25l-7.5 7.5-7.5-7.5"
+      />
+    </svg>
+  );
+}
+
+function MoreHorizontalIcon({ className }: { className?: string }) {
+  return (
+    <svg
+      className={className}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={2}
+    >
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M6.75 12a.75.75 0 11-1.5 0 .75.75 0 011.5 0zM12.75 12a.75.75 0 11-1.5 0 .75.75 0 011.5 0zM18.75 12a.75.75 0 11-1.5 0 .75.75 0 011.5 0z"
+      />
+    </svg>
+  );
+}
+
+function CheckIcon({ className }: { className?: string }) {
+  return (
+    <svg
+      className={className}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={2}
+    >
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M4.5 12.75l6 6 9-13.5"
+      />
+    </svg>
+  );
+}
+
+function EmptyState({ message }: { message: string }) {
+  return (
+    <div className="flex flex-col items-center justify-center py-20 text-center">
+      <div className="w-16 h-16 rounded-full bg-secondary flex items-center justify-center mb-4">
+        <BellIcon className="w-8 h-8 text-muted-foreground" />
+      </div>
+      <p className="text-muted-foreground">{message}</p>
+    </div>
   );
 }

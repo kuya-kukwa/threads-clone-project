@@ -205,12 +205,12 @@ export function BottomNav() {
 
   return (
     <nav
-      className={`fixed bottom-0 left-0 right-0 z-50 md:hidden transition-transform duration-300 ${
+      className={`fixed bottom-0 left-0 right-0 z-50 lg:hidden transition-transform duration-300 ${
         isVisible && !isModalOpen ? 'translate-y-0' : 'translate-y-full'
       }`}
     >
       {/* Solid opaque background */}
-      <div className="bg-[#121212] border-t border-border/50">
+      <div className="bg-black border-t border-border/30">
         <div
           className="flex items-center justify-around px-1"
           style={{ paddingBottom: 'max(0.5rem, env(safe-area-inset-bottom))' }}

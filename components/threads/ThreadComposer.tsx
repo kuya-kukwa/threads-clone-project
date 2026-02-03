@@ -299,7 +299,10 @@ export function ThreadComposer({ onSuccess }: ThreadComposerProps) {
   ].join(',');
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4 p-4 border-b border-border/50 bg-card/30">
+    <form
+      onSubmit={handleSubmit}
+      className="space-y-4 p-4 border-b border-border/50 bg-card/30"
+    >
       {/* Textarea */}
       <div>
         <Textarea
@@ -444,7 +447,11 @@ export function ThreadComposer({ onSuccess }: ThreadComposerProps) {
           )}
         </div>
 
-        <Button type="submit" disabled={!canSubmit} className="min-w-[80px] btn-gradient text-white">
+        <Button
+          type="submit"
+          disabled={!canSubmit}
+          className="min-w-[80px] btn-gradient text-white"
+        >
           {isSubmitting ? 'Posting...' : 'Post'}
         </Button>
       </div>

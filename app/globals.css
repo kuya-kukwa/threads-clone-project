@@ -1,43 +1,43 @@
 @import 'tailwindcss';
 
 @theme {
-  /* Dark Theme - Premium Social Media Colors */
+  /* Dark Theme - Official Threads Color Scheme */
   /* Background hierarchy */
-  --color-background: 0 0% 4%; /* #0a0a0a - Main bg */
-  --color-foreground: 0 0% 95%; /* #f2f2f2 - Main text */
+  --color-background: 0 0% 0%; /* #000000 - Pure black main bg */
+  --color-foreground: 0 0% 97%; /* #f7f7f7 - Main text */
 
   /* Card/Surface colors */
-  --color-card: 0 0% 7%; /* #121212 - Elevated surfaces */
-  --color-card-foreground: 0 0% 95%;
+  --color-card: 0 0% 9.5%; /* #181818 - Elevated surfaces/cards */
+  --color-card-foreground: 0 0% 97%;
 
   /* Popover/Modal */
-  --color-popover: 0 0% 9%; /* #171717 */
-  --color-popover-foreground: 0 0% 95%;
+  --color-popover: 0 0% 9.5%; /* #181818 */
+  --color-popover-foreground: 0 0% 97%;
 
-  /* Primary - Vibrant Blue/Indigo */
-  --color-primary: 234 89% 64%; /* #4F6DF5 - Bright blue */
+  /* Primary - Threads Blue */
+  --color-primary: 210 100% 52%; /* #0095f6 - Threads blue */
   --color-primary-foreground: 0 0% 100%;
 
   /* Secondary - Subtle gray */
-  --color-secondary: 0 0% 14%; /* #242424 */
+  --color-secondary: 0 0% 12%; /* #1e1e1e */
   --color-secondary-foreground: 0 0% 85%;
 
   /* Muted - For subtle elements */
-  --color-muted: 0 0% 12%; /* #1f1f1f */
-  --color-muted-foreground: 0 0% 55%; /* #8c8c8c */
+  --color-muted: 0 0% 10%; /* #1a1a1a */
+  --color-muted-foreground: 0 0% 45%; /* #737373 */
 
-  /* Accent - Soft purple/pink for highlights */
-  --color-accent: 280 60% 55%; /* Purple accent */
+  /* Accent - Threads accent */
+  --color-accent: 210 100% 52%; /* Match primary */
   --color-accent-foreground: 0 0% 100%;
 
   /* Destructive - Red */
   --color-destructive: 0 84% 60%;
   --color-destructive-foreground: 0 0% 100%;
 
-  /* Borders */
-  --color-border: 0 0% 16%; /* #292929 */
-  --color-input: 0 0% 18%; /* #2e2e2e */
-  --color-ring: 234 89% 64%; /* Match primary */
+  /* Borders - Very subtle */
+  --color-border: 0 0% 15%; /* #262626 - Subtle borders */
+  --color-input: 0 0% 15%; /* #262626 */
+  --color-ring: 210 100% 52%; /* Match primary */
 
   /* Success */
   --color-success: 142 76% 45%; /* Green */

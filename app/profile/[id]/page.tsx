@@ -133,7 +133,7 @@ function ProfileContent({ userId }: { userId: string }) {
   if (isLoading) {
     return (
       <div className="min-h-screen bg-background pb-20 md:pb-0">
-        <div className="max-w-2xl mx-auto">
+        <div className="max-w-[640px] mx-auto lg:border-x lg:border-border/30">
           <ProfileHeader isOwnProfile={false} onSettingsClick={() => {}} />
           {/* Profile Card Skeleton */}
           <div className="px-4 py-4">
@@ -141,7 +141,7 @@ function ProfileContent({ userId }: { userId: string }) {
           </div>
           {/* Tabs Skeleton */}
           <div className="border-b border-border/50">
-            <div className="max-w-2xl mx-auto px-4">
+            <div className="max-w-[640px] mx-auto px-4">
               <div className="flex">
                 {tabs.map((tab) => (
                   <div key={tab.id} className="flex-1 py-3 flex justify-center">
@@ -163,7 +163,7 @@ function ProfileContent({ userId }: { userId: string }) {
   if (error || !profile) {
     return (
       <div className="min-h-screen bg-background pb-20 md:pb-0">
-        <div className="max-w-2xl mx-auto">
+        <div className="max-w-[640px] mx-auto lg:border-x lg:border-border/30 lg:min-h-screen">
           <ProfileHeader isOwnProfile={false} onSettingsClick={() => {}} />
           <div className="text-center py-16 px-4">
             <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-secondary flex items-center justify-center">
@@ -182,8 +182,8 @@ function ProfileContent({ userId }: { userId: string }) {
   }
 
   return (
-    <div className="min-h-screen bg-background pb-20 md:pb-0">
-      <div className="max-w-2xl mx-auto">
+    <div className="min-h-screen bg-background pb-20 lg:pb-0">
+      <div className="max-w-[640px] mx-auto lg:border-x lg:border-border/30 lg:min-h-screen">
         {/* Header with settings */}
         <ProfileHeader
           isOwnProfile={isOwnProfile}
@@ -196,8 +196,8 @@ function ProfileContent({ userId }: { userId: string }) {
         </div>
 
         {/* Tabs */}
-        <div className="sticky top-0 md:top-12 z-40 bg-background border-b border-border/50">
-          <div className="max-w-2xl mx-auto px-4">
+        <div className="sticky top-0 z-40 bg-background border-b border-border/50">
+          <div className="max-w-[640px] mx-auto px-4">
             <div className="flex">
               {tabs.map((tab) => (
                 <button
@@ -526,7 +526,7 @@ function SettingsModal({
       />
 
       {/* Modal */}
-      <div className="relative w-full max-w-md bg-[#1a1a1a] border border-border rounded-t-2xl md:rounded-2xl overflow-hidden animate-slide-up">
+      <div className="relative w-full max-w-md bg-[#181818] border border-border rounded-t-2xl md:rounded-2xl overflow-hidden animate-slide-up">
         <div className="p-4 border-b border-border">
           <div className="flex items-center justify-between">
             <h2 className="text-lg font-semibold">Settings</h2>
