@@ -24,9 +24,86 @@ export default function MessagesPage() {
   return (
     <AuthGuard>
       <div className="min-h-screen bg-background pb-20 lg:pb-0">
-        <div className="max-w-[640px] mx-auto lg:border-x lg:border-border/30 lg:min-h-screen">
-          {/* Header with search and filter */}
-          <div className="sticky top-0 z-40 bg-black">
+        {/* Desktop Content Container - Fixed height with internal scroll */}
+        <div className="hidden lg:flex lg:flex-col max-w-[640px] mx-auto lg:pl-6 lg:pr-4 h-screen overflow-hidden">
+          {/* Fixed Header - Outside bordered area */}
+          <div className="flex-shrink-0 bg-background pt-6 pb-2">
+            <div className="flex items-center justify-center h-12 px-4 relative">
+              <div className="flex items-center gap-8">
+                <button
+                  onClick={() => setActiveTab('inbox')}
+                  className={`relative py-3 text-[15px] font-medium transition-colors ${
+                    activeTab === 'inbox'
+                      ? 'text-foreground'
+                      : 'text-muted-foreground hover:text-foreground'
+                  }`}
+                >
+                  Inbox
+                </button>
+                <button
+                  onClick={() => setActiveTab('requests')}
+                  className={`relative py-3 text-[15px] font-medium transition-colors ${
+                    activeTab === 'requests'
+                      ? 'text-foreground'
+                      : 'text-muted-foreground hover:text-foreground'
+                  }`}
+                >
+                  Requests
+                  <span className="ml-1.5 px-1.5 py-0.5 text-xs bg-primary/20 text-primary rounded-full">
+                    3
+                  </span>
+                </button>
+              </div>
+              <div className="absolute right-4 flex items-center gap-2 -mr-2">
+                <button
+                  onClick={() => setShowSearch(!showSearch)}
+                  className="p-2 rounded-full hover:bg-secondary/50 transition-colors"
+                  aria-label="Search messages"
+                >
+                  <SearchIcon className="w-5 h-5 text-muted-foreground" />
+                </button>
+                <button
+                  className="p-2 rounded-full hover:bg-secondary/50 transition-colors"
+                  aria-label="Filter messages"
+                >
+                  <FilterIcon className="w-5 h-5 text-muted-foreground" />
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* Content wrapper with border and rounded corners - scrollable area contained */}
+          <div className="border border-border/30 rounded-t-2xl flex-1 min-h-0 overflow-y-auto bg-background [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+            {/* Desktop Search Bar - collapsible */}
+            {showSearch && (
+              <div className="px-4 pt-4">
+                <div className="relative">
+                  <SearchIcon className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+                  <input
+                    type="text"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    placeholder="Search messages..."
+                    className="w-full h-11 pl-12 pr-4 bg-[#262626] border border-border/30 rounded-xl text-[15px] placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-border transition-all"
+                  />
+                </div>
+              </div>
+            )}
+            {/* Desktop Content */}
+            <div className="px-4 py-4">
+              {activeTab === 'inbox' ? (
+                <InboxContent searchQuery={searchQuery} />
+              ) : (
+                <RequestsContent searchQuery={searchQuery} />
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Mobile Layout */}
+        <div className="lg:hidden max-w-[640px] mx-auto">
+          {/* Mobile Header with search and filter */}
+          <div className="sticky top-0 z-40 bg-background">
             <div className="px-4">
               {/* Title row with icons */}
               <div className="flex items-center justify-between py-3">
@@ -91,7 +168,7 @@ export default function MessagesPage() {
             </div>
           </div>
 
-          {/* Content */}
+          {/* Mobile Content */}
           <div className="px-4 py-4">
             {activeTab === 'inbox' ? (
               <InboxContent searchQuery={searchQuery} />

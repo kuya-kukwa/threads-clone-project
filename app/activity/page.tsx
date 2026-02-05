@@ -21,9 +21,8 @@ type TabType =
   | 'all'
   | 'follows'
   | 'replies'
-  | 'mentions'
-  | 'quotes'
-  | 'reposts';
+  | 'likes'
+  | 'mentions';
 
 // API client helper
 async function fetchNotifications(
@@ -90,9 +89,8 @@ export default function ActivityPage() {
     { id: 'all', label: 'All' },
     { id: 'follows', label: 'Follows' },
     { id: 'replies', label: 'Replies' },
+    { id: 'likes', label: 'Likes' },
     { id: 'mentions', label: 'Mentions' },
-    { id: 'quotes', label: 'Quotes' },
-    { id: 'reposts', label: 'Reposts' },
   ];
 
   // Close dropdown when clicking outside
@@ -126,12 +124,12 @@ export default function ActivityPage() {
   return (
     <AuthGuard>
       <div className="min-h-screen bg-background pb-20 lg:pb-0">
-        {/* Desktop Content Container with borders */}
-        <div className="hidden lg:block max-w-[640px] mx-auto border-x border-border/30 min-h-screen">
-          {/* Desktop Header with dropdown */}
-          <div className="sticky top-0 z-40 bg-background">
+        {/* Desktop Content Container - Fixed height with internal scroll */}
+        <div className="hidden lg:flex lg:flex-col max-w-[640px] mx-auto lg:pl-6 lg:pr-4 h-screen overflow-hidden">
+          {/* Fixed Header - Outside bordered area */}
+          <div className="flex-shrink-0 bg-background pt-6 pb-2">
             <div
-              className="flex items-center justify-center h-14 relative"
+              className="flex items-center justify-center h-12 px-4 relative"
               ref={dropdownRef}
             >
               {/* Activity dropdown trigger */}
@@ -144,7 +142,7 @@ export default function ActivityPage() {
               </button>
 
               {/* More button */}
-              <button className="absolute right-4 p-2 rounded-full hover:bg-secondary/50 transition-colors">
+              <button className="absolute right-4 p-2 rounded-full hover:bg-secondary/50 transition-colors -mr-2">
                 <MoreHorizontalIcon className="w-5 h-5 text-muted-foreground" />
               </button>
 
@@ -174,36 +172,21 @@ export default function ActivityPage() {
             </div>
           </div>
 
-          {/* Desktop Content */}
-          <div className="px-4 py-4">
-            {activeTab === 'all' && (
-              <NotificationsList onUnreadCountChange={setUnreadCount} />
-            )}
-            {activeTab === 'follows' && (
+          {/* Content wrapper with border and rounded corners - scrollable area contained */}
+          <div className="border border-border/30 rounded-t-2xl flex-1 min-h-0 overflow-y-auto bg-background [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+            {/* Desktop Content */}
+            <div className="px-4 py-4">
               <NotificationsList
-                type="follow"
+                key={activeTab}
+                type={activeTab === 'all' ? undefined : activeTab === 'follows' ? 'follow' : activeTab === 'replies' ? 'reply' : activeTab === 'likes' ? 'like' : 'mention'}
                 onUnreadCountChange={setUnreadCount}
               />
-            )}
-            {activeTab === 'replies' && (
-              <NotificationsList
-                type="reply"
-                onUnreadCountChange={setUnreadCount}
-              />
-            )}
-            {activeTab === 'mentions' && (
-              <NotificationsList
-                type="mention"
-                onUnreadCountChange={setUnreadCount}
-              />
-            )}
-            {activeTab === 'quotes' && <EmptyState message="No quotes yet" />}
-            {activeTab === 'reposts' && <EmptyState message="No reposts yet" />}
+            </div>
           </div>
         </div>
 
         {/* Mobile Header with tabs */}
-        <div className="lg:hidden sticky top-0 z-40 bg-black border-b border-border/30">
+        <div className="lg:hidden sticky top-0 z-40 bg-background border-b border-border/30">
           <div className="max-w-[640px] mx-auto px-4">
             {/* Title with mark all read */}
             <div className="py-3 flex items-center justify-between">
@@ -242,29 +225,11 @@ export default function ActivityPage() {
 
         {/* Mobile Content */}
         <div className="lg:hidden max-w-[640px] mx-auto px-4 py-4">
-          {activeTab === 'all' && (
-            <NotificationsList onUnreadCountChange={setUnreadCount} />
-          )}
-          {activeTab === 'follows' && (
-            <NotificationsList
-              type="follow"
-              onUnreadCountChange={setUnreadCount}
-            />
-          )}
-          {activeTab === 'replies' && (
-            <NotificationsList
-              type="reply"
-              onUnreadCountChange={setUnreadCount}
-            />
-          )}
-          {activeTab === 'mentions' && (
-            <NotificationsList
-              type="mention"
-              onUnreadCountChange={setUnreadCount}
-            />
-          )}
-          {activeTab === 'quotes' && <EmptyState message="No quotes yet" />}
-          {activeTab === 'reposts' && <EmptyState message="No reposts yet" />}
+          <NotificationsList
+            key={`mobile-${activeTab}`}
+            type={activeTab === 'all' ? undefined : activeTab === 'follows' ? 'follow' : activeTab === 'replies' ? 'reply' : activeTab === 'likes' ? 'like' : 'mention'}
+            onUnreadCountChange={setUnreadCount}
+          />
         </div>
       </div>
     </AuthGuard>
@@ -358,6 +323,8 @@ function NotificationsList({
         return 'No new followers';
       case 'reply':
         return 'No replies yet';
+      case 'like':
+        return 'No likes yet';
       case 'mention':
         return 'No mentions yet';
       default:

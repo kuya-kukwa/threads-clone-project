@@ -123,7 +123,7 @@ function ThreadDetailContent({ threadId }: { threadId: string }) {
     return (
       <div className="min-h-screen bg-background pb-20 lg:pb-0">
         {/* Header - Mobile */}
-        <div className="sticky top-0 z-40 bg-black border-b border-border/30 lg:hidden">
+        <div className="sticky top-0 z-40 bg-background border-b border-border/30 lg:hidden">
           <div className="flex items-center h-12 px-4">
             <button
               onClick={() => router.back()}
@@ -162,9 +162,10 @@ function ThreadDetailContent({ threadId }: { threadId: string }) {
   // Main layout - always render immediately for smooth transitions
   return (
     <div className="min-h-screen bg-background pb-20 lg:pb-0">
-      <div className="max-w-[640px] mx-auto lg:border-x lg:border-border/30 lg:min-h-screen">
+      {/* Mobile Layout */}
+      <div className="lg:hidden max-w-[640px] mx-auto">
         {/* Header - Mobile */}
-        <div className="sticky top-0 z-40 bg-black lg:hidden border-b border-border/30">
+        <div className="sticky top-0 z-40 bg-background border-b border-border/30">
           <div className="flex items-center h-12 px-4">
             <button
               onClick={() => router.back()}
@@ -177,9 +178,61 @@ function ThreadDetailContent({ threadId }: { threadId: string }) {
           </div>
         </div>
 
-        {/* Header - Desktop */}
-        <div className="hidden lg:block sticky top-0 z-40 bg-background">
-          <div className="px-4 py-3 flex items-center gap-3">
+        {/* Content */}
+        <div>
+          {/* Original Thread - Show skeleton while loading, then thread content */}
+          <div className="border-b border-border/50">
+            {loading ? (
+              <ThreadSkeleton />
+            ) : notFound ? (
+              <div className="p-8 text-center">
+                <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-secondary flex items-center justify-center">
+                  <SearchOffIcon className="w-8 h-8 text-muted-foreground" />
+                </div>
+                <h2 className="text-xl font-semibold mb-2">Thread Not Found</h2>
+                <p className="text-muted-foreground mb-4">
+                  This thread doesn&apos;t exist or has been deleted.
+                </p>
+                <Button
+                  onClick={() => router.push('/feed')}
+                  variant="default"
+                  size="sm"
+                >
+                  Back to Feed
+                </Button>
+              </div>
+            ) : thread ? (
+              <ThreadCard thread={thread} />
+            ) : null}
+          </div>
+
+          {/* Reply Composer - Only show when thread is loaded */}
+          {thread && (
+            <div className="border-b border-border/50">
+              <ReplyComposer
+                ref={replyComposerRef}
+                threadId={threadId}
+                onReplyCreated={handleReplyCreated}
+              />
+            </div>
+          )}
+
+          {/* Replies List - Only show when thread is loaded */}
+          {thread && (
+            <ReplyList
+              threadId={threadId}
+              refreshTrigger={replyRefreshTrigger}
+              onReplyToComment={handleReplyToComment}
+            />
+          )}
+        </div>
+      </div>
+
+      {/* Desktop Content Container - Fixed height with internal scroll */}
+      <div className="hidden lg:flex lg:flex-col max-w-[640px] mx-auto lg:pl-6 lg:pr-4 h-screen overflow-hidden">
+        {/* Fixed Header - Outside bordered area */}
+        <div className="flex-shrink-0 bg-background pt-6 pb-2">
+          <div className="flex items-center h-12 px-4">
             <button
               onClick={() => router.back()}
               className="p-2 -ml-2 rounded-lg hover:bg-secondary transition-colors"
@@ -187,12 +240,12 @@ function ThreadDetailContent({ threadId }: { threadId: string }) {
             >
               <ChevronLeftIcon className="w-5 h-5" />
             </button>
-            <h1 className="text-xl font-semibold">Thread</h1>
+            <h1 className="text-[15px] font-medium ml-2">Thread</h1>
           </div>
         </div>
 
-        {/* Content */}
-        <div>
+        {/* Content wrapper with border and rounded corners - scrollable area contained */}
+        <div className="border border-border/30 rounded-t-2xl flex-1 min-h-0 overflow-y-auto bg-background [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
           {/* Original Thread - Show skeleton while loading, then thread content */}
           <div className="border-b border-border/50">
             {loading ? (

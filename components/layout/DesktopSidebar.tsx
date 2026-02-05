@@ -250,7 +250,7 @@ function NavItem({
         className={`relative w-8 h-8 flex items-center justify-center ${isCreate ? 'border-2 border-current rounded-lg' : ''}`}
       >
         {active ? activeIcon : icon}
-        {badge && badge > 0 && (
+        {badge !== undefined && badge > 0 && (
           <span className="absolute -top-1.5 -right-1.5 min-w-[18px] h-[18px] px-1 flex items-center justify-center text-[10px] font-bold text-white bg-red-500 rounded-full">
             {badge > 99 ? '99+' : badge}
           </span>

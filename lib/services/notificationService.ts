@@ -129,7 +129,8 @@ export class NotificationService {
     userId: string,
     cursor?: string,
     limit: number = 20,
-    unreadOnly: boolean = false
+    unreadOnly: boolean = false,
+    type?: 'like' | 'follow' | 'reply' | 'mention'
   ): Promise<{
     notifications: NotificationWithActor[];
     nextCursor: string | null;
@@ -145,6 +146,10 @@ export class NotificationService {
 
       if (unreadOnly) {
         queries.push(Query.equal('read', false));
+      }
+
+      if (type) {
+        queries.push(Query.equal('type', type));
       }
 
       if (cursor) {

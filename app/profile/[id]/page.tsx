@@ -11,7 +11,8 @@ import { useEffect, useState, use } from 'react';
 import { useCurrentUser, useAuth } from '@/hooks';
 import { ProfileCard } from '@/components/profile/ProfileCard';
 import { AuthGuard } from '@/components/auth/AuthGuard';
-import { UserProfile, Thread } from '@/types/appwrite';
+import { UserProfile, Thread, ThreadWithAuthor } from '@/types/appwrite';
+import { ThreadCard } from '@/components/threads/ThreadCard';
 import {
   ProfileCardSkeleton,
   ProfileThreadsSkeleton,
@@ -132,8 +133,9 @@ function ProfileContent({ userId }: { userId: string }) {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-background pb-20 md:pb-0">
-        <div className="max-w-[640px] mx-auto lg:border-x lg:border-border/30">
+      <div className="min-h-screen bg-background pb-20 lg:pb-0">
+        {/* Mobile Loading State */}
+        <div className="lg:hidden max-w-[640px] mx-auto">
           <ProfileHeader isOwnProfile={false} onSettingsClick={() => {}} />
           {/* Profile Card Skeleton */}
           <div className="px-4 py-4">
@@ -156,14 +158,49 @@ function ProfileContent({ userId }: { userId: string }) {
             <ProfileThreadsSkeleton count={3} />
           </div>
         </div>
+
+        {/* Desktop Loading State */}
+        <div className="hidden lg:flex lg:flex-col max-w-[640px] mx-auto lg:pl-6 lg:pr-4 h-screen overflow-hidden">
+          {/* Fixed Header - Outside bordered area */}
+          <div className="flex-shrink-0 bg-background pt-6 pb-2">
+            <div className="flex items-center justify-center h-12 px-4">
+              <span className="text-[15px] font-medium">Profile</span>
+            </div>
+          </div>
+
+          {/* Content wrapper with border and rounded corners */}
+          <div className="border border-border/30 rounded-t-2xl flex-1 min-h-0 overflow-y-auto bg-background">
+            {/* Profile Card Skeleton */}
+            <div className="px-4 py-4">
+              <ProfileCardSkeleton />
+            </div>
+            {/* Tabs Skeleton */}
+            <div className="border-b border-border/50">
+              <div className="px-4">
+                <div className="flex">
+                  {tabs.map((tab) => (
+                    <div key={tab.id} className="flex-1 py-3 flex justify-center">
+                      <div className="h-4 w-16 bg-secondary rounded animate-pulse" />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+            {/* Content Skeleton */}
+            <div className="px-4 py-4">
+              <ProfileThreadsSkeleton count={3} />
+            </div>
+          </div>
+        </div>
       </div>
     );
   }
 
   if (error || !profile) {
     return (
-      <div className="min-h-screen bg-background pb-20 md:pb-0">
-        <div className="max-w-[640px] mx-auto lg:border-x lg:border-border/30 lg:min-h-screen">
+      <div className="min-h-screen bg-background pb-20 lg:pb-0">
+        {/* Mobile Error State */}
+        <div className="lg:hidden max-w-[640px] mx-auto">
           <ProfileHeader isOwnProfile={false} onSettingsClick={() => {}} />
           <div className="text-center py-16 px-4">
             <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-secondary flex items-center justify-center">
@@ -177,13 +214,39 @@ function ProfileContent({ userId }: { userId: string }) {
             </p>
           </div>
         </div>
+
+        {/* Desktop Error State */}
+        <div className="hidden lg:flex lg:flex-col max-w-[640px] mx-auto lg:pl-6 lg:pr-4 h-screen overflow-hidden">
+          {/* Fixed Header - Outside bordered area */}
+          <div className="flex-shrink-0 bg-background pt-6 pb-2">
+            <div className="flex items-center justify-center h-12 px-4">
+              <span className="text-[15px] font-medium">Profile</span>
+            </div>
+          </div>
+
+          {/* Content wrapper with border and rounded corners */}
+          <div className="border border-border/30 rounded-t-2xl flex-1 min-h-0 overflow-y-auto bg-background">
+            <div className="text-center py-16 px-4">
+              <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-secondary flex items-center justify-center">
+                <ProfileIcon className="w-8 h-8 text-muted-foreground" />
+              </div>
+              <h2 className="text-xl font-semibold text-foreground mb-2">
+                Profile Not Found
+              </h2>
+              <p className="text-muted-foreground mb-4">
+                {error || 'The requested profile does not exist.'}
+              </p>
+            </div>
+          </div>
+        </div>
       </div>
     );
   }
 
   return (
     <div className="min-h-screen bg-background pb-20 lg:pb-0">
-      <div className="max-w-[640px] mx-auto lg:border-x lg:border-border/30 lg:min-h-screen">
+      {/* Mobile Layout */}
+      <div className="lg:hidden max-w-[640px] mx-auto">
         {/* Header with settings */}
         <ProfileHeader
           isOwnProfile={isOwnProfile}
@@ -222,10 +285,10 @@ function ProfileContent({ userId }: { userId: string }) {
         {/* Tab Content */}
         <div className="px-4 py-4">
           {activeTab === 'threads' && (
-            <ThreadsTab threads={threads} loading={loadingThreads} />
+            <ThreadsTab threads={threads} loading={loadingThreads} profile={profile} />
           )}
           {activeTab === 'replies' && (
-            <RepliesTab replies={replies} loading={loadingReplies} />
+            <RepliesTab replies={replies} loading={loadingReplies} profile={profile} />
           )}
           {activeTab === 'media' && (
             <MediaTab threads={threads} loading={loadingThreads} />
@@ -236,6 +299,85 @@ function ProfileContent({ userId }: { userId: string }) {
               message="No reposts yet"
             />
           )}
+        </div>
+
+        {/* Settings Modal */}
+        {showSettings && (
+          <SettingsModal
+            onClose={() => setShowSettings(false)}
+            onLogout={handleLogout}
+            isLoggingOut={isLoggingOut}
+          />
+        )}
+      </div>
+
+      {/* Desktop Content Container - Fixed height with internal scroll */}
+      <div className="hidden lg:flex lg:flex-col max-w-[640px] mx-auto lg:pl-6 lg:pr-4 h-screen overflow-hidden">
+        {/* Fixed Header - Outside bordered area */}
+        <div className="flex-shrink-0 bg-background pt-6 pb-2">
+          <div className="flex items-center justify-center h-12 px-4 relative">
+            <span className="text-[15px] font-medium">Profile</span>
+            {isOwnProfile && (
+              <button
+                onClick={() => setShowSettings(true)}
+                className="absolute right-4 p-2 rounded-full hover:bg-secondary/50 transition-colors -mr-2"
+                aria-label="Settings"
+              >
+                <MoreHorizontalIcon className="w-5 h-5 text-muted-foreground" />
+              </button>
+            )}
+          </div>
+        </div>
+
+        {/* Content wrapper with border and rounded corners - scrollable area contained */}
+        <div className="border border-border/30 rounded-t-2xl flex-1 min-h-0 overflow-y-auto bg-background [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+          {/* Profile Card */}
+          <div className="px-4 py-4">
+            <ProfileCard profile={profile} isOwnProfile={isOwnProfile} />
+          </div>
+
+          {/* Tabs - Inside bordered area */}
+          <div className="border-b border-border/50">
+            <div className="px-4">
+              <div className="flex">
+                {tabs.map((tab) => (
+                  <button
+                    key={tab.id}
+                    onClick={() => setActiveTab(tab.id)}
+                    className={`flex-1 py-3 text-sm font-medium transition-colors relative ${
+                      activeTab === tab.id
+                        ? 'text-foreground'
+                        : 'text-muted-foreground hover:text-foreground'
+                    }`}
+                  >
+                    {tab.label}
+                    {activeTab === tab.id && (
+                      <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-foreground rounded-full" />
+                    )}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Tab Content */}
+          <div className="px-4 py-4">
+            {activeTab === 'threads' && (
+              <ThreadsTab threads={threads} loading={loadingThreads} profile={profile} />
+            )}
+            {activeTab === 'replies' && (
+              <RepliesTab replies={replies} loading={loadingReplies} profile={profile} />
+            )}
+            {activeTab === 'media' && (
+              <MediaTab threads={threads} loading={loadingThreads} />
+            )}
+            {activeTab === 'reposts' && (
+              <EmptyTab
+                icon={<RepostIcon className="w-8 h-8" />}
+                message="No reposts yet"
+              />
+            )}
+          </div>
         </div>
 
         {/* Settings Modal */}
@@ -282,9 +424,11 @@ function ProfileHeader({
 function ThreadsTab({
   threads,
   loading,
+  profile,
 }: {
   threads: Thread[];
   loading: boolean;
+  profile: UserProfile;
 }) {
   if (loading) {
     return <ProfileThreadsSkeleton count={3} />;
@@ -299,51 +443,17 @@ function ThreadsTab({
     );
   }
 
-  return (
-    <div className="space-y-4">
-      {threads.map((thread) => {
-        // Parse mediaUrls from JSON string
-        const mediaUrls: string[] = thread.mediaUrls
-          ? (JSON.parse(thread.mediaUrls) as string[])
-          : thread.imageUrl
-            ? [thread.imageUrl]
-            : [];
+  // Convert Thread to ThreadWithAuthor format for ThreadCard
+  const threadsWithAuthor = threads.map((thread) => ({
+    ...thread,
+    author: profile,
+  })) as ThreadWithAuthor[];
 
-        return (
-          <div
-            key={thread.$id}
-            className="p-4 rounded-xl bg-secondary/30 border border-border/50"
-          >
-            <p className="text-sm">{thread.content}</p>
-            {mediaUrls.length > 0 && (
-              <div className="mt-2 flex gap-2">
-                {mediaUrls.slice(0, 3).map((url: string, i: number) => (
-                  <div
-                    key={i}
-                    className="w-16 h-16 rounded-lg bg-secondary overflow-hidden"
-                  >
-                    {url.includes('.mp4') || url.includes('.webm') ? (
-                      <video src={url} className="w-full h-full object-cover" />
-                    ) : (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img
-                        src={url}
-                        alt=""
-                        className="w-full h-full object-cover"
-                      />
-                    )}
-                  </div>
-                ))}
-                {mediaUrls.length > 3 && (
-                  <div className="w-16 h-16 rounded-lg bg-secondary flex items-center justify-center text-sm text-muted-foreground">
-                    +{mediaUrls.length - 3}
-                  </div>
-                )}
-              </div>
-            )}
-          </div>
-        );
-      })}
+  return (
+    <div className="-mx-4">
+      {threadsWithAuthor.map((thread) => (
+        <ThreadCard key={thread.$id} thread={thread} />
+      ))}
     </div>
   );
 }
@@ -405,9 +515,11 @@ function MediaTab({
 function RepliesTab({
   replies,
   loading,
+  profile,
 }: {
   replies: Thread[];
   loading: boolean;
+  profile: UserProfile;
 }) {
   if (loading) {
     return <ProfileThreadsSkeleton count={3} />;
@@ -422,63 +534,28 @@ function RepliesTab({
     );
   }
 
-  return (
-    <div className="space-y-4">
-      {replies.map((reply) => {
-        // Parse mediaUrls from JSON string
-        const mediaUrls: string[] = reply.mediaUrls
-          ? (JSON.parse(reply.mediaUrls) as string[])
-          : reply.imageUrl
-            ? [reply.imageUrl]
-            : [];
+  // Convert Thread to ThreadWithAuthor format for ThreadCard
+  const repliesWithAuthor = replies.map((reply) => ({
+    ...reply,
+    author: profile,
+  })) as ThreadWithAuthor[];
 
-        return (
-          <div
-            key={reply.$id}
-            className="p-4 rounded-xl bg-secondary/30 border border-border/50"
-          >
-            {/* Reply context */}
-            {reply.replyToUsername && (
-              <p className="text-xs text-muted-foreground mb-2">
+  return (
+    <div className="-mx-4">
+      {repliesWithAuthor.map((reply) => (
+        <div key={reply.$id}>
+          {/* Reply context */}
+          {reply.replyToUsername && (
+            <div className="px-4 pt-3 pb-1">
+              <p className="text-xs text-muted-foreground">
                 Replying to{' '}
                 <span className="text-primary">@{reply.replyToUsername}</span>
               </p>
-            )}
-            <p className="text-sm">{reply.content}</p>
-            {mediaUrls.length > 0 && (
-              <div className="mt-2 flex gap-2">
-                {mediaUrls.slice(0, 3).map((url: string, i: number) => (
-                  <div
-                    key={i}
-                    className="w-16 h-16 rounded-lg bg-secondary overflow-hidden"
-                  >
-                    {url.includes('.mp4') || url.includes('.webm') ? (
-                      <video src={url} className="w-full h-full object-cover" />
-                    ) : (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img
-                        src={url}
-                        alt=""
-                        className="w-full h-full object-cover"
-                      />
-                    )}
-                  </div>
-                ))}
-                {mediaUrls.length > 3 && (
-                  <div className="w-16 h-16 rounded-lg bg-secondary flex items-center justify-center text-sm text-muted-foreground">
-                    +{mediaUrls.length - 3}
-                  </div>
-                )}
-              </div>
-            )}
-            {/* Engagement stats */}
-            <div className="flex gap-4 mt-2 text-xs text-muted-foreground">
-              <span>{reply.likeCount} likes</span>
-              <span>{reply.replyCount} replies</span>
             </div>
-          </div>
-        );
-      })}
+          )}
+          <ThreadCard thread={reply} />
+        </div>
+      ))}
     </div>
   );
 }
@@ -626,6 +703,22 @@ function ProfileIcon({ className }: { className?: string }) {
         strokeLinejoin="round"
         d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z"
       />
+    </svg>
+  );
+}
+
+function MoreHorizontalIcon({ className }: { className?: string }) {
+  return (
+    <svg
+      className={className}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={2}
+    >
+      <circle cx="12" cy="12" r="1" fill="currentColor" />
+      <circle cx="19" cy="12" r="1" fill="currentColor" />
+      <circle cx="5" cy="12" r="1" fill="currentColor" />
     </svg>
   );
 }

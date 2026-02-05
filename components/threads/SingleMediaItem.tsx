@@ -51,7 +51,10 @@ export function SingleMediaItem({ item, size, onClick }: SingleMediaItemProps) {
 
   if (item.type === 'video') {
     return (
-      <div className="relative group cursor-pointer h-full overflow-hidden" onClick={handleVideoClick}>
+      <div
+        className="relative group cursor-pointer h-full overflow-hidden"
+        onClick={handleVideoClick}
+      >
         <video
           ref={videoRef}
           src={item.url}
@@ -70,11 +73,17 @@ export function SingleMediaItem({ item, size, onClick }: SingleMediaItemProps) {
             isPlaying ? 'opacity-0 group-hover:opacity-100' : 'opacity-100'
           }`}
         >
-          <div className={`${size === 'gallery' ? 'w-10 h-10' : 'w-14 h-14'} glass-light rounded-full flex items-center justify-center border border-white/20 shadow-lg`}>
+          <div
+            className={`${size === 'gallery' ? 'w-10 h-10' : 'w-14 h-14'} glass-light rounded-full flex items-center justify-center border border-white/20 shadow-lg`}
+          >
             {isPlaying ? (
-              <PauseIcon className={`${size === 'gallery' ? 'w-5 h-5' : 'w-7 h-7'} text-white`} />
+              <PauseIcon
+                className={`${size === 'gallery' ? 'w-5 h-5' : 'w-7 h-7'} text-white`}
+              />
             ) : (
-              <PlayIcon className={`${size === 'gallery' ? 'w-5 h-5' : 'w-7 h-7'} text-white ml-0.5`} />
+              <PlayIcon
+                className={`${size === 'gallery' ? 'w-5 h-5' : 'w-7 h-7'} text-white ml-0.5`}
+              />
             )}
           </div>
         </div>
@@ -103,7 +112,10 @@ export function SingleMediaItem({ item, size, onClick }: SingleMediaItemProps) {
   }
 
   return (
-    <div className="relative group cursor-pointer h-full overflow-hidden" onClick={onClick}>
+    <div
+      className="relative group cursor-pointer h-full overflow-hidden"
+      onClick={onClick}
+    >
       <Image
         src={item.url}
         alt={item.altText || 'Thread image'}
@@ -114,7 +126,9 @@ export function SingleMediaItem({ item, size, onClick }: SingleMediaItemProps) {
       />
 
       {/* Expand overlay on hover */}
-      <div className={`absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors flex items-center justify-center ${size === 'gallery' ? '' : 'rounded-xl'}`}>
+      <div
+        className={`absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors flex items-center justify-center ${size === 'gallery' ? '' : 'rounded-xl'}`}
+      >
         <div className="w-10 h-10 glass-light rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity border border-white/20">
           <ExpandIcon className="w-5 h-5 text-white" />
         </div>

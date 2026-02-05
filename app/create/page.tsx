@@ -221,8 +221,9 @@ export default function CreatePage() {
   return (
     <AuthGuard>
       <div className="min-h-screen bg-background flex flex-col pb-20 lg:pb-0">
-        <div className="max-w-[640px] mx-auto w-full flex-1 lg:border-x lg:border-border/30">
-          {/* Header */}
+        {/* Mobile Layout */}
+        <div className="lg:hidden max-w-[640px] mx-auto w-full flex-1">
+          {/* Mobile Header */}
           <div className="sticky top-0 z-50 bg-black">
             <div className="px-4">
               <div className="flex items-center justify-between h-14">
@@ -451,8 +452,229 @@ export default function CreatePage() {
           </div>
         </div>
 
+        {/* Desktop Content Container - Fixed height with internal scroll */}
+        <div className="hidden lg:flex lg:flex-col max-w-[640px] mx-auto lg:pl-6 lg:pr-4 h-screen overflow-hidden">
+          {/* Fixed Header - Outside bordered area */}
+          <div className="flex-shrink-0 bg-background pt-6 pb-2">
+            <div className="flex items-center justify-between h-12 px-4">
+              <Link
+                href="/feed"
+                className="flex items-center gap-1 text-muted-foreground hover:text-foreground transition-colors"
+              >
+                <ChevronLeftIcon className="w-5 h-5" />
+                <span className="text-sm">Back</span>
+              </Link>
+              <span className="text-[15px] font-medium">New thread</span>
+              <button
+                onClick={handleSubmit}
+                disabled={!canPost || isSubmitting}
+                className={`px-4 py-1.5 rounded-full text-sm font-semibold transition-all ${
+                  canPost && !isSubmitting
+                    ? 'bg-foreground text-background hover:opacity-90'
+                    : 'bg-muted text-muted-foreground cursor-not-allowed'
+                }`}
+              >
+                {isSubmitting ? 'Posting...' : 'Post'}
+              </button>
+            </div>
+          </div>
+
+          {/* Content wrapper with border and rounded corners - scrollable area contained */}
+          <div className="border border-border/30 rounded-t-2xl flex-1 min-h-0 overflow-y-auto bg-background [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+            {/* Desktop Composer */}
+            <div className="px-4 py-6">
+              <div className="flex gap-3">
+                {/* User avatar with thread line */}
+                <div className="flex flex-col items-center">
+                  <Avatar className="w-11 h-11 flex-shrink-0 ring-2 ring-border/50">
+                    <AvatarImage
+                      src={userProfile?.avatarUrl || undefined}
+                      alt={userProfile?.displayName || user?.name || 'User'}
+                    />
+                    <AvatarFallback className="bg-gradient-to-br from-primary to-accent text-white font-semibold text-lg">
+                      {(userProfile?.displayName ||
+                        user?.name ||
+                        'U')[0]?.toUpperCase()}
+                    </AvatarFallback>
+                  </Avatar>
+                  {/* Thread line */}
+                  <div className="w-0.5 flex-1 min-h-[40px] bg-border/40 mt-2 rounded-full" />
+                </div>
+
+                {/* Content area */}
+                <div className="flex-1 min-w-0 pt-1">
+                  {/* Username */}
+                  <p className="text-base font-semibold text-foreground">
+                    {userProfile?.displayName || user?.name || 'User'}
+                  </p>
+
+                  {/* Textarea */}
+                  <textarea
+                    ref={textareaRef}
+                    value={content}
+                    onChange={(e) => setContent(e.target.value)}
+                    placeholder="What's new?"
+                    maxLength={MAX_CHARS}
+                    className="w-full bg-transparent border-0 resize-none text-foreground placeholder:text-muted-foreground/60 focus:outline-none text-[15px] leading-relaxed mt-1 min-h-[100px]"
+                    rows={1}
+                  />
+
+                  {/* Media previews */}
+                  {mediaPreviews.length > 0 && (
+                    <div
+                      className={`grid gap-2 mt-3 ${
+                        mediaPreviews.length === 1
+                          ? 'grid-cols-1 max-w-sm'
+                          : mediaPreviews.length === 2
+                            ? 'grid-cols-2'
+                            : 'grid-cols-2'
+                      }`}
+                    >
+                      {mediaPreviews.map((preview, index) => (
+                        <div
+                          key={index}
+                          className={`relative rounded-xl overflow-hidden bg-secondary ${
+                            mediaPreviews.length === 1
+                              ? 'aspect-video'
+                              : mediaPreviews.length === 3 && index === 0
+                                ? 'row-span-2 aspect-[3/4]'
+                                : 'aspect-square'
+                          }`}
+                        >
+                          {preview.type === 'video' ? (
+                            <video
+                              src={preview.url}
+                              className="w-full h-full object-cover"
+                              muted
+                              playsInline
+                            />
+                          ) : (
+                            // eslint-disable-next-line @next/next/no-img-element
+                            <img
+                              src={preview.url}
+                              alt=""
+                              className="w-full h-full object-cover"
+                            />
+                          )}
+                          {/* Remove button */}
+                          <button
+                            onClick={() => removeMedia(index)}
+                            className="absolute top-2 right-2 w-7 h-7 rounded-full bg-black/60 backdrop-blur-sm flex items-center justify-center hover:bg-black/80 transition-colors"
+                          >
+                            <XIcon className="w-4 h-4 text-white" />
+                          </button>
+                          {/* Video badge */}
+                          {preview.type === 'video' && (
+                            <div className="absolute bottom-2 left-2 px-2 py-0.5 rounded-md bg-black/60 backdrop-blur-sm text-xs text-white flex items-center gap-1">
+                              <PlayIcon className="w-3 h-3" />
+                              Video
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* Toolbar */}
+                  <div className="flex items-center gap-1 mt-4">
+                    {/* Add media button */}
+                    <button
+                      onClick={() => fileInputRef.current?.click()}
+                      disabled={mediaFiles.length >= MAX_FILES}
+                      className="p-2 rounded-full hover:bg-secondary transition-colors disabled:opacity-40 disabled:cursor-not-allowed text-muted-foreground hover:text-foreground"
+                      title="Add photos or videos"
+                    >
+                      <ImageIcon className="w-5 h-5" />
+                    </button>
+
+                    {/* Camera button */}
+                    <button
+                      onClick={() => fileInputRef.current?.click()}
+                      disabled={mediaFiles.length >= MAX_FILES}
+                      className="p-2 rounded-full hover:bg-secondary transition-colors disabled:opacity-40 disabled:cursor-not-allowed text-muted-foreground hover:text-foreground"
+                      title="Take a photo"
+                    >
+                      <CameraIcon className="w-5 h-5" />
+                    </button>
+
+                    {/* GIF button (placeholder) */}
+                    <button
+                      className="p-2 rounded-full hover:bg-secondary transition-colors text-muted-foreground hover:text-foreground opacity-40 cursor-not-allowed"
+                      title="GIFs coming soon"
+                      disabled
+                    >
+                      <GifIcon className="w-5 h-5" />
+                    </button>
+
+                    {/* Media count indicator */}
+                    {mediaFiles.length > 0 && (
+                      <span className="ml-2 text-xs text-muted-foreground">
+                        {mediaFiles.length}/{MAX_FILES}
+                      </span>
+                    )}
+
+                    {/* Spacer */}
+                    <div className="flex-1" />
+
+                    {/* Character count */}
+                    {content.length > 0 && (
+                      <div className="flex items-center gap-2">
+                        <div
+                          className={`w-5 h-5 rounded-full border-2 ${
+                            charsRemaining < 0
+                              ? 'border-red-500'
+                              : charsRemaining < 50
+                                ? 'border-amber-500'
+                                : 'border-muted-foreground/30'
+                          }`}
+                          style={{
+                            background: `conic-gradient(${
+                              charsRemaining < 0
+                                ? '#ef4444'
+                                : charsRemaining < 50
+                                  ? '#f59e0b'
+                                  : 'var(--muted-foreground)'
+                            } ${Math.min(100, (content.length / MAX_CHARS) * 100)}%, transparent 0)`,
+                          }}
+                        />
+                        {charsRemaining <= 20 && (
+                          <span
+                            className={`text-xs font-medium ${
+                              charsRemaining < 0
+                                ? 'text-red-500'
+                                : 'text-amber-500'
+                            }`}
+                          >
+                            {charsRemaining}
+                          </span>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+              {/* Error message */}
+              {error && (
+                <div className="mt-4 p-3 rounded-xl bg-red-500/10 border border-red-500/20">
+                  <p className="text-sm text-red-500">{error}</p>
+                </div>
+              )}
+
+              {/* Upload progress */}
+              {uploadProgress && (
+                <div className="mt-4 p-3 rounded-xl bg-primary/10 border border-primary/20">
+                  <div className="flex items-center gap-2">
+                    <div className="w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+                    <p className="text-sm text-primary">{uploadProgress}</p>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+
         {/* Bottom safe area */}
-        <div className="h-safe" />
+        <div className="h-safe lg:hidden" />
       </div>
     </AuthGuard>
   );

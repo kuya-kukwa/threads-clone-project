@@ -37,8 +37,8 @@ export function SwipeableMediaGallery({
     return (
       <div className="flex gap-1 overflow-hidden rounded-xl">
         {items.map((item, index) => (
-          <div 
-            key={item.id || index} 
+          <div
+            key={item.id || index}
             className="flex-1 min-w-0 overflow-hidden"
           >
             <SingleMediaItem
@@ -56,14 +56,14 @@ export function SwipeableMediaGallery({
   return (
     <div className="relative -mr-4 sm:-mr-0">
       {/* Horizontal scrollable container */}
-      <div
-        className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] snap-x snap-mandatory"
-      >
+      <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] snap-x snap-mandatory">
         {items.map((item, index) => (
           <div
             key={item.id || index}
             className="flex-shrink-0 snap-start last:pr-4 sm:last:pr-0 rounded-xl overflow-hidden"
-            style={{ width: items.length === 3 ? 'calc(55% - 4px)' : 'calc(50% - 4px)' }}
+            style={{
+              width: items.length === 3 ? 'calc(55% - 4px)' : 'calc(50% - 4px)',
+            }}
           >
             <SingleMediaItem
               item={item}

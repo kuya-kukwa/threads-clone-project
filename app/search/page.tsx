@@ -174,49 +174,52 @@ function SearchContent() {
 
   return (
     <div className="min-h-screen bg-background pb-20 lg:pb-0">
-      {/* Desktop Content Container with borders */}
-      <div className="hidden lg:block max-w-[640px] mx-auto border-x border-border/30 min-h-screen">
-        {/* Desktop Header */}
-        <div className="sticky top-0 z-40 bg-background">
-          <div className="flex items-center justify-center h-14 relative">
+      {/* Desktop Content Container - Fixed height with internal scroll */}
+      <div className="hidden lg:flex lg:flex-col max-w-[640px] mx-auto lg:pl-6 lg:pr-4 h-screen overflow-hidden">
+        {/* Fixed Header - Outside bordered area */}
+        <div className="flex-shrink-0 bg-background pt-6 pb-2">
+          <div className="flex items-center justify-center h-12 px-4 relative">
             <span className="text-[15px] font-medium">Search</span>
-            <button className="absolute right-4 p-2 rounded-full hover:bg-secondary/50 transition-colors">
+            <button className="absolute right-4 p-2 rounded-full hover:bg-secondary/50 transition-colors -mr-2">
               <MoreHorizontalIcon className="w-5 h-5 text-muted-foreground" />
             </button>
           </div>
         </div>
 
-        {/* Desktop Search Bar */}
-        <div className="px-4 pt-4">
-          <div className="relative">
-            <SearchIcon className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search"
-              className="w-full h-11 pl-12 pr-12 bg-[#262626] border border-border/30 rounded-xl text-[15px] placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-border transition-all"
-            />
-            <button className="absolute right-4 top-1/2 -translate-y-1/2">
-              <FilterIcon className="w-5 h-5 text-muted-foreground" />
-            </button>
+        {/* Content wrapper with border and rounded corners - scrollable area contained */}
+        <div className="border border-border/30 rounded-t-2xl flex-1 min-h-0 overflow-y-auto bg-background [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+          {/* Desktop Search Bar */}
+          <div className="px-4 pt-4">
+            <div className="relative">
+              <SearchIcon className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Search"
+                className="w-full h-11 pl-12 pr-12 bg-[#262626] border border-border/30 rounded-xl text-[15px] placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-border transition-all"
+              />
+              <button className="absolute right-4 top-1/2 -translate-y-1/2">
+                <FilterIcon className="w-5 h-5 text-muted-foreground" />
+              </button>
+            </div>
           </div>
-        </div>
 
-        {/* Desktop Content */}
-        <div className="px-4 py-4">
-          <SearchResults
-            searchQuery={searchQuery}
-            isSearching={isSearching}
-            searchResults={searchResults}
-            suggestedUsers={suggestedUsers}
-            loadingSuggestions={loadingSuggestions}
-            recentSearches={recentSearches}
-            handleUserClick={handleUserClick}
-            handleFollow={handleFollow}
-            clearRecentSearches={clearRecentSearches}
-            removeRecentSearch={removeRecentSearch}
-          />
+          {/* Desktop Content */}
+          <div className="px-4 py-4">
+            <SearchResults
+              searchQuery={searchQuery}
+              isSearching={isSearching}
+              searchResults={searchResults}
+              suggestedUsers={suggestedUsers}
+              loadingSuggestions={loadingSuggestions}
+              recentSearches={recentSearches}
+              handleUserClick={handleUserClick}
+              handleFollow={handleFollow}
+              clearRecentSearches={clearRecentSearches}
+              removeRecentSearch={removeRecentSearch}
+            />
+          </div>
         </div>
       </div>
 
