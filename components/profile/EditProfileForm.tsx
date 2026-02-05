@@ -145,6 +145,7 @@ export function EditProfileForm({
           placeholder="Your display name"
           className="min-h-[44px] text-base"
           disabled={isLoading}
+          autoFocus
         />
         {errors.displayName && (
           <p className="text-xs sm:text-sm text-destructive">

@@ -8,7 +8,7 @@
  * Features:
  * - Logo at top
  * - Navigation icons (Home, Search, Activity, Profile)
- * - Create post button (square with rounded corners)
+ * - Create post button (opens modal)
  * - More menu at bottom with dropdown
  * - Notification badge on Activity
  */
@@ -25,6 +25,7 @@ import {
 } from 'react';
 import { getSessionToken } from '@/lib/appwriteClient';
 import { logger } from '@/lib/logger/logger';
+import { CreatePostModal } from '@/components/threads/CreatePostModal';
 
 export function DesktopSidebar() {
   const { user } = useCurrentUser();
@@ -33,6 +34,7 @@ export function DesktopSidebar() {
   const pathname = usePathname();
   const [unreadCount, setUnreadCount] = useState(0);
   const [showMoreMenu, setShowMoreMenu] = useState(false);
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
   // Close menu when clicking outside
@@ -128,13 +130,9 @@ export function DesktopSidebar() {
           active={pathname === '/search'}
           tooltip="Search"
         />
-        <NavItem
-          href="/create"
+        <CreateNavButton
+          onClick={() => setIsCreateModalOpen(true)}
           icon={<CreateIcon />}
-          activeIcon={<CreateIcon />}
-          active={pathname === '/create'}
-          isCreate
-          tooltip="Create"
         />
         <NavItem
           href="/activity"
@@ -159,8 +157,7 @@ export function DesktopSidebar() {
           onClick={() => setShowMoreMenu(!showMoreMenu)}
           className={`
             p-3.5 rounded-xl transition-all duration-200
-            ${
-              showMoreMenu
+            ${showMoreMenu
                 ? 'text-foreground bg-secondary/50'
                 : 'text-muted-foreground hover:text-foreground hover:bg-secondary/50'
             }
@@ -210,6 +207,12 @@ export function DesktopSidebar() {
           </div>
         )}
       </div>
+
+      {/* Create Post Modal */}
+      <CreatePostModal
+        open={isCreateModalOpen}
+        onOpenChange={setIsCreateModalOpen}
+      />
     </aside>
   );
 }
@@ -260,6 +263,26 @@ function NavItem({
   );
 }
 
+// Create button component (opens modal instead of navigating)
+interface CreateNavButtonProps {
+  onClick: () => void;
+  icon: React.ReactNode;
+}
+
+function CreateNavButton({ onClick, icon }: CreateNavButtonProps) {
+  return (
+    <button
+      onClick={onClick}
+      className="relative p-3.5 rounded-xl transition-all duration-200 text-muted-foreground hover:text-foreground hover:bg-secondary/50"
+      aria-label="Create new thread"
+    >
+      <div className="relative w-8 h-8 flex items-center justify-center border-2 border-current rounded-lg">
+        {icon}
+      </div>
+    </button>
+  );
+}
+
 // Menu item component
 interface MenuLinkProps {
   href: string;
@@ -292,7 +315,7 @@ function ThreadsLogo({ className }: { className?: string }) {
   );
 }
 
-// Icons - Outline versions
+// Icons - Outline versions (Official Threads style)
 function HomeIcon() {
   return (
     <svg
@@ -300,12 +323,11 @@ function HomeIcon() {
       viewBox="0 0 24 24"
       fill="none"
       stroke="currentColor"
-      strokeWidth={2}
+      strokeWidth={1.75}
     >
       <path
-        strokeLinecap="round"
+        d="M9.005 16.545a2.997 2.997 0 0 1 2.997-2.997A2.997 2.997 0 0 1 15 16.545V22h7V11.543L12 2 2 11.543V22h7.005Z"
         strokeLinejoin="round"
-        d="M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25"
       />
     </svg>
   );
@@ -314,8 +336,9 @@ function HomeIcon() {
 function HomeIconFilled() {
   return (
     <svg className="w-7 h-7" viewBox="0 0 24 24" fill="currentColor">
-      <path d="M11.47 3.84a.75.75 0 011.06 0l8.69 8.69a.75.75 0 101.06-1.06l-8.689-8.69a2.25 2.25 0 00-3.182 0l-8.69 8.69a.75.75 0 001.061 1.06l8.69-8.69z" />
-      <path d="M12 5.432l8.159 8.159c.03.03.06.058.091.086v6.198c0 1.035-.84 1.875-1.875 1.875H15a.75.75 0 01-.75-.75v-4.5a.75.75 0 00-.75-.75h-3a.75.75 0 00-.75.75V21a.75.75 0 01-.75.75H5.625a1.875 1.875 0 01-1.875-1.875v-6.198a2.29 2.29 0 00.091-.086L12 5.43z" />
+      <path
+        d="M9.005 16.545a2.997 2.997 0 0 1 2.997-2.997A2.997 2.997 0 0 1 15 16.545V22h7V11.543L12 2 2 11.543V22h7.005Z"
+      />
     </svg>
   );
 }
@@ -327,12 +350,17 @@ function SearchIcon() {
       viewBox="0 0 24 24"
       fill="none"
       stroke="currentColor"
-      strokeWidth={2}
+      strokeWidth={1.75}
     >
       <path
+        d="M19 10.5A8.5 8.5 0 1 1 10.5 2a8.5 8.5 0 0 1 8.5 8.5Z"
         strokeLinecap="round"
         strokeLinejoin="round"
-        d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"
+      />
+      <path
+        d="M16.511 16.511 22 22"
+        strokeLinecap="round"
+        strokeLinejoin="round"
       />
     </svg>
   );
@@ -340,11 +368,22 @@ function SearchIcon() {
 
 function SearchIconFilled() {
   return (
-    <svg className="w-7 h-7" viewBox="0 0 24 24" fill="currentColor">
+    <svg
+      className="w-7 h-7"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={2.5}
+    >
       <path
-        fillRule="evenodd"
-        d="M10.5 3.75a6.75 6.75 0 100 13.5 6.75 6.75 0 000-13.5zM2.25 10.5a8.25 8.25 0 1114.59 5.28l4.69 4.69a.75.75 0 11-1.06 1.06l-4.69-4.69A8.25 8.25 0 012.25 10.5z"
-        clipRule="evenodd"
+        d="M19 10.5A8.5 8.5 0 1 1 10.5 2a8.5 8.5 0 0 1 8.5 8.5Z"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M16.511 16.511 22 22"
+        strokeLinecap="round"
+        strokeLinejoin="round"
       />
     </svg>
   );
@@ -357,12 +396,19 @@ function CreateIcon() {
       viewBox="0 0 24 24"
       fill="none"
       stroke="currentColor"
-      strokeWidth={2.5}
+      strokeWidth={1.75}
     >
       <path
+        d="M12 8v8m-4-4h8"
         strokeLinecap="round"
-        strokeLinejoin="round"
-        d="M12 4.5v15m7.5-7.5h-15"
+      />
+      <rect
+        x="3"
+        y="3"
+        width="18"
+        height="18"
+        rx="5"
+        strokeLinecap="round"
       />
     </svg>
   );
@@ -375,12 +421,12 @@ function ActivityIcon() {
       viewBox="0 0 24 24"
       fill="none"
       stroke="currentColor"
-      strokeWidth={2}
+      strokeWidth={1.75}
     >
       <path
+        d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"
         strokeLinecap="round"
         strokeLinejoin="round"
-        d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z"
       />
     </svg>
   );
@@ -389,7 +435,9 @@ function ActivityIcon() {
 function ActivityIconFilled() {
   return (
     <svg className="w-7 h-7" viewBox="0 0 24 24" fill="currentColor">
-      <path d="M11.645 20.91l-.007-.003-.022-.012a15.247 15.247 0 01-.383-.218 25.18 25.18 0 01-4.244-3.17C4.688 15.36 2.25 12.174 2.25 8.25 2.25 5.322 4.714 3 7.688 3A5.5 5.5 0 0112 5.052 5.5 5.5 0 0116.313 3c2.973 0 5.437 2.322 5.437 5.25 0 3.925-2.438 7.111-4.739 9.256a25.175 25.175 0 01-4.244 3.17 15.247 15.247 0 01-.383.219l-.022.012-.007.004-.003.001a.752.752 0 01-.704 0l-.003-.001z" />
+      <path
+        d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"
+      />
     </svg>
   );
 }
@@ -401,12 +449,12 @@ function ProfileIcon() {
       viewBox="0 0 24 24"
       fill="none"
       stroke="currentColor"
-      strokeWidth={2}
+      strokeWidth={1.75}
     >
+      <circle cx="12" cy="8" r="4" />
       <path
+        d="M20 21a8 8 0 1 0-16 0"
         strokeLinecap="round"
-        strokeLinejoin="round"
-        d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z"
       />
     </svg>
   );
@@ -415,10 +463,9 @@ function ProfileIcon() {
 function ProfileIconFilled() {
   return (
     <svg className="w-7 h-7" viewBox="0 0 24 24" fill="currentColor">
+      <circle cx="12" cy="8" r="4.5" />
       <path
-        fillRule="evenodd"
-        d="M7.5 6a4.5 4.5 0 119 0 4.5 4.5 0 01-9 0zM3.751 20.105a8.25 8.25 0 0116.498 0 .75.75 0 01-.437.695A18.683 18.683 0 0112 22.5c-2.786 0-5.433-.608-7.812-1.7a.75.75 0 01-.437-.695z"
-        clipRule="evenodd"
+        d="M20 21a8 8 0 1 0-16 0Z"
       />
     </svg>
   );
@@ -431,13 +478,10 @@ function MoreIcon() {
       viewBox="0 0 24 24"
       fill="none"
       stroke="currentColor"
-      strokeWidth={2}
+      strokeWidth={1.75}
     >
-      <path
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5"
-      />
+      <path d="M3 8h18" strokeLinecap="round" />
+      <path d="M3 16h12" strokeLinecap="round" />
     </svg>
   );
 }

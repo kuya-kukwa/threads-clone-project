@@ -72,6 +72,7 @@ export function LoginForm() {
                     type="email"
                     placeholder="Email"
                     autoComplete="email"
+                    autoFocus
                     disabled={isLoading}
                     className="h-12 bg-secondary/50 border-0 rounded-xl px-4 text-sm placeholder:text-muted-foreground/60 focus:bg-secondary focus:ring-1 focus:ring-primary/50 transition-all"
                     {...field}

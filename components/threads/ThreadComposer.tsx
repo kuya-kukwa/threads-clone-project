@@ -311,6 +311,7 @@ export function ThreadComposer({ onSuccess }: ThreadComposerProps) {
           placeholder="What's on your mind?"
           className="min-h-[100px] resize-none text-base bg-secondary/50 border-border/50 focus:border-primary/50 focus:ring-primary/20"
           disabled={isSubmitting}
+          autoFocus
           aria-label="Thread content"
           maxLength={maxLength + 50}
         />
