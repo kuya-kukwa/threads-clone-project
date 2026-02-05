@@ -38,10 +38,7 @@ export function FloatingCreateButton() {
           stroke="currentColor"
           strokeWidth={1.5}
         >
-          <path
-            d="M12 5v14m-7-7h14"
-            strokeLinecap="round"
-          />
+          <path d="M12 5v14m-7-7h14" strokeLinecap="round" />
         </svg>
       </button>
 

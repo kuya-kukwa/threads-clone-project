@@ -68,14 +68,14 @@ export function CreatePostModal({ open, onOpenChange }: CreatePostModalProps) {
   const getMediaTypeFromMime = (mimeType: string): MediaType | null => {
     if (
       (SECURITY_CONFIG.MEDIA.ALLOWED_IMAGE_TYPES as readonly string[]).includes(
-        mimeType
+        mimeType,
       )
     ) {
       return 'image';
     }
     if (
       (SECURITY_CONFIG.MEDIA.ALLOWED_VIDEO_TYPES as readonly string[]).includes(
-        mimeType
+        mimeType,
       )
     ) {
       return 'video';
@@ -88,7 +88,7 @@ export function CreatePostModal({ open, onOpenChange }: CreatePostModalProps) {
       if (!files || files.length === 0) return;
 
       const validateFile = (
-        file: File
+        file: File,
       ): { valid: boolean; error?: string; type?: MediaType } => {
         const mediaType = getMediaTypeFromMime(file.type);
 
@@ -147,7 +147,7 @@ export function CreatePostModal({ open, onOpenChange }: CreatePostModalProps) {
         fileInputRef.current.value = '';
       }
     },
-    [mediaPreviews.length]
+    [mediaPreviews.length],
   );
 
   const handleRemoveMedia = useCallback((index: number) => {
@@ -162,7 +162,7 @@ export function CreatePostModal({ open, onOpenChange }: CreatePostModalProps) {
 
   const handleAltTextChange = useCallback((index: number, altText: string) => {
     setMediaPreviews((prev) =>
-      prev.map((media, i) => (i === index ? { ...media, altText } : media))
+      prev.map((media, i) => (i === index ? { ...media, altText } : media)),
     );
   }, []);
 
