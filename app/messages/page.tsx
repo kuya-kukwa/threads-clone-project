@@ -25,9 +25,9 @@ export default function MessagesPage() {
     <AuthGuard>
       <div className="min-h-screen bg-background pb-20 lg:pb-0">
         {/* Desktop Content Container - Fixed height with internal scroll */}
-        <div className="hidden lg:flex lg:flex-col max-w-[640px] mx-auto lg:pl-6 lg:pr-4 h-screen overflow-hidden">
+        <div className="hidden lg:flex lg:flex-col max-w-160 mx-auto lg:pl-6 lg:pr-4 h-screen overflow-hidden">
           {/* Fixed Header - Outside bordered area */}
-          <div className="flex-shrink-0 bg-background pt-6 pb-2">
+          <div className="shrink-0 bg-background pt-6 pb-2">
             <div className="flex items-center justify-center h-12 px-4 relative">
               <div className="flex items-center gap-8">
                 <button
@@ -101,7 +101,7 @@ export default function MessagesPage() {
         </div>
 
         {/* Mobile Layout */}
-        <div className="lg:hidden max-w-[640px] mx-auto">
+        <div className="lg:hidden max-w-160 mx-auto">
           {/* Mobile Header with search and filter */}
           <div className="sticky top-0 z-40 bg-background">
             <div className="px-4">
@@ -237,7 +237,7 @@ function InboxContent({ searchQuery }: { searchQuery: string }) {
           key={msg.id}
           className="w-full flex items-center gap-3 p-3 rounded-xl hover:bg-secondary/50 transition-colors text-left"
         >
-          <div className="w-12 h-12 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center text-white font-medium flex-shrink-0">
+          <div className="w-12 h-12 rounded-full bg-linear-to-br from-primary to-accent flex items-center justify-center text-white font-medium shrink-0">
             {msg.user.name[0]}
           </div>
           <div className="flex-1 min-w-0">
@@ -256,7 +256,7 @@ function InboxContent({ searchQuery }: { searchQuery: string }) {
             </p>
           </div>
           {msg.unread && (
-            <span className="w-2.5 h-2.5 rounded-full bg-primary flex-shrink-0" />
+            <span className="w-2.5 h-2.5 rounded-full bg-primary shrink-0" />
           )}
         </button>
       ))}
@@ -316,7 +316,7 @@ function RequestsContent({ searchQuery }: { searchQuery: string }) {
           key={req.id}
           className="flex items-center gap-3 p-3 rounded-xl bg-secondary/30 border border-border/50"
         >
-          <div className="w-12 h-12 rounded-full bg-gradient-to-br from-muted to-secondary flex items-center justify-center text-muted-foreground font-medium flex-shrink-0">
+          <div className="w-12 h-12 rounded-full bg-linear-to-br from-muted to-secondary flex items-center justify-center text-muted-foreground font-medium shrink-0">
             {req.user.name[0]}
           </div>
           <div className="flex-1 min-w-0">
@@ -328,7 +328,7 @@ function RequestsContent({ searchQuery }: { searchQuery: string }) {
               {req.message}
             </p>
           </div>
-          <div className="flex gap-2 flex-shrink-0">
+          <div className="flex gap-2 shrink-0">
             <button className="px-3 py-1.5 text-sm font-medium rounded-lg bg-secondary hover:bg-secondary/80 transition-colors">
               Delete
             </button>

@@ -32,7 +32,7 @@ export function ThreadCardSkeleton({ className }: { className?: string }) {
     >
       <div className="flex gap-3">
         {/* Avatar */}
-        <Skeleton className="w-10 h-10 rounded-full flex-shrink-0" />
+        <Skeleton className="w-10 h-10 rounded-full shrink-0" />
 
         {/* Content */}
         <div className="flex-1 min-w-0 space-y-2">
@@ -80,7 +80,7 @@ export function ThreadCardWithMediaSkeleton({
       )}
     >
       <div className="flex gap-3">
-        <Skeleton className="w-10 h-10 rounded-full flex-shrink-0" />
+        <Skeleton className="w-10 h-10 rounded-full shrink-0" />
 
         <div className="flex-1 min-w-0 space-y-2">
           {/* Author info */}
@@ -172,7 +172,7 @@ export function ProfileHeaderSkeleton() {
 export function ReplySkeleton({ className }: { className?: string }) {
   return (
     <div className={cn('flex gap-3 p-4 contain-layout', className)}>
-      <Skeleton className="w-8 h-8 rounded-full flex-shrink-0" />
+      <Skeleton className="w-8 h-8 rounded-full shrink-0" />
       <div className="flex-1 space-y-2">
         <div className="flex items-center gap-2">
           <Skeleton className="h-3.5 w-20" />
@@ -250,7 +250,7 @@ export function ShimmerOverlay({ className }: { className?: string }) {
   return (
     <div
       className={cn(
-        'absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent',
+        'absolute inset-0 bg-linear-to-r from-transparent via-white/10 to-transparent',
         'animate-shimmer',
         className,
       )}

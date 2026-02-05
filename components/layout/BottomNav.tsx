@@ -240,7 +240,7 @@ export function BottomNav() {
               <Link
                 key={item.id}
                 href={href}
-                className={`flex flex-col items-center justify-center min-w-[3.5rem] py-2 px-2 rounded-xl transition-all duration-200 ${
+                className={`flex flex-col items-center justify-center min-w-14 py-2 px-2 rounded-xl transition-all duration-200 ${
                   active
                     ? 'text-foreground'
                     : 'text-muted-foreground hover:text-foreground'
@@ -252,7 +252,7 @@ export function BottomNav() {
                   <Icon className="w-6 h-6" active={active} />
                   {/* Notification badge for Activity tab */}
                   {item.id === 'activity' && unreadCount > 0 && (
-                    <span className="absolute -top-1 -right-1 min-w-[16px] h-4 px-1 flex items-center justify-center text-[10px] font-bold text-white bg-red-500 rounded-full">
+                    <span className="absolute -top-1 -right-1 min-w-4 h-4 px-1 flex items-center justify-center text-[10px] font-bold text-white bg-red-500 rounded-full">
                       {unreadCount > 99 ? '99+' : unreadCount}
                     </span>
                   )}

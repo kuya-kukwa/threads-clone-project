@@ -157,7 +157,7 @@ function NavLink({
     >
       {children}
       {badge && badge > 0 && (
-        <span className="absolute top-1 right-1 min-w-[16px] h-4 px-1 flex items-center justify-center text-[10px] font-bold text-white bg-red-500 rounded-full">
+        <span className="absolute top-1 right-1 min-w-4 h-4 px-1 flex items-center justify-center text-[10px] font-bold text-white bg-red-500 rounded-full">
           {badge > 99 ? '99+' : badge}
         </span>
       )}

@@ -135,7 +135,7 @@ function ProfileContent({ userId }: { userId: string }) {
     return (
       <div className="min-h-screen bg-background pb-20 lg:pb-0">
         {/* Mobile Loading State */}
-        <div className="lg:hidden max-w-[640px] mx-auto">
+        <div className="lg:hidden max-w-160 mx-auto">
           <ProfileHeader isOwnProfile={false} onSettingsClick={() => {}} />
           {/* Profile Card Skeleton */}
           <div className="px-4 py-4">
@@ -143,7 +143,7 @@ function ProfileContent({ userId }: { userId: string }) {
           </div>
           {/* Tabs Skeleton */}
           <div className="border-b border-border/50">
-            <div className="max-w-[640px] mx-auto px-4">
+            <div className="max-w-160 mx-auto px-4">
               <div className="flex">
                 {tabs.map((tab) => (
                   <div key={tab.id} className="flex-1 py-3 flex justify-center">
@@ -160,9 +160,9 @@ function ProfileContent({ userId }: { userId: string }) {
         </div>
 
         {/* Desktop Loading State */}
-        <div className="hidden lg:flex lg:flex-col max-w-[640px] mx-auto lg:pl-6 lg:pr-4 h-screen overflow-hidden">
+        <div className="hidden lg:flex lg:flex-col max-w-160 mx-auto lg:pl-6 lg:pr-4 h-screen overflow-hidden">
           {/* Fixed Header - Outside bordered area */}
-          <div className="flex-shrink-0 bg-background pt-6 pb-2">
+          <div className="shrink-0 bg-background pt-6 pb-2">
             <div className="flex items-center justify-center h-12 px-4">
               <span className="text-[15px] font-medium">Profile</span>
             </div>
@@ -203,7 +203,7 @@ function ProfileContent({ userId }: { userId: string }) {
     return (
       <div className="min-h-screen bg-background pb-20 lg:pb-0">
         {/* Mobile Error State */}
-        <div className="lg:hidden max-w-[640px] mx-auto">
+        <div className="lg:hidden max-w-160 mx-auto">
           <ProfileHeader isOwnProfile={false} onSettingsClick={() => {}} />
           <div className="text-center py-16 px-4">
             <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-secondary flex items-center justify-center">
@@ -219,9 +219,9 @@ function ProfileContent({ userId }: { userId: string }) {
         </div>
 
         {/* Desktop Error State */}
-        <div className="hidden lg:flex lg:flex-col max-w-[640px] mx-auto lg:pl-6 lg:pr-4 h-screen overflow-hidden">
+        <div className="hidden lg:flex lg:flex-col max-w-160 mx-auto lg:pl-6 lg:pr-4 h-screen overflow-hidden">
           {/* Fixed Header - Outside bordered area */}
-          <div className="flex-shrink-0 bg-background pt-6 pb-2">
+          <div className="shrink-0 bg-background pt-6 pb-2">
             <div className="flex items-center justify-center h-12 px-4">
               <span className="text-[15px] font-medium">Profile</span>
             </div>
@@ -249,7 +249,7 @@ function ProfileContent({ userId }: { userId: string }) {
   return (
     <div className="min-h-screen bg-background pb-20 lg:pb-0">
       {/* Mobile Layout */}
-      <div className="lg:hidden max-w-[640px] mx-auto">
+      <div className="lg:hidden max-w-160 mx-auto">
         {/* Header with settings */}
         <ProfileHeader
           isOwnProfile={isOwnProfile}
@@ -263,7 +263,7 @@ function ProfileContent({ userId }: { userId: string }) {
 
         {/* Tabs */}
         <div className="sticky top-0 z-40 bg-background border-b border-border/50">
-          <div className="max-w-[640px] mx-auto px-4">
+          <div className="max-w-160 mx-auto px-4">
             <div className="flex">
               {tabs.map((tab) => (
                 <button
@@ -323,9 +323,9 @@ function ProfileContent({ userId }: { userId: string }) {
       </div>
 
       {/* Desktop Content Container - Fixed height with internal scroll */}
-      <div className="hidden lg:flex lg:flex-col max-w-[640px] mx-auto lg:pl-6 lg:pr-4 h-screen overflow-hidden">
+      <div className="hidden lg:flex lg:flex-col max-w-160 mx-auto lg:pl-6 lg:pr-4 h-screen overflow-hidden">
         {/* Fixed Header - Outside bordered area */}
-        <div className="flex-shrink-0 bg-background pt-6 pb-2">
+        <div className="shrink-0 bg-background pt-6 pb-2">
           <div className="flex items-center justify-center h-12 px-4 relative">
             <span className="text-[15px] font-medium">Profile</span>
             {isOwnProfile && (

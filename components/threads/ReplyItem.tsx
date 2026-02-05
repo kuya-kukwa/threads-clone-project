@@ -77,7 +77,7 @@ export function ReplyItem({
     >
       <div className="flex gap-3">
         {/* Author Avatar - Smaller for replies */}
-        <Avatar className="w-8 h-8 flex-shrink-0">
+        <Avatar className="w-8 h-8 shrink-0">
           <AvatarImage src={author.avatarUrl} alt={author.displayName} />
           <AvatarFallback className="text-xs">{authorInitials}</AvatarFallback>
         </Avatar>
@@ -97,17 +97,15 @@ export function ReplyItem({
                 </span>
               </>
             )}
-            <span className="text-xs text-muted-foreground flex-shrink-0">
-              ·
-            </span>
-            <span className="text-xs text-muted-foreground flex-shrink-0">
+            <span className="text-xs text-muted-foreground shrink-0">·</span>
+            <span className="text-xs text-muted-foreground shrink-0">
               {timeAgo}
             </span>
           </div>
 
           {/* Content Text */}
           {content && (
-            <p className="text-sm whitespace-pre-wrap break-words mb-2">
+            <p className="text-sm whitespace-pre-wrap wrap-break-word mb-2">
               {content}
             </p>
           )}

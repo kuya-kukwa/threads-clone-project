@@ -103,7 +103,7 @@ export function DesktopSidebar() {
   if (!user || isAuthPage) return null;
 
   return (
-    <aside className="hidden lg:flex fixed left-0 top-0 h-screen w-[88px] flex-col bg-background z-50 pl-2">
+    <aside className="hidden lg:flex fixed left-0 top-0 h-screen w-22 flex-col bg-background z-50 pl-2">
       {/* Logo */}
       <div className="flex items-center justify-center pt-6 pb-4">
         <Link
@@ -255,7 +255,7 @@ function NavItem({
       >
         {active ? activeIcon : icon}
         {badge !== undefined && badge > 0 && (
-          <span className="absolute -top-1.5 -right-1.5 min-w-[18px] h-[18px] px-1 flex items-center justify-center text-[10px] font-bold text-white bg-red-500 rounded-full">
+          <span className="absolute -top-1.5 -right-1.5 min-w-4.5 h-4.5 px-1 flex items-center justify-center text-[10px] font-bold text-white bg-red-500 rounded-full">
             {badge > 99 ? '99+' : badge}
           </span>
         )}

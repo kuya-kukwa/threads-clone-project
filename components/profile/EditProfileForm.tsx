@@ -143,7 +143,7 @@ export function EditProfileForm({
           type="text"
           {...register('displayName')}
           placeholder="Your display name"
-          className="min-h-[44px] text-base"
+          className="min-h-11 text-base"
           disabled={isLoading}
           autoFocus
         />
@@ -169,7 +169,7 @@ export function EditProfileForm({
           {...register('bio')}
           placeholder="Tell us about yourself..."
           rows={3}
-          className="resize-none min-h-[88px] text-base"
+          className="resize-none min-h-22 text-base"
           disabled={isLoading}
         />
         {errors.bio && (
@@ -191,7 +191,7 @@ export function EditProfileForm({
         <Button
           type="submit"
           disabled={isLoading}
-          className="w-full sm:w-auto min-h-[44px] text-sm sm:text-base"
+          className="w-full sm:w-auto min-h-11 text-sm sm:text-base"
         >
           {isLoading ? 'Saving...' : 'Save Changes'}
         </Button>
@@ -200,7 +200,7 @@ export function EditProfileForm({
           variant="outline"
           onClick={onCancel}
           disabled={isLoading}
-          className="w-full sm:w-auto min-h-[44px] text-sm sm:text-base"
+          className="w-full sm:w-auto min-h-11 text-sm sm:text-base"
         >
           Cancel
         </Button>

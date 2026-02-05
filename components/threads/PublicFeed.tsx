@@ -174,7 +174,7 @@ export function PublicFeed({
             variant="outline"
             onClick={handleLoadMore}
             disabled={isLoading}
-            className="min-w-[120px]"
+            className="min-w-30"
           >
             {isLoading ? 'Loading...' : 'Load More'}
           </Button>

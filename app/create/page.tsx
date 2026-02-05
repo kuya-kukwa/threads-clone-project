@@ -222,7 +222,7 @@ export default function CreatePage() {
     <AuthGuard>
       <div className="min-h-screen bg-background flex flex-col pb-20 lg:pb-0">
         {/* Mobile Layout */}
-        <div className="lg:hidden max-w-[640px] mx-auto w-full flex-1">
+        <div className="lg:hidden max-w-160 mx-auto w-full flex-1">
           {/* Mobile Header */}
           <div className="sticky top-0 z-50 bg-black">
             <div className="px-4">
@@ -255,19 +255,19 @@ export default function CreatePage() {
             <div className="flex gap-3">
               {/* User avatar with thread line */}
               <div className="flex flex-col items-center">
-                <Avatar className="w-11 h-11 flex-shrink-0 ring-2 ring-border/50">
+                <Avatar className="w-11 h-11 shrink-0 ring-2 ring-border/50">
                   <AvatarImage
                     src={userProfile?.avatarUrl || undefined}
                     alt={userProfile?.displayName || user?.name || 'User'}
                   />
-                  <AvatarFallback className="bg-gradient-to-br from-primary to-accent text-white font-semibold text-lg">
+                  <AvatarFallback className="bg-linear-to-br from-primary to-accent text-white font-semibold text-lg">
                     {(userProfile?.displayName ||
                       user?.name ||
                       'U')[0]?.toUpperCase()}
                   </AvatarFallback>
                 </Avatar>
                 {/* Thread line */}
-                <div className="w-0.5 flex-1 min-h-[40px] bg-border/40 mt-2 rounded-full" />
+                <div className="w-0.5 flex-1 min-h-10 bg-border/40 mt-2 rounded-full" />
               </div>
 
               {/* Content area */}
@@ -284,7 +284,7 @@ export default function CreatePage() {
                   onChange={(e) => setContent(e.target.value)}
                   placeholder="What's new?"
                   maxLength={MAX_CHARS}
-                  className="w-full bg-transparent border-0 resize-none text-foreground placeholder:text-muted-foreground/60 focus:outline-none text-[15px] leading-relaxed mt-1 min-h-[100px]"
+                  className="w-full bg-transparent border-0 resize-none text-foreground placeholder:text-muted-foreground/60 focus:outline-none text-[15px] leading-relaxed mt-1 min-h-25"
                   autoFocus
                   rows={1}
                 />
@@ -307,7 +307,7 @@ export default function CreatePage() {
                           mediaPreviews.length === 1
                             ? 'aspect-video'
                             : mediaPreviews.length === 3 && index === 0
-                              ? 'row-span-2 aspect-[3/4]'
+                              ? 'row-span-2 aspect-3/4'
                               : 'aspect-square'
                         }`}
                       >
@@ -453,9 +453,9 @@ export default function CreatePage() {
         </div>
 
         {/* Desktop Content Container - Fixed height with internal scroll */}
-        <div className="hidden lg:flex lg:flex-col max-w-[640px] mx-auto lg:pl-6 lg:pr-4 h-screen overflow-hidden">
+        <div className="hidden lg:flex lg:flex-col max-w-160 mx-auto lg:pl-6 lg:pr-4 h-screen overflow-hidden">
           {/* Fixed Header - Outside bordered area */}
-          <div className="flex-shrink-0 bg-background pt-6 pb-2">
+          <div className="shrink-0 bg-background pt-6 pb-2">
             <div className="flex items-center justify-between h-12 px-4">
               <Link
                 href="/feed"
@@ -486,19 +486,19 @@ export default function CreatePage() {
               <div className="flex gap-3">
                 {/* User avatar with thread line */}
                 <div className="flex flex-col items-center">
-                  <Avatar className="w-11 h-11 flex-shrink-0 ring-2 ring-border/50">
+                  <Avatar className="w-11 h-11 shrink-0 ring-2 ring-border/50">
                     <AvatarImage
                       src={userProfile?.avatarUrl || undefined}
                       alt={userProfile?.displayName || user?.name || 'User'}
                     />
-                    <AvatarFallback className="bg-gradient-to-br from-primary to-accent text-white font-semibold text-lg">
+                    <AvatarFallback className="bg-linear-to-br from-primary to-accent text-white font-semibold text-lg">
                       {(userProfile?.displayName ||
                         user?.name ||
                         'U')[0]?.toUpperCase()}
                     </AvatarFallback>
                   </Avatar>
                   {/* Thread line */}
-                  <div className="w-0.5 flex-1 min-h-[40px] bg-border/40 mt-2 rounded-full" />
+                  <div className="w-0.5 flex-1 min-h-10 bg-border/40 mt-2 rounded-full" />
                 </div>
 
                 {/* Content area */}
@@ -515,7 +515,7 @@ export default function CreatePage() {
                     onChange={(e) => setContent(e.target.value)}
                     placeholder="What's new?"
                     maxLength={MAX_CHARS}
-                    className="w-full bg-transparent border-0 resize-none text-foreground placeholder:text-muted-foreground/60 focus:outline-none text-[15px] leading-relaxed mt-1 min-h-[100px]"
+                    className="w-full bg-transparent border-0 resize-none text-foreground placeholder:text-muted-foreground/60 focus:outline-none text-[15px] leading-relaxed mt-1 min-h-25"
                     rows={1}
                   />
 
@@ -537,7 +537,7 @@ export default function CreatePage() {
                             mediaPreviews.length === 1
                               ? 'aspect-video'
                               : mediaPreviews.length === 3 && index === 0
-                                ? 'row-span-2 aspect-[3/4]'
+                                ? 'row-span-2 aspect-3/4'
                                 : 'aspect-square'
                           }`}
                         >

@@ -274,7 +274,7 @@ export function CreatePostModal({ open, onOpenChange }: CreatePostModalProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
-        className="sm:max-w-[600px] p-0 gap-0 bg-[#181818] border-[#363636]"
+        className="sm:max-w-150 p-0 gap-0 bg-[#181818] border-[#363636]"
         showCloseButton={false}
       >
         {/* Header */}
@@ -297,7 +297,7 @@ export function CreatePostModal({ open, onOpenChange }: CreatePostModalProps) {
         <form onSubmit={handleSubmit} className="flex flex-col">
           <div className="p-4 flex gap-3">
             {/* Avatar */}
-            <Avatar className="w-10 h-10 flex-shrink-0">
+            <Avatar className="w-10 h-10 shrink-0">
               <AvatarImage src={undefined} alt={user?.name || 'User'} />
               <AvatarFallback className="text-xs bg-secondary">
                 {userInitials}
@@ -311,7 +311,7 @@ export function CreatePostModal({ open, onOpenChange }: CreatePostModalProps) {
                 value={content}
                 onChange={(e) => setContent(e.target.value)}
                 placeholder="What's new?"
-                className="min-h-[100px] resize-none text-base bg-transparent border-0 p-0 focus:ring-0 focus-visible:ring-0 placeholder:text-muted-foreground/60"
+                className="min-h-25 resize-none text-base bg-transparent border-0 p-0 focus:ring-0 focus-visible:ring-0 placeholder:text-muted-foreground/60"
                 disabled={isSubmitting}
                 autoFocus
                 maxLength={maxLength + 50}
@@ -333,12 +333,12 @@ export function CreatePostModal({ open, onOpenChange }: CreatePostModalProps) {
                             alt={media.altText || `Preview ${index + 1}`}
                             width={300}
                             height={200}
-                            className="w-full h-auto max-h-[200px] object-cover rounded-xl border border-[#363636]"
+                            className="w-full h-auto max-h-50 object-cover rounded-xl border border-[#363636]"
                           />
                         ) : (
                           <video
                             src={media.preview}
-                            className="w-full h-auto max-h-[200px] object-cover rounded-xl border border-[#363636]"
+                            className="w-full h-auto max-h-50 object-cover rounded-xl border border-[#363636]"
                             controls
                             muted
                           />

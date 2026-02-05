@@ -28,7 +28,7 @@ export function FloatingCreateButton() {
     <>
       <button
         onClick={() => setIsModalOpen(true)}
-        className="hidden lg:flex fixed bottom-6 right-6 w-[68px] h-[68px] items-center justify-center bg-[#181818] border border-[#363636] rounded-2xl shadow-lg hover:bg-[#252525] transition-all duration-200 z-50"
+        className="hidden lg:flex fixed bottom-6 right-6 w-17 h-17 items-center justify-center bg-[#181818] border border-[#363636] rounded-2xl shadow-lg hover:bg-[#252525] transition-all duration-200 z-50"
         aria-label="Create new thread"
       >
         <svg

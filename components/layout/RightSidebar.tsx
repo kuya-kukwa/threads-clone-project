@@ -90,7 +90,7 @@ export function RightSidebar() {
   if (!user) return null;
 
   return (
-    <aside className="hidden xl:block fixed right-0 top-0 h-screen w-[350px] border-l border-border/30 bg-background">
+    <aside className="hidden xl:block fixed right-0 top-0 h-screen w-87.5 border-l border-border/30 bg-background">
       <div className="flex flex-col h-full px-6 py-6">
         {/* Search Bar */}
         <div className="mb-6">
@@ -141,7 +141,7 @@ export function RightSidebar() {
                   <Link href={`/profile/${suggestedUser.userId}`}>
                     <Avatar className="w-10 h-10 ring-2 ring-border/30">
                       <AvatarImage src={suggestedUser.avatarUrl} />
-                      <AvatarFallback className="bg-gradient-to-br from-primary to-accent text-white text-sm">
+                      <AvatarFallback className="bg-linear-to-br from-primary to-accent text-white text-sm">
                         {suggestedUser.displayName?.[0]?.toUpperCase() || 'U'}
                       </AvatarFallback>
                     </Avatar>

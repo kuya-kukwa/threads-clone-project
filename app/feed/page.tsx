@@ -126,9 +126,9 @@ function FeedContent() {
       </div>
 
       {/* Desktop Content Container - Fixed height with internal scroll */}
-      <div className="hidden lg:flex lg:flex-col max-w-[640px] mx-auto lg:pl-6 lg:pr-4 h-screen overflow-hidden">
+      <div className="hidden lg:flex lg:flex-col max-w-160 mx-auto lg:pl-6 lg:pr-4 h-screen overflow-hidden">
         {/* Fixed Header - Outside bordered area */}
-        <div className="flex-shrink-0 bg-background pt-6 pb-2">
+        <div className="shrink-0 bg-background pt-6 pb-2">
           {/* Tabs row */}
           <div className="flex items-center h-12 px-4">
             {/* Tabs */}
@@ -176,11 +176,11 @@ function FeedContent() {
           {/* Compact Composer Card - "What's new?" - Opens modal on desktop */}
           <button
             onClick={() => setShowComposer(true)}
-            className="flex items-center gap-3 mx-4 mt-4 mb-3 px-4 py-3 bg-[#181818] border border-border/20 rounded-[20px] hover:bg-[#1c1c1c] transition-colors w-[calc(100%-2rem)] text-left"
+            className="flex items-center gap-3 mx-4 mt-4 mb-3 px-4 py-3 bg-[#181818] border border-border/20 rounded-xl hover:bg-[#1c1c1c] transition-colors w-[calc(100%-2rem)] text-left"
           >
             <Avatar className="w-10 h-10">
               <AvatarImage src={userProfile?.avatarUrl} />
-              <AvatarFallback className="bg-gradient-to-br from-primary to-accent text-white text-sm">
+              <AvatarFallback className="bg-linear-to-br from-primary to-accent text-white text-sm">
                 {(userProfile?.displayName ||
                   user?.name ||
                   'U')[0]?.toUpperCase()}
@@ -231,7 +231,7 @@ function FeedContent() {
       {/* Desktop Create Post Modal */}
       <Dialog open={showComposer} onOpenChange={setShowComposer}>
         <DialogContent
-          className="bg-[#181818] border-border/30 p-0 max-w-[620px] rounded-2xl"
+          className="bg-[#181818] border-border/30 p-0 max-w-155 rounded-2xl"
           showCloseButton={false}
         >
           {/* Modal Header */}
@@ -264,13 +264,13 @@ function FeedContent() {
               <div className="flex flex-col items-center">
                 <Avatar className="w-10 h-10">
                   <AvatarImage src={userProfile?.avatarUrl} />
-                  <AvatarFallback className="bg-gradient-to-br from-primary to-accent text-white text-sm">
+                  <AvatarFallback className="bg-linear-to-br from-primary to-accent text-white text-sm">
                     {(userProfile?.displayName ||
                       user?.name ||
                       'U')[0]?.toUpperCase()}
                   </AvatarFallback>
                 </Avatar>
-                <div className="w-0.5 flex-1 bg-border/30 mt-2 min-h-[20px]" />
+                <div className="w-0.5 flex-1 bg-border/30 mt-2 min-h-5" />
               </div>
 
               {/* Right side - Content */}
@@ -289,7 +289,7 @@ function FeedContent() {
                     setComposerContent(e.target.value.slice(0, MAX_CHARS))
                   }
                   placeholder="What's new?"
-                  className="w-full bg-transparent text-[15px] text-foreground placeholder:text-muted-foreground resize-none outline-none min-h-[24px]"
+                  className="w-full bg-transparent text-[15px] text-foreground placeholder:text-muted-foreground resize-none outline-none min-h-6"
                   rows={1}
                 />
                 {/* Media attachment icons */}
@@ -320,7 +320,7 @@ function FeedContent() {
             <div className="flex items-center gap-3 mt-3">
               <Avatar className="w-6 h-6 opacity-40">
                 <AvatarImage src={userProfile?.avatarUrl} />
-                <AvatarFallback className="bg-gradient-to-br from-primary to-accent text-white text-[10px]">
+                <AvatarFallback className="bg-linear-to-br from-primary to-accent text-white text-[10px]">
                   {(userProfile?.displayName ||
                     user?.name ||
                     'U')[0]?.toUpperCase()}

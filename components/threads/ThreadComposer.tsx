@@ -309,7 +309,7 @@ export function ThreadComposer({ onSuccess }: ThreadComposerProps) {
           value={content}
           onChange={(e) => setContent(e.target.value)}
           placeholder="What's on your mind?"
-          className="min-h-[100px] resize-none text-base bg-secondary/50 border-border/50 focus:border-primary/50 focus:ring-primary/20"
+          className="min-h-25 resize-none text-base bg-secondary/50 border-border/50 focus:border-primary/50 focus:ring-primary/20"
           disabled={isSubmitting}
           autoFocus
           aria-label="Thread content"
@@ -346,12 +346,12 @@ export function ThreadComposer({ onSuccess }: ThreadComposerProps) {
                     alt={media.altText || `Preview ${index + 1}`}
                     width={300}
                     height={200}
-                    className="w-full h-auto max-h-[200px] object-cover rounded-xl bg-card border border-border/50"
+                    className="w-full h-auto max-h-50 object-cover rounded-xl bg-card border border-border/50"
                   />
                 ) : (
                   <video
                     src={media.preview}
-                    className="w-full h-auto max-h-[200px] object-cover rounded-xl bg-card border border-border/50"
+                    className="w-full h-auto max-h-50 object-cover rounded-xl bg-card border border-border/50"
                     controls
                     muted
                   />
@@ -451,7 +451,7 @@ export function ThreadComposer({ onSuccess }: ThreadComposerProps) {
         <Button
           type="submit"
           disabled={!canSubmit}
-          className="min-w-[80px] btn-gradient text-white"
+          className="min-w-20 btn-gradient text-white"
         >
           {isSubmitting ? 'Posting...' : 'Post'}
         </Button>

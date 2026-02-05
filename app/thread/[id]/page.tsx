@@ -163,7 +163,7 @@ function ThreadDetailContent({ threadId }: { threadId: string }) {
   return (
     <div className="min-h-screen bg-background pb-20 lg:pb-0">
       {/* Mobile Layout */}
-      <div className="lg:hidden max-w-[640px] mx-auto">
+      <div className="lg:hidden max-w-160 mx-auto">
         {/* Header - Mobile */}
         <div className="sticky top-0 z-40 bg-background border-b border-border/30">
           <div className="flex items-center h-12 px-4">
@@ -229,9 +229,9 @@ function ThreadDetailContent({ threadId }: { threadId: string }) {
       </div>
 
       {/* Desktop Content Container - Fixed height with internal scroll */}
-      <div className="hidden lg:flex lg:flex-col max-w-[640px] mx-auto lg:pl-6 lg:pr-4 h-screen overflow-hidden">
+      <div className="hidden lg:flex lg:flex-col max-w-160 mx-auto lg:pl-6 lg:pr-4 h-screen overflow-hidden">
         {/* Fixed Header - Outside bordered area */}
-        <div className="flex-shrink-0 bg-background pt-6 pb-2">
+        <div className="shrink-0 bg-background pt-6 pb-2">
           <div className="flex items-center h-12 px-4">
             <button
               onClick={() => router.back()}

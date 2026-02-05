@@ -120,9 +120,9 @@ export default function ActivityPage() {
     <AuthGuard>
       <div className="min-h-screen bg-background pb-20 lg:pb-0">
         {/* Desktop Content Container - Fixed height with internal scroll */}
-        <div className="hidden lg:flex lg:flex-col max-w-[640px] mx-auto lg:pl-6 lg:pr-4 h-screen overflow-hidden">
+        <div className="hidden lg:flex lg:flex-col max-w-160 mx-auto lg:pl-6 lg:pr-4 h-screen overflow-hidden">
           {/* Fixed Header - Outside bordered area */}
-          <div className="flex-shrink-0 bg-background pt-6 pb-2">
+          <div className="shrink-0 bg-background pt-6 pb-2">
             <div
               className="flex items-center justify-center h-12 px-4 relative"
               ref={dropdownRef}
@@ -192,7 +192,7 @@ export default function ActivityPage() {
 
         {/* Mobile Header with tabs */}
         <div className="lg:hidden sticky top-0 z-40 bg-background border-b border-border/30">
-          <div className="max-w-[640px] mx-auto px-4">
+          <div className="max-w-160 mx-auto px-4">
             {/* Title with mark all read */}
             <div className="py-3 flex items-center justify-between">
               <h1 className="text-lg font-semibold">Activity</h1>
@@ -229,7 +229,7 @@ export default function ActivityPage() {
         </div>
 
         {/* Mobile Content */}
-        <div className="lg:hidden max-w-[640px] mx-auto px-4 py-4">
+        <div className="lg:hidden max-w-160 mx-auto px-4 py-4">
           <NotificationsList
             key={`mobile-${activeTab}`}
             type={
@@ -441,10 +441,10 @@ function NotificationItem({ notification, onClick }: NotificationItemProps) {
       }`}
     >
       {/* Avatar with type indicator */}
-      <div className="relative flex-shrink-0">
+      <div className="relative shrink-0">
         <Avatar className="w-11 h-11">
           <AvatarImage src={actor?.avatarUrl || undefined} alt={actorName} />
-          <AvatarFallback className="bg-gradient-to-br from-primary to-accent text-white font-medium">
+          <AvatarFallback className="bg-linear-to-br from-primary to-accent text-white font-medium">
             {actorInitial}
           </AvatarFallback>
         </Avatar>
@@ -495,7 +495,7 @@ function NotificationItem({ notification, onClick }: NotificationItemProps) {
         <Link
           href={`/profile/${notification.actorId}`}
           onClick={(e) => e.stopPropagation()}
-          className="flex-shrink-0 px-4 py-1.5 text-sm font-medium rounded-lg bg-secondary hover:bg-secondary/80 transition-colors"
+          className="shrink-0 px-4 py-1.5 text-sm font-medium rounded-lg bg-secondary hover:bg-secondary/80 transition-colors"
         >
           View
         </Link>

@@ -144,7 +144,7 @@ export function ThreadCard({ thread }: ThreadCardProps) {
       >
         <div className="flex gap-3">
           {/* Avatar */}
-          <Avatar className="w-10 h-10 flex-shrink-0 ring-2 ring-border/50">
+          <Avatar className="w-10 h-10 shrink-0 ring-2 ring-border/50">
             <AvatarImage
               src={author.avatarUrl || undefined}
               alt={author.displayName}
@@ -164,14 +164,14 @@ export function ThreadCard({ thread }: ThreadCardProps) {
               <span className="text-xs text-muted-foreground truncate">
                 @{author.username}
               </span>
-              <span className="text-xs text-muted-foreground flex-shrink-0">
+              <span className="text-xs text-muted-foreground shrink-0">
                 {timeAgo}
               </span>
             </div>
 
             {/* Thread content - only render if has content */}
             {content && content.trim().length > 0 && (
-              <div className="text-sm whitespace-pre-wrap break-words mb-2 text-foreground/90 leading-relaxed">
+              <div className="text-sm whitespace-pre-wrap wrap-break-word mb-2 text-foreground/90 leading-relaxed">
                 {content}
               </div>
             )}
@@ -208,9 +208,8 @@ export function ThreadCard({ thread }: ThreadCardProps) {
         </div>
       </article>
 
-      {/* Lightbox Modal - key forces re-mount when opened to reset index */}
+      {/* Full-screen media viewer */}
       <MediaLightbox
-        key={lightboxOpen ? `lightbox-${lightboxIndex}` : 'closed'}
         items={mediaItems}
         isOpen={lightboxOpen}
         onClose={() => setLightboxOpen(false)}

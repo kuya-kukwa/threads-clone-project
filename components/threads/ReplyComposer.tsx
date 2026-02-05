@@ -245,7 +245,7 @@ export const ReplyComposer = forwardRef<
       {/* Composer */}
       <div className="flex gap-3">
         {/* User Avatar */}
-        <Avatar className="w-10 h-10 flex-shrink-0">
+        <Avatar className="w-10 h-10 shrink-0">
           <AvatarImage src={undefined} alt={user?.name || 'User'} />
           <AvatarFallback className="text-xs">{userInitials}</AvatarFallback>
         </Avatar>

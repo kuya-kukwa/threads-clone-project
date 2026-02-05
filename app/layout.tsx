@@ -43,7 +43,7 @@ export default function RootLayout({
         <DesktopSidebar />
 
         {/* Main Content Area */}
-        <main className="pb-20 lg:pb-0 lg:pl-[76px]">{children}</main>
+        <main className="pb-20 lg:pb-0 lg:pl-19">{children}</main>
 
         {/* Floating Create Button - visible on lg+ */}
         <FloatingCreateButton />

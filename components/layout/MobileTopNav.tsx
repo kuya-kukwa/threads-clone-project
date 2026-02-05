@@ -325,7 +325,7 @@ export function MobileTopNav({
             </div>
 
             {/* Search Results */}
-            <div className="max-h-[60vh] overflow-y-auto">
+            <div className="max-h-[60dvh] overflow-y-auto">
               {/* Error state */}
               {searchError && (
                 <div className="p-4">
@@ -358,7 +358,7 @@ export function MobileTopNav({
                             className="w-full flex items-center gap-3 px-3 py-3 rounded-xl hover:bg-secondary/50 transition-colors text-left"
                           >
                             {/* Avatar */}
-                            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-accent flex-shrink-0 overflow-hidden">
+                            <div className="w-10 h-10 rounded-full bg-linear-to-br from-primary to-accent shrink-0 overflow-hidden">
                               {user.avatarUrl ? (
                                 // eslint-disable-next-line @next/next/no-img-element
                                 <img

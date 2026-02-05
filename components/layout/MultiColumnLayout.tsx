@@ -76,7 +76,7 @@ export function MultiColumnLayout({ children }: { children: React.ReactNode }) {
         {columns.map((column, index) => (
           <div
             key={column.id}
-            className="flex-shrink-0 w-1/3 h-full border-r border-border/30 snap-center overflow-y-auto"
+            className="shrink-0 w-1/3 h-full border-r border-border/30 snap-center overflow-y-auto"
           >
             {/* Column Header */}
             <div className="sticky top-0 z-40 bg-background border-b border-border/30">
@@ -99,7 +99,7 @@ export function MultiColumnLayout({ children }: { children: React.ReactNode }) {
             </div>
 
             {/* Column Content */}
-            <div className="h-[calc(100vh-56px)] overflow-y-auto">
+            <div className="h-[calc(100dvh-56px)] overflow-y-auto">
               {index === 0 && pathname === '/feed' ? (
                 children
               ) : index === 1 && pathname.startsWith('/profile') ? (

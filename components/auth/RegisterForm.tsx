@@ -76,7 +76,7 @@ export function RegisterForm() {
                     autoComplete="email"
                     autoFocus
                     disabled={isLoading}
-                    className="h-12 bg-secondary/50 border-0 rounded-xl px-4 text-sm placeholder:text-muted-foreground/60 focus:bg-secondary focus:ring-1 focus:ring-primary/50 transition-all"
+                    className="h-12 bg-secondary/50 border-0 rounded-2xl px-4 text-sm placeholder:text-muted-foreground/60 focus:bg-secondary focus:ring-1 focus:ring-primary/50 transition-all"
                     {...field}
                   />
                 </FormControl>
@@ -97,7 +97,7 @@ export function RegisterForm() {
                     placeholder="Username"
                     autoComplete="username"
                     disabled={isLoading}
-                    className="h-12 bg-secondary/50 border-0 rounded-xl px-4 text-sm placeholder:text-muted-foreground/60 focus:bg-secondary focus:ring-1 focus:ring-primary/50 transition-all"
+                    className="h-12 bg-secondary/50 border-0 rounded-2xl px-4 text-sm placeholder:text-muted-foreground/60 focus:bg-secondary focus:ring-1 focus:ring-primary/50 transition-all"
                     {...field}
                   />
                 </FormControl>
@@ -118,7 +118,7 @@ export function RegisterForm() {
                     placeholder="Display name"
                     autoComplete="name"
                     disabled={isLoading}
-                    className="h-12 bg-secondary/50 border-0 rounded-xl px-4 text-sm placeholder:text-muted-foreground/60 focus:bg-secondary focus:ring-1 focus:ring-primary/50 transition-all"
+                    className="h-12 bg-secondary/50 border-0 rounded-2xl px-4 text-sm placeholder:text-muted-foreground/60 focus:bg-secondary focus:ring-1 focus:ring-primary/50 transition-all"
                     {...field}
                   />
                 </FormControl>
@@ -139,7 +139,7 @@ export function RegisterForm() {
                     placeholder="Password"
                     autoComplete="new-password"
                     disabled={isLoading}
-                    className="h-12 bg-secondary/50 border-0 rounded-xl px-4 text-sm placeholder:text-muted-foreground/60 focus:bg-secondary focus:ring-1 focus:ring-primary/50 transition-all"
+                    className="h-12 bg-secondary/50 border-0 rounded-2xl px-4 text-sm placeholder:text-muted-foreground/60 focus:bg-secondary focus:ring-1 focus:ring-primary/50 transition-all"
                     {...field}
                   />
                 </FormControl>
@@ -160,7 +160,7 @@ export function RegisterForm() {
                     placeholder="Confirm password"
                     autoComplete="new-password"
                     disabled={isLoading}
-                    className="h-12 bg-secondary/50 border-0 rounded-xl px-4 text-sm placeholder:text-muted-foreground/60 focus:bg-secondary focus:ring-1 focus:ring-primary/50 transition-all"
+                    className="h-12 bg-secondary/50 border-0 rounded-2xl px-4 text-sm placeholder:text-muted-foreground/60 focus:bg-secondary focus:ring-1 focus:ring-primary/50 transition-all"
                     {...field}
                   />
                 </FormControl>
@@ -172,7 +172,7 @@ export function RegisterForm() {
           {/* Error Message */}
           {error && (
             <div className="flex items-center gap-2 p-3 text-sm text-destructive bg-destructive/10 rounded-xl">
-              <AlertIcon className="w-4 h-4 flex-shrink-0" />
+              <AlertIcon className="w-4 h-4 shrink-0" />
               <span>{error}</span>
             </div>
           )}

@@ -123,7 +123,7 @@ export function MediaLightbox({
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
       <DialogContent
-        className="max-w-[100vw] max-h-[100vh] w-full h-full p-0 border-0 rounded-none bg-black/95"
+        className="max-w-dvw max-h-dvh w-full h-full p-0 border-0 rounded-none bg-black/95"
         onKeyDown={handleKeyDown}
         showCloseButton={false}
       >
@@ -184,14 +184,14 @@ export function MediaLightbox({
           {/* Media content */}
           <div
             ref={containerRef}
-            className="flex items-center justify-center max-w-[90vw] max-h-[80vh]"
+            className="flex items-center justify-center max-w-[90dvw] max-h-[80dvh]"
             onClick={(e) => e.stopPropagation()}
           >
             {currentItem.type === 'video' ? (
               <video
                 ref={videoRef}
                 src={currentItem.url}
-                className="max-w-full max-h-[80vh] object-contain rounded-xl"
+                className="max-w-full max-h-[80dvh] object-contain rounded-xl"
                 controls
                 autoPlay
                 playsInline
@@ -203,7 +203,7 @@ export function MediaLightbox({
                 alt={currentItem.altText || 'Image'}
                 width={1200}
                 height={800}
-                className="max-w-full max-h-[80vh] object-contain rounded-xl"
+                className="max-w-full max-h-[80dvh] object-contain rounded-xl"
                 priority
               />
             )}

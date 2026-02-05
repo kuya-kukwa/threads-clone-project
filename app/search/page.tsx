@@ -175,9 +175,9 @@ function SearchContent() {
   return (
     <div className="min-h-screen bg-background pb-20 lg:pb-0">
       {/* Desktop Content Container - Fixed height with internal scroll */}
-      <div className="hidden lg:flex lg:flex-col max-w-[640px] mx-auto lg:pl-6 lg:pr-4 h-screen overflow-hidden">
+      <div className="hidden lg:flex lg:flex-col max-w-160 mx-auto lg:pl-6 lg:pr-4 h-screen overflow-hidden">
         {/* Fixed Header - Outside bordered area */}
-        <div className="flex-shrink-0 bg-background pt-6 pb-2">
+        <div className="shrink-0 bg-background pt-6 pb-2">
           <div className="flex items-center justify-center h-12 px-4 relative">
             <span className="text-[15px] font-medium">Search</span>
             <button className="absolute right-4 p-2 rounded-full hover:bg-secondary/50 transition-colors -mr-2">
@@ -225,7 +225,7 @@ function SearchContent() {
 
       {/* Mobile Header */}
       <div className="lg:hidden sticky top-0 z-40 bg-black border-b border-border/30">
-        <div className="max-w-[640px] mx-auto px-4 py-3">
+        <div className="max-w-160 mx-auto px-4 py-3">
           <div className="relative">
             <SearchIcon className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
             <input
@@ -249,7 +249,7 @@ function SearchContent() {
       </div>
 
       {/* Mobile Content */}
-      <div className="lg:hidden max-w-[640px] mx-auto px-4 py-4">
+      <div className="lg:hidden max-w-160 mx-auto px-4 py-4">
         <SearchResults
           searchQuery={searchQuery}
           isSearching={isSearching}
@@ -312,7 +312,7 @@ function SearchResults({
           >
             <Avatar className="w-12 h-12 ring-2 ring-border/30">
               <AvatarImage src={user.avatarUrl} />
-              <AvatarFallback className="bg-gradient-to-br from-primary to-accent text-white">
+              <AvatarFallback className="bg-linear-to-br from-primary to-accent text-white">
                 {user.displayName?.[0]?.toUpperCase() || 'U'}
               </AvatarFallback>
             </Avatar>
@@ -360,7 +360,7 @@ function SearchResults({
                 >
                   <Avatar className="w-12 h-12 ring-2 ring-border/30">
                     <AvatarImage src={user.avatarUrl} />
-                    <AvatarFallback className="bg-gradient-to-br from-primary to-accent text-white">
+                    <AvatarFallback className="bg-linear-to-br from-primary to-accent text-white">
                       {user.displayName?.[0]?.toUpperCase() || 'U'}
                     </AvatarFallback>
                   </Avatar>
@@ -400,7 +400,7 @@ function SearchResults({
                   <Link href={`/profile/${user.userId}`}>
                     <Avatar className="w-10 h-10">
                       <AvatarImage src={user.avatarUrl} />
-                      <AvatarFallback className="bg-gradient-to-br from-primary to-accent text-white text-sm">
+                      <AvatarFallback className="bg-linear-to-br from-primary to-accent text-white text-sm">
                         {user.displayName?.[0]?.toUpperCase() || 'U'}
                       </AvatarFallback>
                     </Avatar>
