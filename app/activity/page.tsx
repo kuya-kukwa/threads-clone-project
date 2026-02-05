@@ -17,12 +17,7 @@ import { formatDistanceToNow } from 'date-fns';
 import { NotificationWithActor, NotificationType } from '@/types/appwrite';
 import { getSessionToken } from '@/lib/appwriteClient';
 
-type TabType =
-  | 'all'
-  | 'follows'
-  | 'replies'
-  | 'likes'
-  | 'mentions';
+type TabType = 'all' | 'follows' | 'replies' | 'likes' | 'mentions';
 
 // API client helper
 async function fetchNotifications(
@@ -178,7 +173,17 @@ export default function ActivityPage() {
             <div className="px-4 py-4">
               <NotificationsList
                 key={activeTab}
-                type={activeTab === 'all' ? undefined : activeTab === 'follows' ? 'follow' : activeTab === 'replies' ? 'reply' : activeTab === 'likes' ? 'like' : 'mention'}
+                type={
+                  activeTab === 'all'
+                    ? undefined
+                    : activeTab === 'follows'
+                      ? 'follow'
+                      : activeTab === 'replies'
+                        ? 'reply'
+                        : activeTab === 'likes'
+                          ? 'like'
+                          : 'mention'
+                }
                 onUnreadCountChange={setUnreadCount}
               />
             </div>
@@ -227,7 +232,17 @@ export default function ActivityPage() {
         <div className="lg:hidden max-w-[640px] mx-auto px-4 py-4">
           <NotificationsList
             key={`mobile-${activeTab}`}
-            type={activeTab === 'all' ? undefined : activeTab === 'follows' ? 'follow' : activeTab === 'replies' ? 'reply' : activeTab === 'likes' ? 'like' : 'mention'}
+            type={
+              activeTab === 'all'
+                ? undefined
+                : activeTab === 'follows'
+                  ? 'follow'
+                  : activeTab === 'replies'
+                    ? 'reply'
+                    : activeTab === 'likes'
+                      ? 'like'
+                      : 'mention'
+            }
             onUnreadCountChange={setUnreadCount}
           />
         </div>

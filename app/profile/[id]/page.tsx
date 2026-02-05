@@ -179,7 +179,10 @@ function ProfileContent({ userId }: { userId: string }) {
               <div className="px-4">
                 <div className="flex">
                   {tabs.map((tab) => (
-                    <div key={tab.id} className="flex-1 py-3 flex justify-center">
+                    <div
+                      key={tab.id}
+                      className="flex-1 py-3 flex justify-center"
+                    >
                       <div className="h-4 w-16 bg-secondary rounded animate-pulse" />
                     </div>
                   ))}
@@ -285,10 +288,18 @@ function ProfileContent({ userId }: { userId: string }) {
         {/* Tab Content */}
         <div className="px-4 py-4">
           {activeTab === 'threads' && (
-            <ThreadsTab threads={threads} loading={loadingThreads} profile={profile} />
+            <ThreadsTab
+              threads={threads}
+              loading={loadingThreads}
+              profile={profile}
+            />
           )}
           {activeTab === 'replies' && (
-            <RepliesTab replies={replies} loading={loadingReplies} profile={profile} />
+            <RepliesTab
+              replies={replies}
+              loading={loadingReplies}
+              profile={profile}
+            />
           )}
           {activeTab === 'media' && (
             <MediaTab threads={threads} loading={loadingThreads} />
@@ -363,10 +374,18 @@ function ProfileContent({ userId }: { userId: string }) {
           {/* Tab Content */}
           <div className="px-4 py-4">
             {activeTab === 'threads' && (
-              <ThreadsTab threads={threads} loading={loadingThreads} profile={profile} />
+              <ThreadsTab
+                threads={threads}
+                loading={loadingThreads}
+                profile={profile}
+              />
             )}
             {activeTab === 'replies' && (
-              <RepliesTab replies={replies} loading={loadingReplies} profile={profile} />
+              <RepliesTab
+                replies={replies}
+                loading={loadingReplies}
+                profile={profile}
+              />
             )}
             {activeTab === 'media' && (
               <MediaTab threads={threads} loading={loadingThreads} />
