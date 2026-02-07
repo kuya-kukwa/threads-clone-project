@@ -82,8 +82,8 @@ export async function GET(request: NextRequest) {
       },
       {
         headers: {
-          // Personalized feed - private cache only, shorter duration
-          'Cache-Control': 'private, max-age=15, stale-while-revalidate=30',
+          // No caching - always serve fresh feed data
+          'Cache-Control': 'no-store, no-cache, must-revalidate',
         },
       }
     );

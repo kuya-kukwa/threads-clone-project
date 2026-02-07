@@ -1,47 +1,52 @@
 @import 'tailwindcss';
 
 @theme {
-  /* Dark Theme - Official Threads Color Scheme */
+  /* Dark Theme - Official Threads Color Palette */
   /* Background hierarchy */
-  --color-background: 0 0% 0%; /* #000000 - Pure black main bg */
-  --color-foreground: 0 0% 97%; /* #f7f7f7 - Main text */
+  --color-background: 0 0% 0%; /* #000000 - Pure black like Threads */
+  --color-foreground: 0 0% 97%; /* #f7f7f7 - Primary text */
 
   /* Card/Surface colors */
-  --color-card: 0 0% 9.5%; /* #181818 - Elevated surfaces/cards */
+  --color-card: 0 0% 9.4%; /* #181818 - Elevated surfaces/cards */
   --color-card-foreground: 0 0% 97%;
 
   /* Popover/Modal */
-  --color-popover: 0 0% 9.5%; /* #181818 */
+  --color-popover: 0 0% 9.4%; /* #181818 */
   --color-popover-foreground: 0 0% 97%;
 
-  /* Primary - Threads Blue */
-  --color-primary: 210 100% 52%; /* #0095f6 - Threads blue */
-  --color-primary-foreground: 0 0% 100%;
+  /* Primary - Threads accent (used sparingly for links/buttons) */
+  --color-primary: 0 0% 100%; /* #FFFFFF - White as primary action */
+  --color-primary-foreground: 0 0% 0%;
 
-  /* Secondary - Subtle gray */
+  /* Secondary - Subtle gray surface */
   --color-secondary: 0 0% 12%; /* #1e1e1e */
   --color-secondary-foreground: 0 0% 85%;
 
-  /* Muted - For subtle elements */
+  /* Muted - Nav icons, secondary text, action icons */
   --color-muted: 0 0% 10%; /* #1a1a1a */
-  --color-muted-foreground: 0 0% 45%; /* #737373 */
+  --color-muted-foreground: 0 0% 40%; /* #666666 - Threads grey inactive icons */
 
-  /* Accent - Threads accent */
-  --color-accent: 210 100% 52%; /* Match primary */
+  /* Accent - Threads blue (links, primary buttons) */
+  --color-accent: 210 100% 52%; /* #0095f6 */
   --color-accent-foreground: 0 0% 100%;
 
   /* Destructive - Red */
   --color-destructive: 0 84% 60%;
   --color-destructive-foreground: 0 0% 100%;
 
-  /* Borders - Very subtle */
-  --color-border: 0 0% 15%; /* #262626 - Subtle borders */
-  --color-input: 0 0% 15%; /* #262626 */
-  --color-ring: 210 100% 52%; /* Match primary */
+  /* Borders - Threads subtle dividers */
+  --color-border: 0 0% 20%; /* #333333 - Subtle borders */
+  --color-input: 0 0% 15%; /* #262626 - Input borders */
+  --color-ring: 0 0% 40%; /* Subtle ring */
 
   /* Success */
-  --color-success: 142 76% 45%; /* Green */
+  --color-success: 142 76% 45%;
   --color-success-foreground: 0 0% 100%;
+
+  /* Threads-specific greys */
+  --color-threads-icon: 0 0% 72%; /* #B8B8B8 - Post action icons */
+  --color-threads-secondary-text: 0 0% 60%; /* #999999 - Timestamps, secondary text */
+  --color-threads-blue: 210 100% 52%; /* #0095F6 - Links & accent buttons */
 
   /* Radius */
   --radius-sm: 0.5rem;
@@ -125,21 +130,37 @@ body {
   background-clip: text;
 }
 
-/* Primary gradient button */
+/* Primary button - Threads style (white on dark) */
 .btn-gradient {
-  background: linear-gradient(
-    135deg,
-    hsl(234 89% 64%) 0%,
-    hsl(260 70% 58%) 100%
-  );
+  background: hsl(0 0% 100%);
+  color: hsl(0 0% 0%);
 }
 
 .btn-gradient:hover {
-  background: linear-gradient(
-    135deg,
-    hsl(234 89% 58%) 0%,
-    hsl(260 70% 52%) 100%
-  );
+  background: hsl(0 0% 90%);
+}
+
+/* Threads blue button (for login/register) */
+.btn-threads-blue {
+  background: hsl(210 100% 52%);
+  color: white;
+}
+
+.btn-threads-blue:hover {
+  background: hsl(210 100% 46%);
+}
+
+/* Threads action icon color */
+.text-threads-icon {
+  color: hsl(0 0% 72%); /* #B8B8B8 */
+}
+
+.text-threads-secondary {
+  color: hsl(0 0% 60%); /* #999999 */
+}
+
+.text-threads-blue {
+  color: hsl(210 100% 52%); /* #0095F6 */
 }
 
 /* Animation utilities */

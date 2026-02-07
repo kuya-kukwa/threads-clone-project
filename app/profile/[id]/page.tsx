@@ -169,7 +169,7 @@ function ProfileContent({ userId }: { userId: string }) {
           </div>
 
           {/* Content wrapper with border and rounded corners */}
-          <div className="border border-border/30 rounded-t-2xl flex-1 min-h-0 overflow-y-auto bg-background">
+          <div className="border border-border/30 rounded-t-2xl flex-1 min-h-0 overflow-y-auto bg-[#181818]">
             {/* Profile Card Skeleton */}
             <div className="px-4 py-4">
               <ProfileCardSkeleton />
@@ -228,7 +228,7 @@ function ProfileContent({ userId }: { userId: string }) {
           </div>
 
           {/* Content wrapper with border and rounded corners */}
-          <div className="border border-border/30 rounded-t-2xl flex-1 min-h-0 overflow-y-auto bg-background">
+          <div className="border border-border/30 rounded-t-2xl flex-1 min-h-0 overflow-y-auto bg-[#181818]">
             <div className="text-center py-16 px-4">
               <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-secondary flex items-center justify-center">
                 <ProfileIcon className="w-8 h-8 text-muted-foreground" />
@@ -341,7 +341,7 @@ function ProfileContent({ userId }: { userId: string }) {
         </div>
 
         {/* Content wrapper with border and rounded corners - scrollable area contained */}
-        <div className="border border-border/30 rounded-t-2xl flex-1 min-h-0 overflow-y-auto bg-background [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+        <div className="border border-border/30 rounded-t-2xl flex-1 min-h-0 overflow-y-auto bg-[#181818] [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
           {/* Profile Card */}
           <div className="px-4 py-4">
             <ProfileCard profile={profile} isOwnProfile={isOwnProfile} />

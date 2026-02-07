@@ -90,7 +90,7 @@ export function RightSidebar() {
   if (!user) return null;
 
   return (
-    <aside className="hidden xl:block fixed right-0 top-0 h-screen w-87.5 border-l border-border/30 bg-background">
+    <aside className="hidden xl:block fixed right-0 top-0 h-screen w-87.5 border-l border-border/20 bg-background">
       <div className="flex flex-col h-full px-6 py-6">
         {/* Search Bar */}
         <div className="mb-6">

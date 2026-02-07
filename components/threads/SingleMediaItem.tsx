@@ -19,10 +19,17 @@ interface SingleMediaItemProps {
 }
 
 const sizeClasses: Record<MediaSize, string> = {
-  small: 'h-[150px]',
-  medium: 'h-[200px]',
-  large: 'aspect-[4/3] max-h-[400px]',
+  small: 'max-h-[150px]',
+  medium: 'max-h-[200px]',
+  large: 'max-h-[400px]',
   gallery: 'h-[280px] lg:h-[320px]',
+};
+
+const objectFitClass: Record<MediaSize, string> = {
+  small: 'object-contain',
+  medium: 'object-contain',
+  large: 'object-contain',
+  gallery: 'object-cover',
 };
 
 export function SingleMediaItem({ item, size, onClick }: SingleMediaItemProps) {
@@ -52,13 +59,13 @@ export function SingleMediaItem({ item, size, onClick }: SingleMediaItemProps) {
   if (item.type === 'video') {
     return (
       <div
-        className="relative group cursor-pointer h-full overflow-hidden"
+        className={`relative group cursor-pointer overflow-hidden ${size === 'gallery' ? 'h-full' : 'rounded-xl border border-border/30'}`}
         onClick={handleVideoClick}
       >
         <video
           ref={videoRef}
           src={item.url}
-          className={`w-full h-full object-cover bg-card ${sizeClasses[size]} ${size === 'gallery' ? '' : 'rounded-xl'}`}
+          className={`w-full bg-card ${sizeClasses[size]} ${objectFitClass[size]} ${size === 'gallery' ? 'h-full' : ''} ${size === 'gallery' ? '' : 'rounded-xl'}`}
           preload="metadata"
           aria-label={item.altText || 'Video'}
           onEnded={handleVideoEnded}
@@ -113,7 +120,7 @@ export function SingleMediaItem({ item, size, onClick }: SingleMediaItemProps) {
 
   return (
     <div
-      className="relative group cursor-pointer h-full overflow-hidden"
+      className={`relative group cursor-pointer overflow-hidden ${size === 'gallery' ? 'h-full' : 'rounded-xl border border-border/30'}`}
       onClick={onClick}
     >
       <Image
@@ -121,7 +128,7 @@ export function SingleMediaItem({ item, size, onClick }: SingleMediaItemProps) {
         alt={item.altText || 'Thread image'}
         width={600}
         height={400}
-        className={`w-full h-full bg-card ${sizeClasses[size]} transition-transform object-cover ${size === 'gallery' ? '' : 'rounded-xl'}`}
+        className={`w-full bg-card ${sizeClasses[size]} ${objectFitClass[size]} transition-transform ${size === 'gallery' ? 'h-full' : ''} ${size === 'gallery' ? '' : 'rounded-xl'}`}
         loading="lazy"
       />
 

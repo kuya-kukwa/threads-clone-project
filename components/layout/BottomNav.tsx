@@ -220,18 +220,16 @@ export function BottomNav() {
             const href = getHref(item);
             const Icon = item.icon;
 
-            // Special styling for create button
+            // Create button - Threads style (outlined square icon, same grey as others)
             if (item.isCreate) {
               return (
                 <Link
                   key={item.id}
                   href={href}
-                  className="flex items-center justify-center -mt-4"
+                  className="flex items-center justify-center min-w-14 py-3 px-2 rounded-xl transition-all duration-200 text-[#B8B8B8] hover:text-white"
                   aria-label="Create new post"
                 >
-                  <div className="w-12 h-12 rounded-full btn-gradient flex items-center justify-center shadow-lg shadow-primary/30">
-                    <Icon className="w-6 h-6 text-white" />
-                  </div>
+                  <Icon className="w-7 h-7" />
                 </Link>
               );
             }
@@ -240,16 +238,14 @@ export function BottomNav() {
               <Link
                 key={item.id}
                 href={href}
-                className={`flex flex-col items-center justify-center min-w-14 py-2 px-2 rounded-xl transition-all duration-200 ${
-                  active
-                    ? 'text-foreground'
-                    : 'text-muted-foreground hover:text-foreground'
+                className={`flex items-center justify-center min-w-14 py-3 px-2 rounded-xl transition-all duration-200 ${
+                  active ? 'text-white' : 'text-[#B8B8B8] hover:text-white'
                 }`}
                 aria-label={item.label}
                 aria-current={active ? 'page' : undefined}
               >
                 <div className="relative">
-                  <Icon className="w-6 h-6" active={active} />
+                  <Icon className="w-7 h-7" active={active} />
                   {/* Notification badge for Activity tab */}
                   {item.id === 'activity' && unreadCount > 0 && (
                     <span className="absolute -top-1 -right-1 min-w-4 h-4 px-1 flex items-center justify-center text-[10px] font-bold text-white bg-red-500 rounded-full">
@@ -257,9 +253,6 @@ export function BottomNav() {
                     </span>
                   )}
                 </div>
-                <span className="text-[10px] mt-0.5 font-medium">
-                  {item.label}
-                </span>
               </Link>
             );
           })}
@@ -307,13 +300,7 @@ function MessagesIcon({
 }) {
   return active ? (
     <svg className={className} viewBox="0 0 24 24" fill="currentColor">
-      <path d="M19 10.5A8.5 8.5 0 1 1 10.5 2a8.5 8.5 0 0 1 8.5 8.5Z" />
-      <path
-        d="M16.511 16.511 22 22"
-        stroke="currentColor"
-        strokeWidth={2.5}
-        strokeLinecap="round"
-      />
+      <path d="M12.003 1.131a10.487 10.487 0 0 0-10.87 10.497 10.44 10.44 0 0 0 3.476 7.764l.474 6.467a.5.5 0 0 0 .81.362l3.109-2.59a10.3 10.3 0 0 0 3.001.44 10.487 10.487 0 0 0 10.87-10.498A10.487 10.487 0 0 0 12.003 1.13Z" />
     </svg>
   ) : (
     <svg
@@ -324,13 +311,7 @@ function MessagesIcon({
       strokeWidth={1.75}
     >
       <path
-        d="M19 10.5A8.5 8.5 0 1 1 10.5 2a8.5 8.5 0 0 1 8.5 8.5Z"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      <path
-        d="M16.511 16.511 22 22"
-        strokeLinecap="round"
+        d="M12.003 2.001a9.705 9.705 0 1 1 0 19.4 10.15 10.15 0 0 1-2.839-.401l-3.1 2.59a.502.502 0 0 1-.814-.362l-.474-6.467A9.66 9.66 0 0 1 2.298 11.7a9.705 9.705 0 0 1 9.705-9.7Z"
         strokeLinejoin="round"
       />
     </svg>

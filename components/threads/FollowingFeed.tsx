@@ -23,7 +23,7 @@ interface FollowingFeedResponse {
   followingCount?: number;
 }
 
-export function FollowingFeed() {
+export function FollowingFeed({ refreshKey = 0 }: { refreshKey?: number }) {
   const [threads, setThreads] = useState<ThreadWithLikeStatus[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
@@ -51,6 +51,7 @@ export function FollowingFeed() {
       const response = await fetch(`/api/feed/following?${params}`, {
         credentials: 'include',
         headers,
+        cache: 'no-store',
       });
 
       const data: FollowingFeedResponse = await response.json();
@@ -76,11 +77,11 @@ export function FollowingFeed() {
     }
   }, []);
 
-  // Initial load
+  // Initial load and refresh when refreshKey changes
   useEffect(() => {
     setIsLoading(true);
     fetchFeed().finally(() => setIsLoading(false));
-  }, [fetchFeed]);
+  }, [fetchFeed, refreshKey]);
 
   // Load more
   const loadMore = useCallback(async () => {

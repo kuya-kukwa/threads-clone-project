@@ -159,8 +159,8 @@ export function DesktopSidebar() {
             p-3.5 rounded-xl transition-all duration-200
             ${
               showMoreMenu
-                ? 'text-foreground bg-secondary/50'
-                : 'text-muted-foreground hover:text-foreground hover:bg-secondary/50'
+                ? 'text-white bg-secondary/50'
+                : 'text-[#B8B8B8] hover:text-white hover:bg-secondary/50'
             }
           `}
           aria-label="More options"
@@ -245,8 +245,8 @@ function NavItem({
           isCreate
             ? 'hover:bg-secondary/50'
             : active
-              ? 'text-foreground'
-              : 'text-muted-foreground hover:text-foreground hover:bg-secondary/50'
+              ? 'text-white'
+              : 'text-[#B8B8B8] hover:text-white hover:bg-secondary/50'
         }
       `}
     >
@@ -274,11 +274,11 @@ function CreateNavButton({ onClick, icon }: CreateNavButtonProps) {
   return (
     <button
       onClick={onClick}
-      className="relative p-3.5 rounded-xl transition-all duration-200 text-muted-foreground hover:text-foreground hover:bg-secondary/50"
+      className="relative p-2 rounded-xl transition-all duration-200"
       aria-label="Create new thread"
     >
-      <div className="relative w-8 h-8 flex items-center justify-center border-2 border-current rounded-lg">
-        {icon}
+      <div className="relative w-14 h-12 flex items-center justify-center bg-[#1e1e1e] rounded-2xl hover:bg-[#282828] transition-colors">
+        <div className="text-[#6e6e6e]">{icon}</div>
       </div>
     </button>
   );
@@ -391,14 +391,13 @@ function SearchIconFilled() {
 function CreateIcon() {
   return (
     <svg
-      className="w-6 h-6"
+      className="w-5 h-5"
       viewBox="0 0 24 24"
       fill="none"
       stroke="currentColor"
-      strokeWidth={1.75}
+      strokeWidth={2.5}
     >
-      <path d="M12 8v8m-4-4h8" strokeLinecap="round" />
-      <rect x="3" y="3" width="18" height="18" rx="5" strokeLinecap="round" />
+      <path d="M12 6v12m-6-6h12" strokeLinecap="round" />
     </svg>
   );
 }

@@ -280,6 +280,7 @@ export function ThreadComposer({ onSuccess }: ThreadComposerProps) {
       } else {
         router.refresh();
       }
+      window.dispatchEvent(new CustomEvent('feed-refresh'));
     } catch (err) {
       logger.error({
         msg: 'Thread creation failed',
@@ -373,25 +374,6 @@ export function ThreadComposer({ onSuccess }: ThreadComposerProps) {
                 >
                   ✕
                 </Button>
-              </div>
-            ))}
-          </div>
-
-          {/* Alt text inputs */}
-          <div className="space-y-2">
-            {mediaPreviews.map((media, index) => (
-              <div key={index} className="flex items-center gap-2">
-                <span className="text-xs text-muted-foreground w-16">
-                  {media.type === 'video' ? 'Video' : 'Image'} {index + 1}:
-                </span>
-                <Input
-                  value={media.altText}
-                  onChange={(e) => handleAltTextChange(index, e.target.value)}
-                  placeholder="Add alt text for accessibility..."
-                  maxLength={200}
-                  disabled={isSubmitting}
-                  className="flex-1 text-sm"
-                />
               </div>
             ))}
           </div>

@@ -29,7 +29,7 @@ export function ActionButton({
       className={`flex items-center gap-1.5 transition-colors p-2 rounded-full ${
         isActive
           ? 'text-red-500 hover:text-red-600'
-          : 'text-muted-foreground hover:text-primary hover:bg-primary/10'
+          : 'text-[#B8B8B8] hover:text-white'
       } ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
       aria-label={label}
       onClick={onClick}

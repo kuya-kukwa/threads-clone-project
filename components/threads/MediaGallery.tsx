@@ -35,11 +35,11 @@ export function SwipeableMediaGallery({
   // Two items - show side by side with equal width
   if (items.length === 2) {
     return (
-      <div className="flex gap-1 overflow-hidden rounded-xl">
+      <div className="flex gap-1">
         {items.map((item, index) => (
           <div
             key={item.id || index}
-            className="flex-1 min-w-0 overflow-hidden"
+            className="flex-1 min-w-0 overflow-hidden rounded-xl"
           >
             <SingleMediaItem
               item={item}

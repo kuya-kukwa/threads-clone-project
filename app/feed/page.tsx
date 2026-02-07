@@ -45,6 +45,16 @@ function FeedContent() {
     displayName?: string;
   } | null>(null);
 
+  // Feed refresh key - increment to trigger re-fetch
+  const [refreshKey, setRefreshKey] = useState(0);
+
+  // Listen for feed-refresh events (from CreatePostModal in sidebar/floating button)
+  useEffect(() => {
+    const handleFeedRefresh = () => setRefreshKey((k) => k + 1);
+    window.addEventListener('feed-refresh', handleFeedRefresh);
+    return () => window.removeEventListener('feed-refresh', handleFeedRefresh);
+  }, []);
+
   // Modal composer state
   const [showComposer, setShowComposer] = useState(false);
   const [composerContent, setComposerContent] = useState('');
@@ -106,7 +116,8 @@ function FeedContent() {
       if (response.ok) {
         setComposerContent('');
         setShowComposer(false);
-        router.refresh();
+        setRefreshKey((k) => k + 1);
+        window.dispatchEvent(new CustomEvent('feed-refresh'));
       }
     } catch {
       // Handle error silently
@@ -153,16 +164,6 @@ function FeedContent() {
               >
                 Following
               </button>
-              <button
-                onClick={() => setActiveTab('ghost-posts')}
-                className={`relative py-3 text-[15px] font-medium transition-colors ${
-                  activeTab === 'ghost-posts'
-                    ? 'text-foreground'
-                    : 'text-muted-foreground hover:text-foreground'
-                }`}
-              >
-                Ghost posts
-              </button>
             </div>
             {/* More menu */}
             <button className="p-2 rounded-full hover:bg-secondary/50 transition-colors -mr-2">
@@ -172,13 +173,13 @@ function FeedContent() {
         </div>
 
         {/* Content wrapper with border and rounded corners - scrollable area contained */}
-        <div className="border border-border/30 rounded-t-2xl flex-1 min-h-0 overflow-y-auto bg-background [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+        <div className="border border-border/30 rounded-t-2xl flex-1 min-h-0 overflow-y-auto bg-[#181818] [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
           {/* Compact Composer Card - "What's new?" - Opens modal on desktop */}
           <button
             onClick={() => setShowComposer(true)}
-            className="flex items-center gap-3 mx-4 mt-4 mb-3 px-4 py-3 bg-[#181818] border border-border/20 rounded-xl hover:bg-[#1c1c1c] transition-colors w-[calc(100%-2rem)] text-left"
+            className="flex items-center gap-3 w-full px-4 py-4 hover:bg-[#1e1e1e] transition-colors text-left"
           >
-            <Avatar className="w-10 h-10">
+            <Avatar className="w-10 h-10 shrink-0">
               <AvatarImage src={userProfile?.avatarUrl} />
               <AvatarFallback className="bg-linear-to-br from-primary to-accent text-white text-sm">
                 {(userProfile?.displayName ||
@@ -189,23 +190,22 @@ function FeedContent() {
             <span className="flex-1 text-[15px] text-muted-foreground">
               What&apos;s new?
             </span>
-            <span className="px-5 py-2 text-[15px] font-semibold border border-border/50 rounded-xl text-foreground/80">
+            <span className="px-5 py-1.5 text-[15px] font-semibold border border-border/50 rounded-xl text-foreground/80">
               Post
             </span>
           </button>
+          <div className="border-b border-border/30" />
 
           {/* Feed content based on active tab */}
-          {activeTab === 'for-you' && <PublicFeed />}
-          {activeTab === 'following' && <FollowingFeed />}
+          {activeTab === 'for-you' && <PublicFeed refreshKey={refreshKey} />}
+          {activeTab === 'following' && (
+            <FollowingFeed refreshKey={refreshKey} />
+          )}
           {activeTab === 'ghost-posts' && (
             <div className="flex flex-col items-center justify-center py-20 text-center px-4">
               <div className="w-16 h-16 rounded-full bg-secondary flex items-center justify-center mb-4">
                 <GhostIcon className="w-8 h-8 text-muted-foreground" />
               </div>
-              <h2 className="text-lg font-semibold mb-2">Ghost Posts</h2>
-              <p className="text-muted-foreground text-sm">
-                Posts that disappear after 24 hours
-              </p>
             </div>
           )}
         </div>
@@ -213,145 +213,16 @@ function FeedContent() {
 
       {/* Mobile Feed Content */}
       <div className="lg:hidden">
-        {activeTab === 'for-you' && <PublicFeed />}
-        {activeTab === 'following' && <FollowingFeed />}
+        {activeTab === 'for-you' && <PublicFeed refreshKey={refreshKey} />}
+        {activeTab === 'following' && <FollowingFeed refreshKey={refreshKey} />}
         {activeTab === 'ghost-posts' && (
           <div className="flex flex-col items-center justify-center py-20 text-center px-4">
             <div className="w-16 h-16 rounded-full bg-secondary flex items-center justify-center mb-4">
               <GhostIcon className="w-8 h-8 text-muted-foreground" />
             </div>
-            <h2 className="text-lg font-semibold mb-2">Ghost Posts</h2>
-            <p className="text-muted-foreground text-sm">
-              Posts that disappear after 24 hours
-            </p>
           </div>
         )}
       </div>
-
-      {/* Desktop Create Post Modal */}
-      <Dialog open={showComposer} onOpenChange={setShowComposer}>
-        <DialogContent
-          className="bg-[#181818] border-border/30 p-0 max-w-155 rounded-2xl"
-          showCloseButton={false}
-        >
-          {/* Modal Header */}
-          <DialogHeader className="p-0">
-            <div className="flex items-center justify-between px-4 py-3 border-b border-border/30">
-              <button
-                onClick={() => setShowComposer(false)}
-                className="text-[15px] text-foreground hover:opacity-80 transition-opacity"
-              >
-                Cancel
-              </button>
-              <DialogTitle className="text-[15px] font-semibold">
-                New thread
-              </DialogTitle>
-              <div className="flex items-center gap-2">
-                <button className="p-1.5 rounded-full hover:bg-secondary/50 transition-colors">
-                  <DraftsIcon className="w-5 h-5 text-muted-foreground" />
-                </button>
-                <button className="p-1.5 rounded-full hover:bg-secondary/50 transition-colors border border-border/50">
-                  <MoreHorizontalIcon className="w-5 h-5 text-muted-foreground" />
-                </button>
-              </div>
-            </div>
-          </DialogHeader>
-
-          {/* Composer Content */}
-          <div className="px-4 py-3">
-            <div className="flex gap-3">
-              {/* Left side - Avatar and line */}
-              <div className="flex flex-col items-center">
-                <Avatar className="w-10 h-10">
-                  <AvatarImage src={userProfile?.avatarUrl} />
-                  <AvatarFallback className="bg-linear-to-br from-primary to-accent text-white text-sm">
-                    {(userProfile?.displayName ||
-                      user?.name ||
-                      'U')[0]?.toUpperCase()}
-                  </AvatarFallback>
-                </Avatar>
-                <div className="w-0.5 flex-1 bg-border/30 mt-2 min-h-5" />
-              </div>
-
-              {/* Right side - Content */}
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2 mb-1">
-                  <span className="text-[15px] font-semibold">
-                    {userProfile?.displayName || user?.name || 'User'}
-                  </span>
-                  <span className="text-muted-foreground text-sm">{'>'}</span>
-                  <span className="text-primary text-sm">Add a topic</span>
-                </div>
-                <textarea
-                  ref={textareaRef}
-                  value={composerContent}
-                  onChange={(e) =>
-                    setComposerContent(e.target.value.slice(0, MAX_CHARS))
-                  }
-                  placeholder="What's new?"
-                  className="w-full bg-transparent text-[15px] text-foreground placeholder:text-muted-foreground resize-none outline-none min-h-6"
-                  rows={1}
-                />
-                {/* Media attachment icons */}
-                <div className="flex items-center gap-1 mt-3">
-                  <button className="p-2 rounded-full hover:bg-secondary/50 transition-colors">
-                    <ImageIcon className="w-5 h-5 text-muted-foreground" />
-                  </button>
-                  <button className="p-2 rounded-full hover:bg-secondary/50 transition-colors">
-                    <GifIcon className="w-5 h-5 text-muted-foreground" />
-                  </button>
-                  <button className="p-2 rounded-full hover:bg-secondary/50 transition-colors">
-                    <EmojiIcon className="w-5 h-5 text-muted-foreground" />
-                  </button>
-                  <button className="p-2 rounded-full hover:bg-secondary/50 transition-colors">
-                    <HashIcon className="w-5 h-5 text-muted-foreground" />
-                  </button>
-                  <button className="p-2 rounded-full hover:bg-secondary/50 transition-colors">
-                    <PollIcon className="w-5 h-5 text-muted-foreground" />
-                  </button>
-                  <button className="p-2 rounded-full hover:bg-secondary/50 transition-colors">
-                    <LocationIcon className="w-5 h-5 text-muted-foreground" />
-                  </button>
-                </div>
-              </div>
-            </div>
-
-            {/* Add to thread */}
-            <div className="flex items-center gap-3 mt-3">
-              <Avatar className="w-6 h-6 opacity-40">
-                <AvatarImage src={userProfile?.avatarUrl} />
-                <AvatarFallback className="bg-linear-to-br from-primary to-accent text-white text-[10px]">
-                  {(userProfile?.displayName ||
-                    user?.name ||
-                    'U')[0]?.toUpperCase()}
-                </AvatarFallback>
-              </Avatar>
-              <span className="text-muted-foreground text-[15px]">
-                Add to thread
-              </span>
-            </div>
-          </div>
-
-          {/* Modal Footer */}
-          <div className="flex items-center justify-between px-4 py-3 border-t border-border/30">
-            <button className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors">
-              <ReplyOptionsIcon className="w-4 h-4" />
-              <span className="text-[15px]">Reply options</span>
-            </button>
-            <button
-              onClick={handleSubmitPost}
-              disabled={!canPost || isSubmitting}
-              className={`px-5 py-2 rounded-xl text-[15px] font-semibold transition-all ${
-                canPost && !isSubmitting
-                  ? 'bg-foreground text-background hover:opacity-90'
-                  : 'bg-muted/50 text-muted-foreground cursor-not-allowed border border-border/50'
-              }`}
-            >
-              {isSubmitting ? 'Posting...' : 'Post'}
-            </button>
-          </div>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 }

@@ -251,8 +251,8 @@ export function MobileTopNav({
                   onClick={() => handleTabSelect(item.id)}
                   className={`w-full flex items-center gap-3 px-3 py-3 rounded-xl transition-colors ${
                     activeTab === item.id
-                      ? 'bg-secondary text-foreground'
-                      : 'text-muted-foreground hover:bg-secondary/50 hover:text-foreground'
+                      ? 'bg-secondary text-white'
+                      : 'text-[#B8B8B8] hover:bg-secondary/50 hover:text-white'
                   }`}
                 >
                   {item.icon}
@@ -275,7 +275,7 @@ export function MobileTopNav({
               <Link
                 href="/create"
                 onClick={() => setShowMenu(false)}
-                className="w-full flex items-center gap-3 px-3 py-3 rounded-xl text-muted-foreground hover:bg-secondary/50 hover:text-foreground transition-colors"
+                className="w-full flex items-center gap-3 px-3 py-3 rounded-xl text-[#B8B8B8] hover:bg-secondary/50 hover:text-white transition-colors"
               >
                 <PlusIcon className="w-5 h-5" />
                 <span className="font-medium">Create New Post</span>

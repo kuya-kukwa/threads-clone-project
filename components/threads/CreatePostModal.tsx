@@ -36,9 +36,14 @@ interface MediaPreview {
 interface CreatePostModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  onPostCreated?: () => void;
 }
 
-export function CreatePostModal({ open, onOpenChange }: CreatePostModalProps) {
+export function CreatePostModal({
+  open,
+  onOpenChange,
+  onPostCreated,
+}: CreatePostModalProps) {
   const { user } = useCurrentUser();
   const [content, setContent] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -253,6 +258,8 @@ export function CreatePostModal({ open, onOpenChange }: CreatePostModalProps) {
 
       resetForm();
       onOpenChange(false);
+      onPostCreated?.();
+      window.dispatchEvent(new CustomEvent('feed-refresh'));
       router.refresh();
     } catch (err) {
       logger.error({
@@ -354,21 +361,6 @@ export function CreatePostModal({ open, onOpenChange }: CreatePostModalProps) {
                       </div>
                     ))}
                   </div>
-
-                  {/* Alt text inputs */}
-                  {mediaPreviews.map((media, index) => (
-                    <Input
-                      key={index}
-                      value={media.altText}
-                      onChange={(e) =>
-                        handleAltTextChange(index, e.target.value)
-                      }
-                      placeholder={`Alt text for ${media.type} ${index + 1}...`}
-                      maxLength={200}
-                      disabled={isSubmitting}
-                      className="text-sm bg-secondary/30 border-[#363636]"
-                    />
-                  ))}
                 </div>
               )}
 

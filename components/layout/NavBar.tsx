@@ -151,8 +151,8 @@ function NavLink({
       href={href}
       className={`relative p-3 rounded-lg transition-colors ${
         active
-          ? 'text-foreground bg-secondary'
-          : 'text-muted-foreground hover:text-foreground hover:bg-secondary/50'
+          ? 'text-white bg-secondary'
+          : 'text-[#B8B8B8] hover:text-white hover:bg-secondary/50'
       }`}
     >
       {children}

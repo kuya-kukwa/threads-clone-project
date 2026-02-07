@@ -31,12 +31,14 @@ interface PublicFeedProps {
   initialThreads?: ThreadWithLikeStatus[];
   initialNextCursor?: string | null;
   initialHasMore?: boolean;
+  refreshKey?: number;
 }
 
 export function PublicFeed({
   initialThreads = [],
   initialNextCursor = null,
   initialHasMore = false,
+  refreshKey = 0,
 }: PublicFeedProps) {
   const [threads, setThreads] =
     useState<ThreadWithLikeStatus[]>(initialThreads);
@@ -50,12 +52,10 @@ export function PublicFeed({
   );
   const [error, setError] = useState<string | null>(null);
 
-  // Initial load if no threads provided
+  // Initial load if no threads provided, or re-fetch when refreshKey changes
   useEffect(() => {
-    if (initialThreads.length === 0) {
-      loadThreads();
-    }
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+    loadThreads();
+  }, [refreshKey]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const loadThreads = async (cursor?: string) => {
     try {
@@ -82,6 +82,7 @@ export function PublicFeed({
       const response = await fetch(`/api/feed?${params.toString()}`, {
         credentials: 'include',
         headers,
+        cache: 'no-store',
       });
       const data: FeedResponse = await response.json();
 

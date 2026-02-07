@@ -73,7 +73,7 @@ export default function MessagesPage() {
           </div>
 
           {/* Content wrapper with border and rounded corners - scrollable area contained */}
-          <div className="border border-border/30 rounded-t-2xl flex-1 min-h-0 overflow-y-auto bg-background [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+          <div className="border border-border/30 rounded-t-2xl flex-1 min-h-0 overflow-y-auto bg-[#181818] [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
             {/* Desktop Search Bar - collapsible */}
             {showSearch && (
               <div className="px-4 pt-4">
