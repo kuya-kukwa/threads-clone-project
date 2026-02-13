@@ -26,7 +26,7 @@ interface ProfilePageProps {
 type TabType = 'threads' | 'replies' | 'media' | 'reposts';
 
 function ProfileContent({ userId }: { userId: string }) {
-  const { user } = useCurrentUser();
+  const { user, isLoading: userLoading } = useCurrentUser();
   const { logout } = useAuth();
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -36,7 +36,7 @@ function ProfileContent({ userId }: { userId: string }) {
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [threads, setThreads] = useState<Thread[]>([]);
   const [replies, setReplies] = useState<Thread[]>([]);
-  const [loadingThreads, setLoadingThreads] = useState(false);
+  const [loadingThreads, setLoadingThreads] = useState(true);
   const [loadingReplies, setLoadingReplies] = useState(false);
 
   const tabs: { id: TabType; label: string }[] = [
@@ -69,15 +69,10 @@ function ProfileContent({ userId }: { userId: string }) {
       }
     };
 
-    fetchProfile();
-  }, [userId]);
-
-  useEffect(() => {
+    // Fetch threads in parallel with profile — only needs userId (URL param)
     const fetchUserThreads = async () => {
-      if (!profile) return;
       setLoadingThreads(true);
       try {
-        // Fetch user's threads
         const response = await fetch(`/api/threads?userId=${userId}`, {
           credentials: 'include',
         });
@@ -92,10 +87,37 @@ function ProfileContent({ userId }: { userId: string }) {
       }
     };
 
-    if (activeTab === 'threads' && profile) {
+    fetchProfile();
+    fetchUserThreads();
+  }, [userId]);
+
+  // Refetch threads when tab changes back to threads (e.g. after creating a post)
+  useEffect(() => {
+    if (
+      activeTab === 'threads' &&
+      profile &&
+      threads.length === 0 &&
+      !loadingThreads
+    ) {
+      const fetchUserThreads = async () => {
+        setLoadingThreads(true);
+        try {
+          const response = await fetch(`/api/threads?userId=${userId}`, {
+            credentials: 'include',
+          });
+          const data = await response.json();
+          if (data.threads) {
+            setThreads(data.threads);
+          }
+        } catch (err) {
+          console.error('Failed to fetch threads:', err);
+        } finally {
+          setLoadingThreads(false);
+        }
+      };
       fetchUserThreads();
     }
-  }, [activeTab, profile, userId]);
+  }, [activeTab, profile, userId, threads.length, loadingThreads]);
 
   // Fetch user's replies when replies tab is active
   useEffect(() => {
@@ -129,9 +151,11 @@ function ProfileContent({ userId }: { userId: string }) {
     setIsLoggingOut(false);
   };
 
-  const isOwnProfile = user?.$id === profile?.userId;
+  // Only determine isOwnProfile after user auth has resolved
+  const isOwnProfile = !userLoading && user?.$id === profile?.userId;
 
-  if (isLoading) {
+  // Show skeleton while either profile or user auth is still loading
+  if (isLoading || userLoading) {
     return (
       <div className="min-h-screen bg-black pb-20 lg:pb-0">
         {/* Mobile Loading State */}

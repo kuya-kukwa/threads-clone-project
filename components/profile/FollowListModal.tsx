@@ -44,9 +44,10 @@ interface FollowListModalProps {
   followingCount: number;
 }
 
-// In-memory cache
+// In-memory cache with stale-while-revalidate support
 const listCache = new Map<string, { users: FollowUser[]; ts: number }>();
 const CACHE_TTL = 30_000;
+const STALE_TTL = 120_000; // Show stale data up to 2 minutes while revalidating
 const key = (uid: string, tab: TabType) => `${uid}:${tab}`;
 
 export function FollowListModal({
@@ -70,20 +71,27 @@ export function FollowListModal({
     new Set(),
   );
   const [, startTransition] = useTransition();
-  const abortRef = useRef<AbortController | null>(null);
+  // Per-tab abort controllers to prevent prefetch from killing primary fetch
+  const abortRefs = useRef<Record<TabType, AbortController | null>>({
+    followers: null,
+    following: null,
+  });
 
   const users = activeTab === 'followers' ? followersData : followingData;
   const loaded = activeTab === 'followers' ? followersLoaded : followingLoaded;
 
   /* ------------------------------------------------------------------ */
-  /*  Data fetching                                                      */
+  /*  Data fetching — stale-while-revalidate pattern                     */
   /* ------------------------------------------------------------------ */
 
   const fetchTab = useCallback(
     async (tab: TabType, silent = false) => {
       const k = key(userId, tab);
       const cached = listCache.get(k);
-      if (cached && Date.now() - cached.ts < CACHE_TTL) {
+      const age = cached ? Date.now() - cached.ts : Infinity;
+
+      // Fresh cache — use directly, skip network
+      if (cached && age < CACHE_TTL) {
         if (tab === 'followers') {
           setFollowersData(cached.users);
           setFollowersLoaded(true);
@@ -94,14 +102,27 @@ export function FollowListModal({
         return;
       }
 
-      if (!silent) {
+      // Stale cache — show immediately, then revalidate in background
+      if (cached && age < STALE_TTL) {
+        if (tab === 'followers') {
+          setFollowersData(cached.users);
+          setFollowersLoaded(true);
+        } else {
+          setFollowingData(cached.users);
+          setFollowingLoaded(true);
+        }
+        // Continue to fetch fresh data below (no skeleton shown)
+        silent = true;
+      } else if (!silent) {
+        // No cache at all — show skeleton
         if (tab === 'followers') setFollowersLoaded(false);
         else setFollowingLoaded(false);
       }
 
-      abortRef.current?.abort();
+      // Abort only this tab's previous request
+      abortRefs.current[tab]?.abort();
       const ctrl = new AbortController();
-      abortRef.current = ctrl;
+      abortRefs.current[tab] = ctrl;
 
       try {
         const sessionToken = getSessionToken();
@@ -160,7 +181,13 @@ export function FollowListModal({
     };
   }, [isOpen]);
 
-  useEffect(() => () => abortRef.current?.abort(), []);
+  useEffect(
+    () => () => {
+      abortRefs.current.followers?.abort();
+      abortRefs.current.following?.abort();
+    },
+    [],
+  );
 
   /* ------------------------------------------------------------------ */
   /*  Handlers                                                           */

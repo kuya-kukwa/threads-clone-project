@@ -71,34 +71,41 @@ export function ThreadCardCompactSkeleton() {
 
 /**
  * Profile Card Skeleton
- * Matches the ProfileCard component layout
+ * Matches the ProfileCard component layout exactly:
+ * - Top: name/username left, avatar right (flex justify-between gap-4)
+ * - Bio lines
+ * - Follower/following stats
+ * - Full-width action button
  */
 export function ProfileCardSkeleton() {
   return (
-    <div className="space-y-4">
-      {/* Profile header */}
-      <div className="flex items-start justify-between">
-        <div className="flex-1 space-y-2">
-          <Skeleton className="h-6 w-28 sm:w-32" />
-          <Skeleton className="h-4 w-20 sm:w-24" />
+    <div className="w-full">
+      {/* Top section: Info left, Avatar right — matches ProfileCard flex layout */}
+      <div className="flex items-start justify-between gap-4">
+        {/* Left: Name and username */}
+        <div className="flex-1 min-w-0 space-y-1.5">
+          <Skeleton className="h-7 w-32 sm:h-8 sm:w-40" /> {/* displayName */}
+          <Skeleton className="h-4 w-24 sm:w-28" /> {/* @username */}
         </div>
-        <Skeleton className="w-16 h-16 sm:w-20 sm:h-20 rounded-full" />
+
+        {/* Right: Avatar with ring */}
+        <Skeleton className="w-16 h-16 sm:w-20 sm:h-20 rounded-full shrink-0 ring-2 ring-border" />
       </div>
 
-      {/* Bio */}
-      <div className="space-y-2">
+      {/* Bio — mt-3 matches ProfileCard */}
+      <div className="mt-3 space-y-1.5">
         <Skeleton className="h-4 w-full" />
-        <Skeleton className="h-4 w-4/5" />
+        <Skeleton className="h-4 w-3/5" />
       </div>
 
-      {/* Stats */}
-      <div className="flex gap-4">
-        <Skeleton className="h-4 w-20" />
-        <Skeleton className="h-4 w-20" />
+      {/* Followers/Following stats — mt-2 flex gap-4 matches ProfileCard */}
+      <div className="flex items-center gap-4 mt-2">
+        <Skeleton className="h-4 w-24" /> {/* X followers */}
+        <Skeleton className="h-4 w-24" /> {/* X following */}
       </div>
 
-      {/* Action button */}
-      <Skeleton className="h-10 w-full rounded-lg" />
+      {/* Action button — mt-4 h-10 w-full matches ProfileCard */}
+      <Skeleton className="h-10 w-full rounded-lg mt-4" />
     </div>
   );
 }

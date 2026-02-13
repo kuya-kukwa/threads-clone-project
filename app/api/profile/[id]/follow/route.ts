@@ -32,19 +32,22 @@ export async function GET(
       const limit = Math.min(parseInt(searchParams.get('limit') || '50'), 100);
       const offset = parseInt(searchParams.get('offset') || '0');
 
-      const result = listType === 'followers'
-        ? await FollowService.getFollowersList(targetUserId, limit, offset)
-        : await FollowService.getFollowingList(targetUserId, limit, offset);
+      // Run list fetch and auth check in parallel for faster response
+      const listPromise = listType === 'followers'
+        ? FollowService.getFollowersList(targetUserId, limit, offset)
+        : FollowService.getFollowingList(targetUserId, limit, offset);
 
-      // Check if current user follows each person — batch query instead of N+1
-      let currentUserId: string | null = null;
-      try {
-        const { account } = await createSessionClient(request);
-        const user = await account.get();
-        currentUserId = user.$id;
-      } catch {
-        // Not authenticated, no follow status
-      }
+      const authPromise = (async () => {
+        try {
+          const { account } = await createSessionClient(request);
+          const user = await account.get();
+          return user.$id;
+        } catch {
+          return null;
+        }
+      })();
+
+      const [result, currentUserId] = await Promise.all([listPromise, authPromise]);
 
       // Single batch: get all IDs the current user follows from this list
       let followedSet = new Set<string>();
