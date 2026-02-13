@@ -1,9 +1,7 @@
 /**
  * Authentication Layout
  * Server Component - provides layout for login/register pages
- *
- * WHY: Centralized layout for auth pages (centered, clean)
- * SERVER COMPONENT: No interactivity needed, pure layout
+ * Matches official Threads login page design
  */
 
 import { ReactNode } from 'react';
@@ -14,19 +12,20 @@ interface AuthLayoutProps {
 
 export default function AuthLayout({ children }: AuthLayoutProps) {
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-background relative overflow-hidden">
-      {/* Subtle gradient orbs for depth */}
-      <div className="absolute top-0 left-1/4 w-96 h-96 bg-primary/5 rounded-full blur-3xl" />
-      <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-accent/5 rounded-full blur-3xl" />
+    <div className="fixed inset-0 z-50 flex flex-col bg-[#101010] overflow-hidden">
+      {/* Radial gradient background like official Threads */}
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_#1a1a1a_0%,_#101010_60%,_#000_100%)]" />
 
-      {/* Content */}
-      <div className="relative z-10 w-full max-w-sm px-6 animate-fade-in">
-        {/* Logo/Brand */}
-        <div className="text-center mb-8">
-          <h1 className="text-2xl font-bold gradient-text">Threads</h1>
-        </div>
+      {/* Main content — centered */}
+      <div className="relative z-10 flex-1 flex flex-col items-center justify-center w-full px-6">
+        <div className="w-full max-w-[396px]">{children}</div>
+      </div>
 
-        {children}
+      {/* Bottom bar */}
+      <div className="relative z-10 px-6 py-6">
+        <p className="text-[12px] text-[#555] text-center">
+          © 2026 Threads Clone
+        </p>
       </div>
     </div>
   );

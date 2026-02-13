@@ -62,6 +62,13 @@ export interface Thread extends Models.Document {
   mediaTypes?: string; // JSON array of types: '["image", "video"]'
   mediaAltTexts?: string; // JSON array of alt texts: '["alt1", "alt2"]'
   
+  // Topic & Location metadata
+  topic?: string; // Queryable topic/category tag (e.g., "Technology", "Music")
+  location?: string; // Location tag (e.g., "San Francisco", "New York")
+  
+  // Audience / visibility control
+  audience?: string; // Who can reply: 'anyone' | 'followers' | 'mentioned'
+  
   parentThreadId?: string; // If reply, references parent Thread.$id (future feature)
   parentReplyId?: string; // If replying to a comment, references the parent comment's $id
   replyToUsername?: string; // Username of the user being replied to (for @mention display)

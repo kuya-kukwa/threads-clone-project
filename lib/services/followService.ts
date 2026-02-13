@@ -378,6 +378,129 @@ export class FollowService {
   }
 
   /**
+   * Batch check: which of the given userIds does followerId follow?
+   * Returns a Set of followed userIds. Single DB query instead of N+1.
+   */
+  static async getFollowingSetFor(
+    followerId: string,
+    targetIds: string[],
+  ): Promise<Set<string>> {
+    try {
+      if (targetIds.length === 0) return new Set();
+
+      const response = await serverDatabases.listDocuments<Follow>(
+        APPWRITE_CONFIG.DATABASE_ID,
+        APPWRITE_CONFIG.COLLECTIONS.FOLLOWS,
+        [
+          Query.equal('followerId', followerId),
+          Query.equal('followingId', targetIds),
+          Query.limit(targetIds.length),
+        ],
+      );
+
+      return new Set(response.documents.map((f) => f.followingId));
+    } catch (error) {
+      logger.error({
+        msg: 'Error batch-checking follow status',
+        followerId,
+        targetCount: targetIds.length,
+        error: error instanceof Error ? error.message : 'Unknown error',
+      });
+      return new Set();
+    }
+  }
+
+  /**
+   * Get list of followers with profile data
+   */
+  static async getFollowersList(
+    userId: string,
+    limit: number = 50,
+    offset: number = 0
+  ): Promise<{ users: UserProfile[]; total: number }> {
+    try {
+      const response = await serverDatabases.listDocuments<Follow>(
+        APPWRITE_CONFIG.DATABASE_ID,
+        APPWRITE_CONFIG.COLLECTIONS.FOLLOWS,
+        [
+          Query.equal('followingId', userId),
+          Query.orderDesc('createdAt'),
+          Query.limit(limit),
+          Query.offset(offset),
+        ]
+      );
+
+      const total = response.total;
+
+      if (response.documents.length === 0) {
+        return { users: [], total };
+      }
+
+      const followerIds = response.documents.map((f) => f.followerId);
+
+      const usersResponse = await serverDatabases.listDocuments<UserProfile>(
+        APPWRITE_CONFIG.DATABASE_ID,
+        APPWRITE_CONFIG.COLLECTIONS.USERS,
+        [Query.equal('userId', followerIds), Query.limit(limit)]
+      );
+
+      return { users: usersResponse.documents, total };
+    } catch (error) {
+      logger.error({
+        msg: 'Error getting followers list',
+        userId,
+        error: error instanceof Error ? error.message : 'Unknown error',
+      });
+      return { users: [], total: 0 };
+    }
+  }
+
+  /**
+   * Get list of following users with profile data
+   */
+  static async getFollowingList(
+    userId: string,
+    limit: number = 50,
+    offset: number = 0
+  ): Promise<{ users: UserProfile[]; total: number }> {
+    try {
+      const response = await serverDatabases.listDocuments<Follow>(
+        APPWRITE_CONFIG.DATABASE_ID,
+        APPWRITE_CONFIG.COLLECTIONS.FOLLOWS,
+        [
+          Query.equal('followerId', userId),
+          Query.orderDesc('createdAt'),
+          Query.limit(limit),
+          Query.offset(offset),
+        ]
+      );
+
+      const total = response.total;
+
+      if (response.documents.length === 0) {
+        return { users: [], total };
+      }
+
+      const followingIds = response.documents.map((f) => f.followingId);
+
+      const usersResponse = await serverDatabases.listDocuments<UserProfile>(
+        APPWRITE_CONFIG.DATABASE_ID,
+        APPWRITE_CONFIG.COLLECTIONS.USERS,
+        [Query.equal('userId', followingIds), Query.limit(limit)]
+      );
+
+      return { users: usersResponse.documents, total };
+    } catch (error) {
+      logger.error({
+        msg: 'Error getting following list',
+        userId,
+        error: error instanceof Error ? error.message : 'Unknown error',
+      });
+      return { users: [], total: 0 };
+    }
+  }
+
+  /**
    * Get follow counts for a user (followers and following)
    */
   static async getFollowCounts(

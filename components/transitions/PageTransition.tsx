@@ -186,6 +186,7 @@ export function StaggerChildren({
     });
 
     return () => timeouts.forEach(clearTimeout);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [children.length, staggerDelay, initialDelay]);
 
   return (

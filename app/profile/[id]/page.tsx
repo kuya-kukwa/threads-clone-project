@@ -133,64 +133,64 @@ function ProfileContent({ userId }: { userId: string }) {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-background pb-20 lg:pb-0">
+      <div className="min-h-screen bg-black pb-20 lg:pb-0">
         {/* Mobile Loading State */}
-        <div className="lg:hidden max-w-160 mx-auto">
+        <div className="lg:hidden max-w-[640px] mx-auto">
           <ProfileHeader isOwnProfile={false} onSettingsClick={() => {}} />
           {/* Profile Card Skeleton */}
-          <div className="px-4 py-4">
+          <div className="px-4 pt-5 pb-3">
             <ProfileCardSkeleton />
           </div>
           {/* Tabs Skeleton */}
-          <div className="border-b border-border/50">
-            <div className="max-w-160 mx-auto px-4">
+          <div className="border-b border-white/[0.08]">
+            <div className="max-w-[640px] mx-auto px-4">
               <div className="flex">
                 {tabs.map((tab) => (
                   <div key={tab.id} className="flex-1 py-3 flex justify-center">
-                    <div className="h-4 w-16 bg-secondary rounded animate-pulse" />
+                    <div className="h-4 w-16 bg-[#1e1e1e] rounded animate-pulse" />
                   </div>
                 ))}
               </div>
             </div>
           </div>
           {/* Content Skeleton */}
-          <div className="px-4 py-4">
+          <div className="py-1">
             <ProfileThreadsSkeleton count={3} />
           </div>
         </div>
 
         {/* Desktop Loading State */}
-        <div className="hidden lg:flex lg:flex-col max-w-160 mx-auto lg:pl-6 lg:pr-4 h-screen overflow-hidden">
+        <div className="hidden lg:flex lg:flex-col max-w-[640px] mx-auto h-screen overflow-hidden">
           {/* Fixed Header - Outside bordered area */}
-          <div className="shrink-0 bg-background pt-6 pb-2">
+          <div className="shrink-0 bg-black pt-6 pb-2">
             <div className="flex items-center justify-center h-12 px-4">
               <span className="text-[15px] font-medium">Profile</span>
             </div>
           </div>
 
           {/* Content wrapper with border and rounded corners */}
-          <div className="border border-border/30 rounded-t-2xl flex-1 min-h-0 overflow-y-auto bg-[#181818]">
+          <div className="border border-white/[0.08] rounded-t-2xl flex-1 min-h-0 overflow-y-auto bg-[#181818]">
             {/* Profile Card Skeleton */}
-            <div className="px-4 py-4">
+            <div className="px-6 pt-5 pb-3">
               <ProfileCardSkeleton />
             </div>
             {/* Tabs Skeleton */}
-            <div className="border-b border-border/50">
-              <div className="px-4">
+            <div className="border-b border-white/[0.08]">
+              <div className="px-6">
                 <div className="flex">
                   {tabs.map((tab) => (
                     <div
                       key={tab.id}
                       className="flex-1 py-3 flex justify-center"
                     >
-                      <div className="h-4 w-16 bg-secondary rounded animate-pulse" />
+                      <div className="h-4 w-16 bg-[#1e1e1e] rounded animate-pulse" />
                     </div>
                   ))}
                 </div>
               </div>
             </div>
             {/* Content Skeleton */}
-            <div className="px-4 py-4">
+            <div className="py-1">
               <ProfileThreadsSkeleton count={3} />
             </div>
           </div>
@@ -201,42 +201,44 @@ function ProfileContent({ userId }: { userId: string }) {
 
   if (error || !profile) {
     return (
-      <div className="min-h-screen bg-background pb-20 lg:pb-0">
+      <div className="min-h-screen bg-black pb-20 lg:pb-0">
         {/* Mobile Error State */}
-        <div className="lg:hidden max-w-160 mx-auto">
+        <div className="lg:hidden max-w-[640px] mx-auto">
           <ProfileHeader isOwnProfile={false} onSettingsClick={() => {}} />
           <div className="text-center py-16 px-4">
-            <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-secondary flex items-center justify-center">
-              <ProfileIcon className="w-8 h-8 text-muted-foreground" />
+            <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-[#1e1e1e] flex items-center justify-center">
+              <ProfileIcon className="w-8 h-8 text-[#777]" />
             </div>
-            <h2 className="text-xl font-semibold text-foreground mb-2">
+            <h2 className="text-xl font-semibold text-white mb-2">
               Profile Not Found
             </h2>
-            <p className="text-muted-foreground mb-4">
+            <p className="text-[#777] mb-4">
               {error || 'The requested profile does not exist.'}
             </p>
           </div>
         </div>
 
         {/* Desktop Error State */}
-        <div className="hidden lg:flex lg:flex-col max-w-160 mx-auto lg:pl-6 lg:pr-4 h-screen overflow-hidden">
+        <div className="hidden lg:flex lg:flex-col max-w-[640px] mx-auto h-screen overflow-hidden">
           {/* Fixed Header - Outside bordered area */}
-          <div className="shrink-0 bg-background pt-6 pb-2">
+          <div className="shrink-0 bg-black pt-6 pb-2">
             <div className="flex items-center justify-center h-12 px-4">
-              <span className="text-[15px] font-medium">Profile</span>
+              <span className="text-[15px] font-medium text-white">
+                Profile
+              </span>
             </div>
           </div>
 
           {/* Content wrapper with border and rounded corners */}
-          <div className="border border-border/30 rounded-t-2xl flex-1 min-h-0 overflow-y-auto bg-[#181818]">
+          <div className="border border-white/[0.08] rounded-t-2xl flex-1 min-h-0 overflow-y-auto bg-[#181818]">
             <div className="text-center py-16 px-4">
-              <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-secondary flex items-center justify-center">
-                <ProfileIcon className="w-8 h-8 text-muted-foreground" />
+              <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-[#1e1e1e] flex items-center justify-center">
+                <ProfileIcon className="w-8 h-8 text-[#777]" />
               </div>
-              <h2 className="text-xl font-semibold text-foreground mb-2">
+              <h2 className="text-xl font-semibold text-white mb-2">
                 Profile Not Found
               </h2>
-              <p className="text-muted-foreground mb-4">
+              <p className="text-[#777] mb-4">
                 {error || 'The requested profile does not exist.'}
               </p>
             </div>
@@ -247,23 +249,17 @@ function ProfileContent({ userId }: { userId: string }) {
   }
 
   return (
-    <div className="min-h-screen bg-background pb-20 lg:pb-0">
+    <div className="min-h-screen bg-black pb-20 lg:pb-0">
       {/* Mobile Layout */}
-      <div className="lg:hidden max-w-160 mx-auto">
-        {/* Header with settings */}
-        <ProfileHeader
-          isOwnProfile={isOwnProfile}
-          onSettingsClick={() => setShowSettings(true)}
-        />
-
+      <div className="lg:hidden max-w-[640px] mx-auto">
         {/* Profile Card */}
-        <div className="px-4 py-4">
+        <div className="px-4 pt-5 pb-3">
           <ProfileCard profile={profile} isOwnProfile={isOwnProfile} />
         </div>
 
         {/* Tabs */}
-        <div className="sticky top-0 z-40 bg-background border-b border-border/50">
-          <div className="max-w-160 mx-auto px-4">
+        <div className="sticky top-14 z-40 bg-black border-b border-white/[0.08]">
+          <div className="max-w-[640px] mx-auto px-4">
             <div className="flex">
               {tabs.map((tab) => (
                 <button
@@ -271,13 +267,13 @@ function ProfileContent({ userId }: { userId: string }) {
                   onClick={() => setActiveTab(tab.id)}
                   className={`flex-1 py-3 text-sm font-medium transition-colors relative ${
                     activeTab === tab.id
-                      ? 'text-foreground'
-                      : 'text-muted-foreground hover:text-foreground'
+                      ? 'text-white'
+                      : 'text-[#777] hover:text-white'
                   }`}
                 >
                   {tab.label}
                   {activeTab === tab.id && (
-                    <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-foreground rounded-full" />
+                    <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-white rounded-full" />
                   )}
                 </button>
               ))}
@@ -286,7 +282,7 @@ function ProfileContent({ userId }: { userId: string }) {
         </div>
 
         {/* Tab Content */}
-        <div className="px-4 py-4">
+        <div>
           {activeTab === 'threads' && (
             <ThreadsTab
               threads={threads}
@@ -323,32 +319,32 @@ function ProfileContent({ userId }: { userId: string }) {
       </div>
 
       {/* Desktop Content Container - Fixed height with internal scroll */}
-      <div className="hidden lg:flex lg:flex-col max-w-160 mx-auto lg:pl-6 lg:pr-4 h-screen overflow-hidden">
+      <div className="hidden lg:flex lg:flex-col max-w-[640px] mx-auto h-screen overflow-hidden">
         {/* Fixed Header - Outside bordered area */}
-        <div className="shrink-0 bg-background pt-6 pb-2">
+        <div className="shrink-0 bg-black pt-6 pb-2">
           <div className="flex items-center justify-center h-12 px-4 relative">
-            <span className="text-[15px] font-medium">Profile</span>
+            <span className="text-[15px] font-medium text-white">Profile</span>
             {isOwnProfile && (
               <button
                 onClick={() => setShowSettings(true)}
-                className="absolute right-4 p-2 rounded-full hover:bg-secondary/50 transition-colors -mr-2"
+                className="absolute right-4 p-2 rounded-full hover:bg-white/[0.06] transition-colors -mr-2"
                 aria-label="Settings"
               >
-                <MoreHorizontalIcon className="w-5 h-5 text-muted-foreground" />
+                <MoreHorizontalIcon className="w-5 h-5 text-[#777]" />
               </button>
             )}
           </div>
         </div>
 
         {/* Content wrapper with border and rounded corners - scrollable area contained */}
-        <div className="border border-border/30 rounded-t-2xl flex-1 min-h-0 overflow-y-auto bg-[#181818] [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+        <div className="border border-white/[0.08] rounded-t-2xl flex-1 min-h-0 overflow-y-auto bg-[#181818] [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
           {/* Profile Card */}
-          <div className="px-4 py-4">
+          <div className="px-6 pt-5 pb-3">
             <ProfileCard profile={profile} isOwnProfile={isOwnProfile} />
           </div>
 
           {/* Tabs - Inside bordered area */}
-          <div className="border-b border-border/50">
+          <div className="border-b border-white/[0.08]">
             <div className="px-4">
               <div className="flex">
                 {tabs.map((tab) => (
@@ -357,13 +353,13 @@ function ProfileContent({ userId }: { userId: string }) {
                     onClick={() => setActiveTab(tab.id)}
                     className={`flex-1 py-3 text-sm font-medium transition-colors relative ${
                       activeTab === tab.id
-                        ? 'text-foreground'
-                        : 'text-muted-foreground hover:text-foreground'
+                        ? 'text-white'
+                        : 'text-[#777] hover:text-white'
                     }`}
                   >
                     {tab.label}
                     {activeTab === tab.id && (
-                      <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-foreground rounded-full" />
+                      <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-white rounded-full" />
                     )}
                   </button>
                 ))}
@@ -372,7 +368,7 @@ function ProfileContent({ userId }: { userId: string }) {
           </div>
 
           {/* Tab Content */}
-          <div className="px-4 py-4">
+          <div>
             {activeTab === 'threads' && (
               <ThreadsTab
                 threads={threads}
@@ -424,12 +420,12 @@ function ProfileHeader({
   }
 
   return (
-    <div className="bg-background">
+    <div className="bg-black">
       <div className="max-w-2xl mx-auto px-4">
         <div className="flex items-center justify-end h-12">
           <button
             onClick={onSettingsClick}
-            className="p-2 rounded-lg hover:bg-secondary transition-colors"
+            className="p-2 rounded-lg hover:bg-white/[0.06] transition-colors"
             aria-label="Settings"
           >
             <MenuIcon className="w-5 h-5" />
@@ -469,7 +465,7 @@ function ThreadsTab({
   })) as ThreadWithAuthor[];
 
   return (
-    <div className="-mx-4">
+    <div>
       {threadsWithAuthor.map((thread) => (
         <ThreadCard key={thread.$id} thread={thread} />
       ))}
@@ -513,17 +509,24 @@ function MediaTab({
   }
 
   return (
-    <div className="grid grid-cols-3 gap-1">
+    <div className="grid grid-cols-2 sm:grid-cols-3 gap-0.5 sm:gap-1">
       {mediaItems.map((url: string, i: number) => (
         <div
           key={i}
-          className="aspect-square rounded-lg bg-secondary overflow-hidden"
+          className="aspect-square rounded-md sm:rounded-lg bg-[#1e1e1e] overflow-hidden group cursor-pointer"
         >
           {url.includes('.mp4') || url.includes('.webm') ? (
-            <video src={url} className="w-full h-full object-cover" />
+            <video
+              src={url}
+              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
+            />
           ) : (
             // eslint-disable-next-line @next/next/no-img-element
-            <img src={url} alt="" className="w-full h-full object-cover" />
+            <img
+              src={url}
+              alt=""
+              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
+            />
           )}
         </div>
       ))}
@@ -560,15 +563,15 @@ function RepliesTab({
   })) as ThreadWithAuthor[];
 
   return (
-    <div className="-mx-4">
+    <div>
       {repliesWithAuthor.map((reply) => (
         <div key={reply.$id}>
           {/* Reply context */}
           {reply.replyToUsername && (
             <div className="px-4 pt-3 pb-1">
-              <p className="text-xs text-muted-foreground">
+              <p className="text-xs text-[#777]">
                 Replying to{' '}
-                <span className="text-primary">@{reply.replyToUsername}</span>
+                <span className="text-blue-500">@{reply.replyToUsername}</span>
               </p>
             </div>
           )}
@@ -588,10 +591,10 @@ function EmptyTab({
 }) {
   return (
     <div className="flex flex-col items-center justify-center py-16 text-center">
-      <div className="w-16 h-16 rounded-full bg-secondary flex items-center justify-center mb-4 text-muted-foreground">
+      <div className="w-16 h-16 rounded-full bg-[#1e1e1e] flex items-center justify-center mb-4 text-[#777]">
         {icon}
       </div>
-      <p className="text-muted-foreground">{message}</p>
+      <p className="text-[#777]">{message}</p>
     </div>
   );
 }
@@ -614,7 +617,7 @@ function SettingsModal({
   }, []);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end justify-center md:items-center">
+    <div className="fixed inset-0 z-50 flex items-end justify-center sm:items-center">
       {/* Backdrop - Dark overlay for better focus */}
       <div
         className="absolute inset-0 bg-black/70 backdrop-blur-sm transition-opacity"
@@ -622,13 +625,13 @@ function SettingsModal({
       />
 
       {/* Modal */}
-      <div className="relative w-full max-w-md bg-[#181818] border border-border rounded-t-2xl md:rounded-2xl overflow-hidden animate-slide-up">
-        <div className="p-4 border-b border-border">
+      <div className="relative w-full max-w-md bg-[#181818] border border-white/[0.08] rounded-t-2xl sm:rounded-2xl overflow-hidden animate-slide-up">
+        <div className="p-4 border-b border-white/[0.08]">
           <div className="flex items-center justify-between">
             <h2 className="text-lg font-semibold">Settings</h2>
             <button
               onClick={onClose}
-              className="p-2 rounded-lg hover:bg-secondary transition-colors"
+              className="p-2 rounded-lg hover:bg-white/[0.06] transition-colors"
             >
               <XIcon className="w-5 h-5" />
             </button>
@@ -639,7 +642,7 @@ function SettingsModal({
           <button
             onClick={onLogout}
             disabled={isLoggingOut}
-            className="w-full flex items-center gap-3 p-3 rounded-xl hover:bg-secondary transition-colors text-red-500"
+            className="w-full flex items-center gap-3 p-3 rounded-xl hover:bg-white/[0.06] transition-colors text-red-500"
           >
             <LogoutIcon className="w-5 h-5" />
             <span>{isLoggingOut ? 'Logging out...' : 'Log out'}</span>

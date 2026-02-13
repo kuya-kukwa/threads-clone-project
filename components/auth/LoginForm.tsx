@@ -1,8 +1,7 @@
 /**
  * Login Form Component
  * Client Component - handles user interaction and form submission
- *
- * Modern minimalistic design with clean aesthetics
+ * Matches official Threads login page exactly
  */
 
 'use client';
@@ -13,7 +12,6 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 
-import { Button } from '@/components/ui/button';
 import {
   Form,
   FormControl,
@@ -21,7 +19,6 @@ import {
   FormItem,
   FormMessage,
 } from '@/components/ui/form';
-import { Input } from '@/components/ui/input';
 
 import { loginSchema, type LoginInput } from '@/schemas/auth.schema';
 import { useAuth } from '@/hooks';
@@ -49,18 +46,22 @@ export function LoginForm() {
   }
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="text-center space-y-2">
-        <h2 className="text-xl font-semibold text-foreground">Welcome back</h2>
-        <p className="text-sm text-muted-foreground">
-          Sign in to continue to Threads
-        </p>
-      </div>
+    <div className="text-center">
+      {/* Heading */}
+      <h1 className="text-[28px] font-bold text-white mb-3 tracking-tight">
+        Say more with Threads
+      </h1>
+      <p className="text-[15px] text-[#999] leading-relaxed mb-8 max-w-[320px] mx-auto">
+        Join Threads to share thoughts, find out what&apos;s going on, follow
+        your people and more.
+      </p>
+
+      {/* Log in label */}
+      <p className="text-[15px] font-semibold text-white mb-4">Log in</p>
 
       {/* Form */}
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-2">
           {/* Email Field */}
           <FormField
             control={form.control}
@@ -68,17 +69,17 @@ export function LoginForm() {
             render={({ field }) => (
               <FormItem>
                 <FormControl>
-                  <Input
+                  <input
                     type="email"
-                    placeholder="Email"
+                    placeholder="Username, phone or email"
                     autoComplete="email"
                     autoFocus
                     disabled={isLoading}
-                    className="h-12 bg-secondary/50 border-0 rounded-2xl px-4 text-sm placeholder:text-muted-foreground/60 focus:bg-secondary focus:ring-1 focus:ring-primary/50 transition-all"
+                    className="w-full h-[54px] bg-[#363636] border-0 rounded-xl px-4 text-[16px] text-white placeholder:text-[#8e8e8e] focus:outline-none focus:ring-1 focus:ring-white/20 transition-all disabled:opacity-50"
                     {...field}
                   />
                 </FormControl>
-                <FormMessage className="text-xs px-1" />
+                <FormMessage className="text-xs text-red-400 px-1 text-left" />
               </FormItem>
             )}
           />
@@ -90,68 +91,71 @@ export function LoginForm() {
             render={({ field }) => (
               <FormItem>
                 <FormControl>
-                  <Input
+                  <input
                     type="password"
                     placeholder="Password"
                     autoComplete="current-password"
                     disabled={isLoading}
-                    className="h-12 bg-secondary/50 border-0 rounded-2xl px-4 text-sm placeholder:text-muted-foreground/60 focus:bg-secondary focus:ring-1 focus:ring-primary/50 transition-all"
+                    className="w-full h-[54px] bg-[#363636] border-0 rounded-xl px-4 text-[16px] text-white placeholder:text-[#8e8e8e] focus:outline-none focus:ring-1 focus:ring-white/20 transition-all disabled:opacity-50"
                     {...field}
                   />
                 </FormControl>
-                <FormMessage className="text-xs px-1" />
+                <FormMessage className="text-xs text-red-400 px-1 text-left" />
               </FormItem>
             )}
           />
 
           {/* Error Message */}
           {error && (
-            <div className="flex items-center gap-2 p-3 text-sm text-destructive bg-destructive/10 rounded-xl">
+            <div className="flex items-center gap-2 px-3 py-2.5 text-[14px] text-red-400 bg-red-500/10 rounded-xl border border-red-500/20 text-left">
               <AlertIcon className="w-4 h-4 shrink-0" />
               <span>{error}</span>
             </div>
           )}
 
           {/* Submit Button */}
-          <Button
+          <button
             type="submit"
-            className="w-full h-12 rounded-xl btn-gradient text-white font-medium text-sm transition-all hover:opacity-90 disabled:opacity-50"
+            className="w-full h-[54px] rounded-xl bg-white text-black font-semibold text-[16px] transition-all hover:bg-white/90 active:scale-[0.98] disabled:opacity-40 disabled:active:scale-100 !mt-3"
             disabled={isLoading}
           >
             {isLoading ? (
-              <div className="flex items-center gap-2">
+              <div className="flex items-center justify-center gap-2">
                 <LoadingSpinner className="w-4 h-4" />
-                <span>Signing in...</span>
+                <span>Logging in...</span>
               </div>
             ) : (
-              'Sign in'
+              'Log in'
             )}
-          </Button>
+          </button>
         </form>
       </Form>
 
+      {/* Forgot password */}
+      <div className="mt-5">
+        <span className="text-[14px] text-[#999] cursor-pointer hover:text-white transition-colors">
+          Forgot password?
+        </span>
+      </div>
+
       {/* Divider */}
-      <div className="relative">
+      <div className="relative py-6">
         <div className="absolute inset-0 flex items-center">
-          <div className="w-full border-t border-border/50" />
+          <div className="w-full border-t border-white/[0.12]" />
         </div>
-        <div className="relative flex justify-center text-xs">
-          <span className="px-3 bg-background text-muted-foreground">or</span>
+        <div className="relative flex justify-center text-[13px]">
+          <span className="px-4 bg-[#101010] text-[#777]">or</span>
         </div>
       </div>
 
       {/* Sign Up Link */}
-      <div className="text-center">
-        <p className="text-sm text-muted-foreground">
-          Don&apos;t have an account?{' '}
-          <Link
-            href="/register"
-            className="text-primary hover:text-primary/80 font-medium transition-colors"
-          >
-            Sign up
-          </Link>
-        </p>
-      </div>
+      <Link
+        href="/register"
+        className="text-[15px] text-[#999] hover:text-white transition-colors"
+      >
+        Don&apos;t have an account?{' '}
+        <span className="text-white font-semibold">Sign up</span>
+      </Link>
     </div>
   );
 }

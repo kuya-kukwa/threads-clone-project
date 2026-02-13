@@ -212,7 +212,7 @@ export const ReplyComposer = forwardRef<
   };
 
   return (
-    <div className="p-4 bg-background">
+    <div className="px-4 py-3 bg-background">
       {/* Error message */}
       {error && (
         <div className="mb-3 p-3 rounded-xl bg-destructive/10 border border-destructive/20">
@@ -222,9 +222,9 @@ export const ReplyComposer = forwardRef<
 
       {/* Replying to indicator */}
       {replyTo && (
-        <div className="mb-3 flex items-center gap-2 text-sm">
+        <div className="mb-3 flex items-center gap-2 text-[14px]">
           <span className="text-muted-foreground">Replying to</span>
-          <span className="text-primary font-medium">@{replyTo.username}</span>
+          <span className="text-primary font-semibold">@{replyTo.username}</span>
           <button
             onClick={() => {
               setReplyTo(null);
@@ -245,7 +245,7 @@ export const ReplyComposer = forwardRef<
       {/* Composer */}
       <div className="flex gap-3">
         {/* User Avatar */}
-        <Avatar className="w-10 h-10 shrink-0">
+        <Avatar className="w-8 h-8 sm:w-10 sm:h-10 shrink-0">
           <AvatarImage src={undefined} alt={user?.name || 'User'} />
           <AvatarFallback className="text-xs">{userInitials}</AvatarFallback>
         </Avatar>
@@ -259,7 +259,7 @@ export const ReplyComposer = forwardRef<
             onKeyDown={handleKeyDown}
             placeholder="Write a reply..."
             disabled={isSubmitting}
-            className={`w-full bg-transparent border-none outline-none resize-none text-base placeholder:text-muted-foreground disabled:opacity-50 disabled:cursor-not-allowed ${
+            className={`w-full bg-transparent border-none outline-none resize-none text-[15px] leading-[1.45] placeholder:text-muted-foreground disabled:opacity-50 disabled:cursor-not-allowed ${
               isOverLimit ? 'text-destructive' : ''
             }`}
             style={{

@@ -1,12 +1,17 @@
 'use client';
 
 /**
- * Create Post Page
- * Dedicated page for creating new threads
- * Mobile-optimized with full-screen composer
+ * Create Post Page — Authentic Threads Full-Screen Composer
+ *
+ * Mobile-optimized full-screen thread creation with:
+ * - Avatar + thread line UI identical to official Threads
+ * - Emoji picker, topic tags, location, audience selector
+ * - Media grid with smart aspect ratio handling
+ * - Circular character counter
+ * - Upload progress with spinner
  */
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { AuthGuard } from '@/components/auth/AuthGuard';
@@ -14,10 +19,24 @@ import { useCurrentUser } from '@/hooks';
 import { getSessionToken } from '@/lib/appwriteClient';
 import { UserProfile } from '@/types/appwrite';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import {
+  ImageAttachIcon,
+  GifIcon,
+  CloseCircleIcon,
+} from '@/components/icons/ThreadsIcons';
+import { TopicSelector } from '@/components/threads/TopicSelector';
+import { EmojiPicker } from '@/components/threads/EmojiPicker';
+import { LocationPicker } from '@/components/threads/LocationPicker';
+import { ThreadsSpinner } from '@/components/skeletons';
+import {
+  AudienceSelector,
+  type AudienceType,
+} from '@/components/threads/AudienceSelector';
+import { cn } from '@/lib/utils';
 
 const MAX_CHARS = 500;
-const MAX_FILES = 4; // Maximum 4 media files per post
-const MAX_FILE_SIZE = 50 * 1024 * 1024; // 50MB
+const MAX_FILES = 4;
+const MAX_FILE_SIZE = 50 * 1024 * 1024;
 
 export default function CreatePage() {
   const router = useRouter();
@@ -31,11 +50,31 @@ export default function CreatePage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [uploadProgress, setUploadProgress] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [selectedTopic, setSelectedTopic] = useState<string | null>(null);
+  const [selectedLocation, setSelectedLocation] = useState<string | null>(null);
+  const [audience, setAudience] = useState<AudienceType>('anyone');
+  const [showDiscardConfirm, setShowDiscardConfirm] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   const charsRemaining = MAX_CHARS - content.length;
-  const canPost = content.trim().length > 0 || mediaFiles.length > 0;
+  const charPercentage = Math.min(100, (content.length / MAX_CHARS) * 100);
+  const isOverLimit = charsRemaining < 0;
+  const canPost =
+    (content.trim().length > 0 || mediaFiles.length > 0) && !isOverLimit;
+  const hasUnsavedContent =
+    content.trim().length > 0 ||
+    mediaFiles.length > 0 ||
+    selectedTopic !== null ||
+    selectedLocation !== null;
+
+  const handleCancel = useCallback(() => {
+    if (hasUnsavedContent && !isSubmitting) {
+      setShowDiscardConfirm(true);
+    } else {
+      router.push('/feed');
+    }
+  }, [hasUnsavedContent, isSubmitting, router]);
 
   // Fetch user profile to get avatar
   useEffect(() => {
@@ -62,6 +101,11 @@ export default function CreatePage() {
       textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`;
     }
   }, [content]);
+
+  const handleEmojiSelect = useCallback((emoji: string) => {
+    setContent((prev) => prev + emoji);
+    textareaRef.current?.focus();
+  }, []);
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
@@ -191,6 +235,9 @@ export default function CreatePage() {
         body: JSON.stringify({
           content: content.trim(),
           media: uploadedMedia.length > 0 ? uploadedMedia : undefined,
+          topic: selectedTopic || undefined,
+          location: selectedLocation || undefined,
+          audience: audience || 'anyone',
         }),
       });
 
@@ -221,60 +268,69 @@ export default function CreatePage() {
 
   return (
     <AuthGuard>
-      <div className="min-h-screen bg-background flex flex-col pb-20 lg:pb-0">
+      <div className="min-h-screen bg-black flex flex-col pb-20 lg:pb-0">
         {/* Mobile Layout */}
-        <div className="lg:hidden max-w-160 mx-auto w-full flex-1">
+        <div className="lg:hidden max-w-[640px] mx-auto w-full flex-1">
           {/* Mobile Header */}
           <div className="sticky top-0 z-50 bg-black">
             <div className="px-4">
               <div className="flex items-center justify-between h-14">
                 <Link
                   href="/feed"
-                  className="flex items-center gap-1 text-muted-foreground hover:text-foreground transition-colors"
+                  onClick={(e) => {
+                    if (hasUnsavedContent) {
+                      e.preventDefault();
+                      handleCancel();
+                    }
+                  }}
+                  className="text-[15px] text-[#f3f5f7] hover:text-white transition-colors"
                 >
-                  <ChevronLeftIcon className="w-5 h-5" />
-                  <span className="text-sm">Back</span>
+                  Cancel
                 </Link>
-                <h1 className="text-base font-semibold">New thread</h1>
+                <h1 className="text-[15px] font-semibold text-white">
+                  New thread
+                </h1>
                 <button
                   onClick={handleSubmit}
                   disabled={!canPost || isSubmitting}
-                  className={`px-4 py-1.5 rounded-full text-sm font-semibold transition-all ${
+                  className={cn(
+                    'px-4 py-1.5 rounded-full text-[14px] font-semibold transition-all',
                     canPost && !isSubmitting
-                      ? 'bg-foreground text-background hover:opacity-90'
-                      : 'bg-muted text-muted-foreground cursor-not-allowed'
-                  }`}
+                      ? 'bg-white text-black hover:bg-white/90 active:scale-95'
+                      : 'bg-white/[0.15] text-white/[0.35] cursor-not-allowed',
+                  )}
                 >
                   {isSubmitting ? 'Posting...' : 'Post'}
                 </button>
               </div>
             </div>
+            <div className="h-px bg-white/[0.08]" />
           </div>
 
           {/* Composer */}
-          <div className="flex-1 w-full px-4 py-6">
+          <div className="flex-1 w-full px-4 py-4">
             <div className="flex gap-3">
               {/* User avatar with thread line */}
               <div className="flex flex-col items-center">
-                <Avatar className="w-11 h-11 shrink-0 ring-2 ring-border/50">
+                <Avatar className="w-9 h-9 shrink-0">
                   <AvatarImage
                     src={userProfile?.avatarUrl || undefined}
                     alt={userProfile?.displayName || user?.name || 'User'}
                   />
-                  <AvatarFallback className="bg-linear-to-br from-primary to-accent text-white font-semibold text-lg">
+                  <AvatarFallback className="bg-[#333] text-white font-semibold text-sm">
                     {(userProfile?.displayName ||
                       user?.name ||
                       'U')[0]?.toUpperCase()}
                   </AvatarFallback>
                 </Avatar>
                 {/* Thread line */}
-                <div className="w-0.5 flex-1 min-h-10 bg-border/40 mt-2 rounded-full" />
+                <div className="w-0.5 flex-1 min-h-8 bg-white/[0.12] mt-2 rounded-full" />
               </div>
 
               {/* Content area */}
-              <div className="flex-1 min-w-0 pt-1">
+              <div className="flex-1 min-w-0 pt-0.5">
                 {/* Username */}
-                <p className="text-base font-semibold text-foreground">
+                <p className="text-[15px] font-semibold text-white tracking-[-0.01em]">
                   {userProfile?.displayName || user?.name || 'User'}
                 </p>
 
@@ -284,8 +340,8 @@ export default function CreatePage() {
                   value={content}
                   onChange={(e) => setContent(e.target.value)}
                   placeholder="What's new?"
-                  maxLength={MAX_CHARS}
-                  className="w-full bg-transparent border-0 resize-none text-foreground placeholder:text-muted-foreground/60 focus:outline-none text-[15px] leading-relaxed mt-1 min-h-25"
+                  maxLength={MAX_CHARS + 50}
+                  className="w-full bg-transparent border-0 resize-none text-[15px] leading-[1.45] text-white placeholder:text-[#777] focus:outline-none mt-1 min-h-[60px]"
                   autoFocus
                   rows={1}
                 />
@@ -293,24 +349,24 @@ export default function CreatePage() {
                 {/* Media previews */}
                 {mediaPreviews.length > 0 && (
                   <div
-                    className={`grid gap-2 mt-3 ${
+                    className={cn(
+                      'grid gap-1.5 mt-2',
                       mediaPreviews.length === 1
-                        ? 'grid-cols-1 max-w-sm'
-                        : mediaPreviews.length === 2
-                          ? 'grid-cols-2'
-                          : 'grid-cols-2'
-                    }`}
+                        ? 'grid-cols-1 max-w-[280px]'
+                        : 'grid-cols-2',
+                    )}
                   >
                     {mediaPreviews.map((preview, index) => (
                       <div
                         key={index}
-                        className={`relative rounded-xl overflow-hidden bg-secondary ${
+                        className={cn(
+                          'relative rounded-xl overflow-hidden bg-[#0a0a0a]',
                           mediaPreviews.length === 1
-                            ? 'aspect-video'
+                            ? 'aspect-[4/3]'
                             : mediaPreviews.length === 3 && index === 0
-                              ? 'row-span-2 aspect-3/4'
-                              : 'aspect-square'
-                        }`}
+                              ? 'row-span-2 aspect-[3/4]'
+                              : 'aspect-square',
+                        )}
                       >
                         {preview.type === 'video' ? (
                           <video
@@ -330,13 +386,13 @@ export default function CreatePage() {
                         {/* Remove button */}
                         <button
                           onClick={() => removeMedia(index)}
-                          className="absolute top-2 right-2 w-7 h-7 rounded-full bg-black/60 backdrop-blur-sm flex items-center justify-center hover:bg-black/80 transition-colors"
+                          className="absolute top-1.5 right-1.5 text-white/80 hover:text-white transition-colors drop-shadow-lg"
                         >
-                          <XIcon className="w-4 h-4 text-white" />
+                          <CloseCircleIcon className="w-6 h-6" />
                         </button>
                         {/* Video badge */}
                         {preview.type === 'video' && (
-                          <div className="absolute bottom-2 left-2 px-2 py-0.5 rounded-md bg-black/60 backdrop-blur-sm text-xs text-white flex items-center gap-1">
+                          <div className="absolute bottom-1.5 left-1.5 px-1.5 py-0.5 rounded-md bg-black/60 backdrop-blur-sm text-[11px] text-white flex items-center gap-1">
                             <PlayIcon className="w-3 h-3" />
                             Video
                           </div>
@@ -346,85 +402,105 @@ export default function CreatePage() {
                   </div>
                 )}
 
-                {/* Toolbar */}
-                <div className="flex items-center gap-1 mt-4">
-                  {/* Hidden file input */}
-                  <input
-                    ref={fileInputRef}
-                    type="file"
-                    accept="image/*,video/*"
-                    multiple
-                    onChange={handleFileSelect}
-                    className="hidden"
-                  />
+                {/* Tags row: topic + location pills */}
+                {(selectedTopic || selectedLocation) && (
+                  <div className="flex flex-wrap items-center gap-1.5 mt-2.5">
+                    {selectedTopic && (
+                      <TopicSelector
+                        selectedTopic={selectedTopic}
+                        onSelectTopic={setSelectedTopic}
+                      />
+                    )}
+                    {selectedLocation && (
+                      <LocationPicker
+                        selectedLocation={selectedLocation}
+                        onSelectLocation={setSelectedLocation}
+                      />
+                    )}
+                  </div>
+                )}
 
-                  {/* Add media button */}
+                {/* Toolbar */}
+                <div className="flex items-center gap-0.5 mt-3">
+                  {/* Media */}
                   <button
                     onClick={() => fileInputRef.current?.click()}
                     disabled={mediaFiles.length >= MAX_FILES}
-                    className="p-2 rounded-full hover:bg-secondary transition-colors disabled:opacity-40 disabled:cursor-not-allowed text-muted-foreground hover:text-foreground"
+                    className="p-2 rounded-full hover:bg-white/[0.06] transition-colors disabled:opacity-30 text-[#777] hover:text-[#999]"
                     title="Add photos or videos"
                   >
-                    <ImageIcon className="w-5 h-5" />
+                    <ImageAttachIcon className="w-5 h-5" />
                   </button>
 
-                  {/* Camera button */}
+                  {/* GIF */}
                   <button
-                    onClick={() => fileInputRef.current?.click()}
-                    disabled={mediaFiles.length >= MAX_FILES}
-                    className="p-2 rounded-full hover:bg-secondary transition-colors disabled:opacity-40 disabled:cursor-not-allowed text-muted-foreground hover:text-foreground"
-                    title="Take a photo"
-                  >
-                    <CameraIcon className="w-5 h-5" />
-                  </button>
-
-                  {/* GIF button (placeholder) */}
-                  <button
-                    className="p-2 rounded-full hover:bg-secondary transition-colors text-muted-foreground hover:text-foreground opacity-40 cursor-not-allowed"
-                    title="GIFs coming soon"
                     disabled
+                    className="p-2 rounded-full hover:bg-white/[0.06] transition-colors text-[#777] hover:text-[#999] disabled:opacity-30"
+                    title="GIF coming soon"
                   >
                     <GifIcon className="w-5 h-5" />
                   </button>
 
-                  {/* Media count indicator */}
-                  {mediaFiles.length > 0 && (
-                    <span className="ml-2 text-xs text-muted-foreground">
-                      {mediaFiles.length}/{MAX_FILES}
-                    </span>
+                  {/* Emoji */}
+                  <EmojiPicker onEmojiSelect={handleEmojiSelect} />
+
+                  {/* Location */}
+                  {!selectedLocation && (
+                    <LocationPicker
+                      selectedLocation={selectedLocation}
+                      onSelectLocation={setSelectedLocation}
+                    />
                   )}
 
-                  {/* Spacer */}
+                  {/* Topic */}
+                  {!selectedTopic && (
+                    <TopicSelector
+                      selectedTopic={selectedTopic}
+                      onSelectTopic={setSelectedTopic}
+                    />
+                  )}
+
                   <div className="flex-1" />
 
                   {/* Character count */}
                   {content.length > 0 && (
-                    <div className="flex items-center gap-2">
-                      <div
-                        className={`w-5 h-5 rounded-full border-2 ${
-                          charsRemaining < 0
-                            ? 'border-red-500'
-                            : charsRemaining < 50
-                              ? 'border-amber-500'
-                              : 'border-muted-foreground/30'
-                        }`}
-                        style={{
-                          background: `conic-gradient(${
-                            charsRemaining < 0
-                              ? '#ef4444'
-                              : charsRemaining < 50
-                                ? '#f59e0b'
-                                : 'var(--muted-foreground)'
-                          } ${Math.min(100, (content.length / MAX_CHARS) * 100)}%, transparent 0)`,
-                        }}
-                      />
+                    <div className="flex items-center gap-1.5">
+                      <div className="relative w-5 h-5">
+                        <svg className="w-5 h-5 -rotate-90" viewBox="0 0 20 20">
+                          <circle
+                            cx="10"
+                            cy="10"
+                            r="8"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                            className="text-white/[0.08]"
+                          />
+                          <circle
+                            cx="10"
+                            cy="10"
+                            r="8"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                            strokeDasharray={`${charPercentage * 0.502} 50.265`}
+                            strokeLinecap="round"
+                            className={cn(
+                              isOverLimit
+                                ? 'text-red-500'
+                                : charsRemaining < 20
+                                  ? 'text-amber-500'
+                                  : 'text-[#555]',
+                            )}
+                          />
+                        </svg>
+                      </div>
                       {charsRemaining <= 20 && (
                         <span
-                          className={`text-xs font-medium ${
-                            charsRemaining < 0
-                              ? 'text-red-500'
-                              : 'text-amber-500'
-                          }`}
+                          className={cn(
+                            'text-[12px] font-medium tabular-nums',
+                            isOverLimit ? 'text-red-500' : 'text-amber-500',
+                          )}
                         >
                           {charsRemaining}
                         </span>
@@ -434,113 +510,147 @@ export default function CreatePage() {
                 </div>
               </div>
             </div>
+
+            {/* "Add to thread" row */}
+            <div className="flex items-center gap-3 mt-1 pl-[3px]">
+              <Avatar className="w-5 h-5 opacity-40">
+                <AvatarImage
+                  src={userProfile?.avatarUrl || undefined}
+                  alt={userProfile?.displayName || user?.name || 'User'}
+                />
+                <AvatarFallback className="text-[8px] bg-[#333] text-white font-semibold">
+                  {(userProfile?.displayName ||
+                    user?.name ||
+                    'U')[0]?.toUpperCase()}
+                </AvatarFallback>
+              </Avatar>
+              <span className="text-[14px] text-[#555]">Add to thread</span>
+            </div>
+
             {/* Error message */}
             {error && (
               <div className="mt-4 p-3 rounded-xl bg-red-500/10 border border-red-500/20">
-                <p className="text-sm text-red-500">{error}</p>
+                <p className="text-[13px] text-red-400">{error}</p>
               </div>
             )}
 
             {/* Upload progress */}
             {uploadProgress && (
-              <div className="mt-4 p-3 rounded-xl bg-primary/10 border border-primary/20">
-                <div className="flex items-center gap-2">
-                  <div className="w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-                  <p className="text-sm text-primary">{uploadProgress}</p>
-                </div>
+              <div className="mt-4 flex items-center gap-2">
+                <ThreadsSpinner size="sm" className="text-blue-400" />
+                <p className="text-[13px] text-blue-400">{uploadProgress}</p>
               </div>
             )}
           </div>
+
+          {/* Bottom bar — audience selector */}
+          <div className="fixed bottom-[68px] left-0 right-0 bg-black border-t border-white/[0.08] px-4 py-2.5 z-40 lg:hidden">
+            <AudienceSelector
+              audience={audience}
+              onAudienceChange={setAudience}
+            />
+          </div>
         </div>
 
-        {/* Desktop Content Container - Fixed height with internal scroll */}
-        <div className="hidden lg:flex lg:flex-col max-w-160 mx-auto lg:pl-6 lg:pr-4 h-screen overflow-hidden">
-          {/* Fixed Header - Outside bordered area */}
-          <div className="shrink-0 bg-background pt-6 pb-2">
+        {/* Desktop Content Container */}
+        <div className="hidden lg:flex lg:flex-col max-w-[580px] mx-auto w-full h-screen">
+          {/* Fixed Header */}
+          <div className="shrink-0 pt-6 pb-2">
             <div className="flex items-center justify-between h-12 px-4">
               <Link
                 href="/feed"
-                className="flex items-center gap-1 text-muted-foreground hover:text-foreground transition-colors"
+                onClick={(e) => {
+                  if (hasUnsavedContent) {
+                    e.preventDefault();
+                    handleCancel();
+                  }
+                }}
+                className="text-[15px] text-[#f3f5f7] hover:text-white transition-colors"
               >
-                <ChevronLeftIcon className="w-5 h-5" />
-                <span className="text-sm">Back</span>
+                Cancel
               </Link>
-              <span className="text-[15px] font-medium">New thread</span>
+              <span className="text-[15px] font-semibold text-white">
+                New thread
+              </span>
               <button
                 onClick={handleSubmit}
                 disabled={!canPost || isSubmitting}
-                className={`px-4 py-1.5 rounded-full text-sm font-semibold transition-all ${
+                className={cn(
+                  'px-5 py-1.5 rounded-full text-[14px] font-semibold transition-all',
                   canPost && !isSubmitting
-                    ? 'bg-foreground text-background hover:opacity-90'
-                    : 'bg-muted text-muted-foreground cursor-not-allowed'
-                }`}
+                    ? 'bg-white text-black hover:bg-white/90 active:scale-95'
+                    : 'bg-white/[0.15] text-white/[0.35] cursor-not-allowed',
+                )}
               >
-                {isSubmitting ? 'Posting...' : 'Post'}
+                {isSubmitting ? (
+                  <span className="flex items-center gap-2">
+                    <ThreadsSpinner size="sm" className="text-black" />
+                    Posting
+                  </span>
+                ) : (
+                  'Post'
+                )}
               </button>
             </div>
           </div>
 
-          {/* Content wrapper with border and rounded corners - scrollable area contained */}
-          <div className="border border-border/30 rounded-t-2xl flex-1 min-h-0 overflow-y-auto bg-[#181818] [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
-            {/* Desktop Composer */}
-            <div className="px-4 py-6">
+          {/* Content wrapper — bordered card */}
+          <div className="border border-white/[0.08] rounded-t-2xl flex-1 min-h-0 overflow-y-auto bg-[#181818] [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+            <div className="px-4 py-5">
               <div className="flex gap-3">
-                {/* User avatar with thread line */}
+                {/* Avatar + thread line */}
                 <div className="flex flex-col items-center">
-                  <Avatar className="w-11 h-11 shrink-0 ring-2 ring-border/50">
+                  <Avatar className="w-10 h-10 shrink-0">
                     <AvatarImage
                       src={userProfile?.avatarUrl || undefined}
                       alt={userProfile?.displayName || user?.name || 'User'}
                     />
-                    <AvatarFallback className="bg-linear-to-br from-primary to-accent text-white font-semibold text-lg">
+                    <AvatarFallback className="bg-[#333] text-white font-semibold text-sm">
                       {(userProfile?.displayName ||
                         user?.name ||
                         'U')[0]?.toUpperCase()}
                     </AvatarFallback>
                   </Avatar>
-                  {/* Thread line */}
-                  <div className="w-0.5 flex-1 min-h-10 bg-border/40 mt-2 rounded-full" />
+                  <div className="w-0.5 flex-1 min-h-8 bg-white/[0.12] mt-2 rounded-full" />
                 </div>
 
                 {/* Content area */}
-                <div className="flex-1 min-w-0 pt-1">
-                  {/* Username */}
-                  <p className="text-base font-semibold text-foreground">
+                <div className="flex-1 min-w-0 pt-0.5">
+                  <p className="text-[15px] font-semibold text-white tracking-[-0.01em]">
                     {userProfile?.displayName || user?.name || 'User'}
                   </p>
 
-                  {/* Textarea */}
                   <textarea
                     ref={textareaRef}
                     value={content}
                     onChange={(e) => setContent(e.target.value)}
                     placeholder="What's new?"
-                    maxLength={MAX_CHARS}
-                    className="w-full bg-transparent border-0 resize-none text-foreground placeholder:text-muted-foreground/60 focus:outline-none text-[15px] leading-relaxed mt-1 min-h-25"
+                    maxLength={MAX_CHARS + 50}
+                    className="w-full bg-transparent border-0 resize-none text-[15px] leading-[1.45] text-white placeholder:text-[#777] focus:outline-none mt-1 min-h-[80px]"
                     rows={1}
                   />
 
                   {/* Media previews */}
                   {mediaPreviews.length > 0 && (
                     <div
-                      className={`grid gap-2 mt-3 ${
+                      className={cn(
+                        'grid gap-2 mt-2',
                         mediaPreviews.length === 1
-                          ? 'grid-cols-1 max-w-sm'
-                          : mediaPreviews.length === 2
-                            ? 'grid-cols-2'
-                            : 'grid-cols-2'
-                      }`}
+                          ? 'grid-cols-1 max-w-[360px]'
+                          : 'grid-cols-2',
+                      )}
                     >
                       {mediaPreviews.map((preview, index) => (
                         <div
                           key={index}
-                          className={`relative rounded-xl overflow-hidden bg-secondary ${
+                          className={cn(
+                            'relative rounded-xl overflow-hidden bg-[#0a0a0a]',
                             mediaPreviews.length === 1
-                              ? 'aspect-video'
+                              ? 'aspect-[4/3]'
                               : mediaPreviews.length === 3 && index === 0
-                                ? 'row-span-2 aspect-3/4'
-                                : 'aspect-square'
-                          }`}
+                                ? 'row-span-2 aspect-[3/4]'
+                                : 'aspect-square',
+                          )}
                         >
                           {preview.type === 'video' ? (
                             <video
@@ -557,16 +667,14 @@ export default function CreatePage() {
                               className="w-full h-full object-cover"
                             />
                           )}
-                          {/* Remove button */}
                           <button
                             onClick={() => removeMedia(index)}
-                            className="absolute top-2 right-2 w-7 h-7 rounded-full bg-black/60 backdrop-blur-sm flex items-center justify-center hover:bg-black/80 transition-colors"
+                            className="absolute top-1.5 right-1.5 text-white/80 hover:text-white transition-colors drop-shadow-lg"
                           >
-                            <XIcon className="w-4 h-4 text-white" />
+                            <CloseCircleIcon className="w-6 h-6" />
                           </button>
-                          {/* Video badge */}
                           {preview.type === 'video' && (
-                            <div className="absolute bottom-2 left-2 px-2 py-0.5 rounded-md bg-black/60 backdrop-blur-sm text-xs text-white flex items-center gap-1">
+                            <div className="absolute bottom-2 left-2 px-1.5 py-0.5 rounded-md bg-black/60 backdrop-blur-sm text-[11px] text-white flex items-center gap-1">
                               <PlayIcon className="w-3 h-3" />
                               Video
                             </div>
@@ -576,75 +684,102 @@ export default function CreatePage() {
                     </div>
                   )}
 
+                  {/* Tags row */}
+                  {(selectedTopic || selectedLocation) && (
+                    <div className="flex flex-wrap items-center gap-1.5 mt-2.5">
+                      {selectedTopic && (
+                        <TopicSelector
+                          selectedTopic={selectedTopic}
+                          onSelectTopic={setSelectedTopic}
+                        />
+                      )}
+                      {selectedLocation && (
+                        <LocationPicker
+                          selectedLocation={selectedLocation}
+                          onSelectLocation={setSelectedLocation}
+                        />
+                      )}
+                    </div>
+                  )}
+
                   {/* Toolbar */}
-                  <div className="flex items-center gap-1 mt-4">
-                    {/* Add media button */}
+                  <div className="flex items-center gap-0.5 mt-3">
                     <button
                       onClick={() => fileInputRef.current?.click()}
                       disabled={mediaFiles.length >= MAX_FILES}
-                      className="p-2 rounded-full hover:bg-secondary transition-colors disabled:opacity-40 disabled:cursor-not-allowed text-muted-foreground hover:text-foreground"
+                      className="p-2 rounded-full hover:bg-white/[0.06] transition-colors disabled:opacity-30 text-[#777] hover:text-[#999]"
                       title="Add photos or videos"
                     >
-                      <ImageIcon className="w-5 h-5" />
+                      <ImageAttachIcon className="w-5 h-5" />
                     </button>
 
-                    {/* Camera button */}
                     <button
-                      onClick={() => fileInputRef.current?.click()}
-                      disabled={mediaFiles.length >= MAX_FILES}
-                      className="p-2 rounded-full hover:bg-secondary transition-colors disabled:opacity-40 disabled:cursor-not-allowed text-muted-foreground hover:text-foreground"
-                      title="Take a photo"
-                    >
-                      <CameraIcon className="w-5 h-5" />
-                    </button>
-
-                    {/* GIF button (placeholder) */}
-                    <button
-                      className="p-2 rounded-full hover:bg-secondary transition-colors text-muted-foreground hover:text-foreground opacity-40 cursor-not-allowed"
-                      title="GIFs coming soon"
                       disabled
+                      className="p-2 rounded-full hover:bg-white/[0.06] transition-colors text-[#777] hover:text-[#999] disabled:opacity-30"
+                      title="GIF coming soon"
                     >
                       <GifIcon className="w-5 h-5" />
                     </button>
 
-                    {/* Media count indicator */}
-                    {mediaFiles.length > 0 && (
-                      <span className="ml-2 text-xs text-muted-foreground">
-                        {mediaFiles.length}/{MAX_FILES}
-                      </span>
+                    <EmojiPicker onEmojiSelect={handleEmojiSelect} />
+
+                    {!selectedLocation && (
+                      <LocationPicker
+                        selectedLocation={selectedLocation}
+                        onSelectLocation={setSelectedLocation}
+                      />
                     )}
 
-                    {/* Spacer */}
+                    {!selectedTopic && (
+                      <TopicSelector
+                        selectedTopic={selectedTopic}
+                        onSelectTopic={setSelectedTopic}
+                      />
+                    )}
+
                     <div className="flex-1" />
 
-                    {/* Character count */}
                     {content.length > 0 && (
-                      <div className="flex items-center gap-2">
-                        <div
-                          className={`w-5 h-5 rounded-full border-2 ${
-                            charsRemaining < 0
-                              ? 'border-red-500'
-                              : charsRemaining < 50
-                                ? 'border-amber-500'
-                                : 'border-muted-foreground/30'
-                          }`}
-                          style={{
-                            background: `conic-gradient(${
-                              charsRemaining < 0
-                                ? '#ef4444'
-                                : charsRemaining < 50
-                                  ? '#f59e0b'
-                                  : 'var(--muted-foreground)'
-                            } ${Math.min(100, (content.length / MAX_CHARS) * 100)}%, transparent 0)`,
-                          }}
-                        />
+                      <div className="flex items-center gap-1.5">
+                        <div className="relative w-5 h-5">
+                          <svg
+                            className="w-5 h-5 -rotate-90"
+                            viewBox="0 0 20 20"
+                          >
+                            <circle
+                              cx="10"
+                              cy="10"
+                              r="8"
+                              fill="none"
+                              stroke="currentColor"
+                              strokeWidth="2"
+                              className="text-white/[0.08]"
+                            />
+                            <circle
+                              cx="10"
+                              cy="10"
+                              r="8"
+                              fill="none"
+                              stroke="currentColor"
+                              strokeWidth="2"
+                              strokeDasharray={`${charPercentage * 0.502} 50.265`}
+                              strokeLinecap="round"
+                              className={cn(
+                                isOverLimit
+                                  ? 'text-red-500'
+                                  : charsRemaining < 20
+                                    ? 'text-amber-500'
+                                    : 'text-[#555]',
+                              )}
+                            />
+                          </svg>
+                        </div>
                         {charsRemaining <= 20 && (
                           <span
-                            className={`text-xs font-medium ${
-                              charsRemaining < 0
-                                ? 'text-red-500'
-                                : 'text-amber-500'
-                            }`}
+                            className={cn(
+                              'text-[12px] font-medium tabular-nums',
+                              isOverLimit ? 'text-red-500' : 'text-amber-500',
+                            )}
                           >
                             {charsRemaining}
                           </span>
@@ -654,115 +789,102 @@ export default function CreatePage() {
                   </div>
                 </div>
               </div>
-              {/* Error message */}
+
+              {/* Error */}
               {error && (
                 <div className="mt-4 p-3 rounded-xl bg-red-500/10 border border-red-500/20">
-                  <p className="text-sm text-red-500">{error}</p>
+                  <p className="text-[13px] text-red-400">{error}</p>
                 </div>
               )}
 
               {/* Upload progress */}
               {uploadProgress && (
-                <div className="mt-4 p-3 rounded-xl bg-primary/10 border border-primary/20">
-                  <div className="flex items-center gap-2">
-                    <div className="w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-                    <p className="text-sm text-primary">{uploadProgress}</p>
-                  </div>
+                <div className="mt-4 flex items-center gap-2">
+                  <ThreadsSpinner size="sm" className="text-blue-400" />
+                  <p className="text-[13px] text-blue-400">{uploadProgress}</p>
                 </div>
               )}
+
+              {/* "Add to thread" row */}
+              <div className="flex items-center gap-3 mt-3">
+                <Avatar className="w-5 h-5 opacity-40">
+                  <AvatarImage
+                    src={userProfile?.avatarUrl || undefined}
+                    alt={userProfile?.displayName || user?.name || 'User'}
+                  />
+                  <AvatarFallback className="text-[8px] bg-[#333] text-white font-semibold">
+                    {(userProfile?.displayName ||
+                      user?.name ||
+                      'U')[0]?.toUpperCase()}
+                  </AvatarFallback>
+                </Avatar>
+                <span className="text-[14px] text-[#555]">Add to thread</span>
+              </div>
+            </div>
+
+            {/* Desktop footer — audience */}
+            <div className="sticky bottom-0 bg-[#181818] border-t border-white/[0.08] px-4 py-2.5">
+              <AudienceSelector
+                audience={audience}
+                onAudienceChange={setAudience}
+              />
             </div>
           </div>
         </div>
 
-        {/* Bottom safe area */}
-        <div className="h-safe lg:hidden" />
+        {/* Hidden file input used by both layouts */}
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="image/*,video/*"
+          multiple
+          onChange={handleFileSelect}
+          className="hidden"
+        />
+
+        {/* Discard confirmation overlay — shared across layouts */}
+        {showDiscardConfirm && (
+          <div className="fixed inset-0 z-[60] bg-black/60 backdrop-blur-sm flex items-center justify-center">
+            <div className="bg-[#262626] rounded-2xl w-[280px] overflow-hidden shadow-2xl">
+              <div className="px-6 pt-5 pb-4 text-center">
+                <p className="text-[16px] font-semibold text-white">
+                  Discard thread?
+                </p>
+                <p className="text-[14px] text-[#777] mt-1">
+                  If you go back now, you&apos;ll lose your changes.
+                </p>
+              </div>
+              <div className="border-t border-white/[0.08]">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowDiscardConfirm(false);
+                    router.push('/feed');
+                  }}
+                  className="w-full py-3.5 text-[15px] font-semibold text-red-500 hover:bg-white/[0.04] transition-colors"
+                >
+                  Discard
+                </button>
+              </div>
+              <div className="border-t border-white/[0.08]">
+                <button
+                  type="button"
+                  onClick={() => setShowDiscardConfirm(false)}
+                  className="w-full py-3.5 text-[15px] text-[#f3f5f7] hover:bg-white/[0.04] transition-colors"
+                >
+                  Keep editing
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
       </div>
     </AuthGuard>
   );
 }
 
-// Icons
-function XIcon({ className }: { className?: string }) {
-  return (
-    <svg
-      className={className}
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth={2}
-    >
-      <path
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        d="M6 18L18 6M6 6l12 12"
-      />
-    </svg>
-  );
-}
-
-function ImageIcon({ className }: { className?: string }) {
-  return (
-    <svg
-      className={className}
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth={1.5}
-    >
-      <path
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z"
-      />
-    </svg>
-  );
-}
-
-function CameraIcon({ className }: { className?: string }) {
-  return (
-    <svg
-      className={className}
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth={1.5}
-    >
-      <path
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z"
-      />
-      <path
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        d="M16.5 12.75a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0zM18.75 10.5h.008v.008h-.008V10.5z"
-      />
-    </svg>
-  );
-}
-
-function GifIcon({ className }: { className?: string }) {
-  return (
-    <svg className={className} viewBox="0 0 24 24" fill="currentColor">
-      <path d="M19 10.5V8.8h-4.4v6.4h1.7v-2h2v-1.7h-2v-1H19zm-7.3-1.7h1.7v6.4h-1.7V8.8zm-3.6 1.6c.4 0 .9.2 1.2.5l1.2-1C9.9 9.2 9 8.8 8.1 8.8c-1.8 0-3.2 1.4-3.2 3.2s1.4 3.2 3.2 3.2c1 0 1.8-.4 2.4-1v-2.5H7.7v1.2h1.2v.6c-.2.1-.5.2-.8.2-.9 0-1.6-.7-1.6-1.7 0-1 .7-1.7 1.6-1.7z" />
-    </svg>
-  );
-}
-
-function ChevronLeftIcon({ className }: { className?: string }) {
-  return (
-    <svg
-      className={className}
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth={2}
-    >
-      <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
-    </svg>
-  );
-}
-
+// Small play icon for video badge overlay
 function PlayIcon({ className }: { className?: string }) {
   return (
     <svg className={className} viewBox="0 0 24 24" fill="currentColor">

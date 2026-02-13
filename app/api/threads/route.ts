@@ -144,7 +144,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { content, imageId, altText } = validation.data;
+    const { content, imageId, altText, topic, location, audience } = validation.data;
     
     // Check if we have new multi-media format
     const media = body.media as MediaItem[] | undefined;
@@ -155,6 +155,9 @@ export async function POST(request: NextRequest) {
       hasMedia: !!(media && media.length > 0),
       mediaCount: media?.length || 0,
       contentLength: content.length,
+      topic: topic || undefined,
+      location: location || undefined,
+      audience: audience || 'anyone',
     });
 
     // Use new multi-media function if media array is provided
@@ -163,7 +166,10 @@ export async function POST(request: NextRequest) {
       thread = await createThreadWithMedia(
         currentUser.$id,
         content,
-        media
+        media,
+        topic,
+        location,
+        audience
       );
     } else {
       // Fall back to legacy single image function
@@ -171,7 +177,10 @@ export async function POST(request: NextRequest) {
         currentUser.$id,
         content,
         imageId,
-        altText
+        altText,
+        topic,
+        location,
+        audience
       );
     }
 

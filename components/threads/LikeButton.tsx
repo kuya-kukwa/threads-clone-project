@@ -2,10 +2,10 @@
 
 /**
  * LikeButton Component
- * Handles like/unlike functionality with optimistic updates
+ * Handles like/unlike functionality with instant optimistic updates
  */
 
-import { useState } from 'react';
+import { useState, useCallback, useRef } from 'react';
 import { getSessionToken } from '@/lib/appwriteClient';
 import { logger } from '@/lib/logger/logger';
 import { ActionButton } from './ActionButton';
@@ -24,58 +24,60 @@ export function LikeButton({
 }: LikeButtonProps) {
   const [isLiked, setIsLiked] = useState(initialIsLiked);
   const [likeCount, setLikeCount] = useState(initialLikeCount);
-  const [isLiking, setIsLiking] = useState(false);
+  const pendingRef = useRef(false);
 
-  const handleLikeClick = async (e?: React.MouseEvent) => {
-    e?.stopPropagation();
+  const handleLikeClick = useCallback(
+    async (e?: React.MouseEvent) => {
+      e?.stopPropagation();
 
-    if (isLiking) return;
+      // Prevent rapid double-taps but don't block UI
+      if (pendingRef.current) return;
+      pendingRef.current = true;
 
-    setIsLiking(true);
+      // Instant optimistic update — no loading state, no delay
+      const wasLiked = isLiked;
+      const prevCount = likeCount;
+      setIsLiked(!wasLiked);
+      setLikeCount(wasLiked ? Math.max(prevCount - 1, 0) : prevCount + 1);
 
-    // Optimistic update
-    const wasLiked = isLiked;
-    setIsLiked(!wasLiked);
-    setLikeCount((prev) => (wasLiked ? Math.max(prev - 1, 0) : prev + 1));
+      try {
+        const sessionToken = getSessionToken();
+        const headers: Record<string, string> = {
+          'Content-Type': 'application/json',
+          'X-CSRF-Token': 'true',
+        };
 
-    try {
-      const sessionToken = getSessionToken();
-      const headers: Record<string, string> = {
-        'Content-Type': 'application/json',
-        'X-CSRF-Token': 'true',
-      };
+        if (sessionToken) {
+          headers['x-session-id'] = sessionToken;
+        }
 
-      if (sessionToken) {
-        headers['x-session-id'] = sessionToken;
-      }
+        const response = await fetch(`/api/threads/${threadId}/like`, {
+          method: 'POST',
+          credentials: 'include',
+          headers,
+        });
 
-      const response = await fetch(`/api/threads/${threadId}/like`, {
-        method: 'POST',
-        credentials: 'include',
-        headers,
-      });
+        const data = await response.json();
 
-      const data = await response.json();
-
-      if (!data.success) {
-        // Revert on failure
+        if (!data.success) {
+          // Revert on failure
+          setIsLiked(wasLiked);
+          setLikeCount(prevCount);
+          logger.warn({ msg: 'Like failed', threadId, error: data.error });
+        }
+        // On success: trust our optimistic update, don't overwrite from server
+        // This prevents the UI "flash" / delay users were seeing
+      } catch (error) {
+        // Revert on error
         setIsLiked(wasLiked);
-        setLikeCount((prev) => (wasLiked ? prev + 1 : Math.max(prev - 1, 0)));
-        logger.warn({ msg: 'Like failed', threadId, error: data.error });
-      } else {
-        // Sync with server response
-        setIsLiked(data.liked);
-        setLikeCount(data.likeCount);
+        setLikeCount(prevCount);
+        logger.error({ msg: 'Like error', threadId, error });
+      } finally {
+        pendingRef.current = false;
       }
-    } catch (error) {
-      // Revert on error
-      setIsLiked(wasLiked);
-      setLikeCount((prev) => (wasLiked ? prev + 1 : Math.max(prev - 1, 0)));
-      logger.error({ msg: 'Like error', threadId, error });
-    } finally {
-      setIsLiking(false);
-    }
-  };
+    },
+    [isLiked, likeCount, threadId],
+  );
 
   return (
     <ActionButton
@@ -84,7 +86,6 @@ export function LikeButton({
       count={likeCount}
       onClick={handleLikeClick}
       isActive={isLiked}
-      isLoading={isLiking}
     />
   );
 }

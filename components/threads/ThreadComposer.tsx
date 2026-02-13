@@ -21,7 +21,6 @@ import { useState, useRef, FormEvent, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { Input } from '@/components/ui/input';
 import { getSessionToken } from '@/lib/appwriteClient';
 import { SECURITY_CONFIG } from '@/lib/appwriteConfig';
 import { getErrorMessage } from '@/lib/errors';
@@ -173,11 +172,7 @@ export function ThreadComposer({ onSuccess }: ThreadComposerProps) {
     setMediaPreviews((prev) => prev.filter((_, i) => i !== index));
   };
 
-  const handleAltTextChange = (index: number, altText: string) => {
-    setMediaPreviews((prev) =>
-      prev.map((item, i) => (i === index ? { ...item, altText } : item)),
-    );
-  };
+
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -310,7 +305,7 @@ export function ThreadComposer({ onSuccess }: ThreadComposerProps) {
           value={content}
           onChange={(e) => setContent(e.target.value)}
           placeholder="What's on your mind?"
-          className="min-h-25 resize-none text-base bg-secondary/50 border-border/50 focus:border-primary/50 focus:ring-primary/20"
+          className="min-h-25 resize-none text-[15px] leading-[1.45] bg-secondary/50 border-border/50 focus:border-primary/50 focus:ring-primary/20"
           disabled={isSubmitting}
           autoFocus
           aria-label="Thread content"
@@ -318,7 +313,7 @@ export function ThreadComposer({ onSuccess }: ThreadComposerProps) {
         />
         <div className="flex justify-between items-center mt-1">
           <span
-            className={`text-sm ${
+            className={`text-[13px] tabular-nums ${
               remainingChars < 0
                 ? 'text-destructive'
                 : remainingChars < 20

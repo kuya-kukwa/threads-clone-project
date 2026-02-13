@@ -66,15 +66,35 @@ html {
 body {
   background-color: hsl(var(--color-background));
   color: hsl(var(--color-foreground));
+  overscroll-behavior-y: none;
   font-family:
-    system-ui,
-    -apple-system,
-    BlinkMacSystemFont,
-    'Segoe UI',
-    Roboto,
+    -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial,
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  font-feature-settings: 'kern';
+  line-height: 1.4;
+  letter-spacing: -0.01em;
+  font-size: 15px;
+}
+
+/* Threads-authentic typography scale */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+}
+
+p {
+  line-height: 1.45;
+}
+
+button {
+  letter-spacing: -0.01em;
 }
 
 /* Mobile bottom nav safe area */
@@ -244,6 +264,12 @@ body {
 
 .animate-shimmer {
   animation: shimmer 1.5s infinite;
+}
+
+/* Authentic Threads spinner — fading bars */
+@keyframes threads-spinner-fade {
+  0% { opacity: 1; }
+  100% { opacity: 0.15; }
 }
 
 /* CSS containment for performance */

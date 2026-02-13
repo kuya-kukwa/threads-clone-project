@@ -159,7 +159,7 @@ export function MediaLightbox({
               <Button
                 variant="ghost"
                 size="icon"
-                className="absolute left-4 top-1/2 -translate-y-1/2 z-50 hidden md:flex bg-white/10 border border-white/20 text-white hover:bg-white/20"
+                className="absolute left-4 top-1/2 -translate-y-1/2 z-50 hidden sm:flex bg-white/10 border border-white/20 text-white hover:bg-white/20"
                 onClick={(e) => {
                   e.stopPropagation();
                   goToPrevious();
@@ -170,7 +170,7 @@ export function MediaLightbox({
               <Button
                 variant="ghost"
                 size="icon"
-                className="absolute right-4 top-1/2 -translate-y-1/2 z-50 hidden md:flex bg-white/10 border border-white/20 text-white hover:bg-white/20"
+                className="absolute right-4 top-1/2 -translate-y-1/2 z-50 hidden sm:flex bg-white/10 border border-white/20 text-white hover:bg-white/20"
                 onClick={(e) => {
                   e.stopPropagation();
                   goToNext();

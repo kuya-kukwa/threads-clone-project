@@ -18,11 +18,10 @@
  * - Smooth scrolling
  */
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { FeedResponse } from '@/types/appwrite';
 import { ThreadCard, ThreadWithLikeStatus } from './ThreadCard';
-import { Button } from '@/components/ui/button';
-import { FeedSkeleton } from '@/components/skeletons';
+import { FeedSkeleton, ThreadsSpinner } from '@/components/skeletons';
 import { getErrorMessage } from '@/lib/errors';
 import { logger } from '@/lib/logger/logger';
 import { getSessionToken } from '@/lib/appwriteClient';
@@ -57,7 +56,7 @@ export function PublicFeed({
     loadThreads();
   }, [refreshKey]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const loadThreads = async (cursor?: string) => {
+  const loadThreads = useCallback(async (cursor?: string) => {
     try {
       if (cursor) {
         setIsLoading(true);
@@ -114,13 +113,24 @@ export function PublicFeed({
       setIsLoading(false);
       setIsInitialLoading(false);
     }
-  };
+  }, []);
 
-  const handleLoadMore = () => {
-    if (nextCursor && !isLoading) {
-      loadThreads(nextCursor);
-    }
-  };
+  const loadMoreRef = useRef<HTMLDivElement>(null);
+
+  // Infinite scroll — auto-load when sentinel enters viewport
+  useEffect(() => {
+    if (!hasMore || isLoading || isInitialLoading) return;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && nextCursor && !isLoading) {
+          loadThreads(nextCursor);
+        }
+      },
+      { threshold: 0.1, rootMargin: '200px' },
+    );
+    if (loadMoreRef.current) observer.observe(loadMoreRef.current);
+    return () => observer.disconnect();
+  }, [hasMore, isLoading, isInitialLoading, nextCursor, loadThreads]);
 
   // Initial loading state - use professional skeleton
   if (isInitialLoading) {
@@ -132,8 +142,10 @@ export function PublicFeed({
     return (
       <div className="flex flex-col items-center justify-center p-8 text-center">
         <div className="text-4xl mb-4">🧵</div>
-        <h3 className="text-lg font-semibold mb-2">No threads yet</h3>
-        <p className="text-sm text-muted-foreground max-w-sm">
+        <h3 className="text-lg font-semibold mb-2 text-white">
+          No threads yet
+        </h3>
+        <p className="text-sm text-[#777] max-w-sm">
           Be the first to share something! Create a thread to get the
           conversation started.
         </p>
@@ -153,41 +165,33 @@ export function PublicFeed({
       {/* Error state */}
       {error && (
         <div className="p-4 text-center">
-          <div className="text-sm text-red-600 bg-red-50 p-3 rounded-md inline-block">
+          <div className="text-sm text-red-400 bg-red-500/10 p-3 rounded-xl inline-block">
             {error}
           </div>
           <div className="mt-2">
-            <Button
-              variant="outline"
-              size="sm"
+            <button
               onClick={() => loadThreads(nextCursor || undefined)}
+              className="text-sm text-blue-400 hover:underline"
             >
-              Try Again
-            </Button>
+              Try again
+            </button>
           </div>
         </div>
       )}
 
-      {/* Load more button */}
-      {!error && hasMore && (
-        <div className="p-4 text-center border-t">
-          <Button
-            variant="outline"
-            onClick={handleLoadMore}
-            disabled={isLoading}
-            className="min-w-30"
-          >
-            {isLoading ? 'Loading...' : 'Load More'}
-          </Button>
-        </div>
-      )}
-
-      {/* End of feed message */}
-      {!error && !hasMore && threads.length > 0 && (
-        <div className="p-4 text-center text-sm text-muted-foreground border-t">
-          You&apos;ve reached the end
-        </div>
-      )}
+      {/* Infinite scroll sentinel + spinner */}
+      <div ref={loadMoreRef} className="py-6">
+        {!error && isLoading && threads.length > 0 && (
+          <div className="flex justify-center">
+            <ThreadsSpinner size="md" className="text-[#555]" />
+          </div>
+        )}
+        {!error && !hasMore && threads.length > 0 && (
+          <p className="text-center text-sm text-[#777]">
+            You&apos;re all caught up!
+          </p>
+        )}
+      </div>
     </div>
   );
 }

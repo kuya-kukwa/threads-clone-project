@@ -14,13 +14,13 @@ Everything in this codebase defaults to a phone-sized viewport. Desktop features
 
 ## 2. Breakpoint Strategy (Tailwind)
 
-| Token | Min-width | What appears |
-|-------|-----------|-------------|
-| _default_ | 0 px | Full mobile UI (bottom nav, top nav, full-width content) |
-| `md` (768 px) | 768 px | Top `NavBar` becomes visible (`hidden md:block`) |
-| `lg` (1024 px) | 1024 px | `DesktopSidebar` appears, `BottomNav` hides, `FloatingCreateButton` shows, main content gets `lg:pl-19` left padding |
-| `xl` (1280 px) | 1280 px | `RightSidebar` (suggested users, search) appears |
-| `2xl` (1536 px) | 1536 px | `MultiColumnLayout` activates (3-column swipe layout) |
+| Token           | Min-width | What appears                                                                                                         |
+| --------------- | --------- | -------------------------------------------------------------------------------------------------------------------- |
+| _default_       | 0 px      | Full mobile UI (bottom nav, top nav, full-width content)                                                             |
+| `md` (768 px)   | 768 px    | Top `NavBar` becomes visible (`hidden md:block`)                                                                     |
+| `lg` (1024 px)  | 1024 px   | `DesktopSidebar` appears, `BottomNav` hides, `FloatingCreateButton` shows, main content gets `lg:pl-19` left padding |
+| `xl` (1280 px)  | 1280 px   | `RightSidebar` (suggested users, search) appears                                                                     |
+| `2xl` (1536 px) | 1536 px   | `MultiColumnLayout` activates (3-column swipe layout)                                                                |
 
 **Key takeaway:** Each breakpoint **adds** a component — it never rebuilds the mobile layout from scratch.
 
@@ -29,25 +29,29 @@ Everything in this codebase defaults to a phone-sized viewport. Desktop features
 ## 3. Navigation Architecture
 
 ### Mobile (default)
-| Component | Location | Behaviour |
-|-----------|----------|-----------|
-| `MobileTopNav` | Top | Hamburger menu + search icon; feed tab switcher (For You / Following / Likes / Ghost Posts) |
-| `BottomNav` | Bottom | 5-tab bar (Home, Messages, Create, Activity, Profile); glass morphism; hides on scroll-down, reappears on scroll-up; safe-area padding for notched devices |
+
+| Component      | Location | Behaviour                                                                                                                                                  |
+| -------------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `MobileTopNav` | Top      | Hamburger menu + search icon; feed tab switcher (For You / Following / Likes / Ghost Posts)                                                                |
+| `BottomNav`    | Bottom   | 5-tab bar (Home, Messages, Create, Activity, Profile); glass morphism; hides on scroll-down, reappears on scroll-up; safe-area padding for notched devices |
 
 ### Desktop (`lg`+)
-| Component | Location | Behaviour |
-|-----------|----------|-----------|
-| `DesktopSidebar` | Fixed left, 88 px wide (`w-22`) | Icon-only vertical nav (Home, Search, Create modal, Activity w/ badge, Profile); "More" dropdown at bottom with settings/logout |
-| `FloatingCreateButton` | Fixed bottom-right | Opens `CreatePostModal`, only shown on `lg`+ (`hidden lg:flex`) |
-| `NavBar` | Sticky top | Centered logo; desktop-only icon row on the right; hidden on mobile (`hidden md:block`) |
+
+| Component              | Location                        | Behaviour                                                                                                                       |
+| ---------------------- | ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| `DesktopSidebar`       | Fixed left, 88 px wide (`w-22`) | Icon-only vertical nav (Home, Search, Create modal, Activity w/ badge, Profile); "More" dropdown at bottom with settings/logout |
+| `FloatingCreateButton` | Fixed bottom-right              | Opens `CreatePostModal`, only shown on `lg`+ (`hidden lg:flex`)                                                                 |
+| `NavBar`               | Sticky top                      | Centered logo; desktop-only icon row on the right; hidden on mobile (`hidden md:block`)                                         |
 
 ### Ultra-wide (`xl`+ / `2xl`+)
-| Component | Location | Behaviour |
-|-----------|----------|-----------|
-| `RightSidebar` | Right column | Suggested users, follow button, footer links |
+
+| Component           | Location      | Behaviour                                                                                              |
+| ------------------- | ------------- | ------------------------------------------------------------------------------------------------------ |
+| `RightSidebar`      | Right column  | Suggested users, follow button, footer links                                                           |
 | `MultiColumnLayout` | Full viewport | 3-column horizontal scroll with snap (`Feed · Profile · Activity`); only activates at `2xl` (1536 px+) |
 
 **Pattern to remember:**
+
 ```
 Mobile:   MobileTopNav + Content + BottomNav
 Desktop:  DesktopSidebar + (NavBar) + Content + (RightSidebar) + FloatingCreateButton
@@ -75,6 +79,7 @@ Wide:     DesktopSidebar + MultiColumnLayout(3 cols) + FloatingCreateButton
 ```
 
 **Notes for extension:**
+
 - `pb-20` reserves space for `BottomNav` on mobile; `lg:pb-0` removes it when the sidebar takes over.
 - `lg:pl-19` offsets main content so it doesn't sit behind the fixed sidebar.
 - All navigation components self-gate with `hidden {breakpoint}:flex` or early-return guards (`if (!user || isAuthPage) return null`).
@@ -84,6 +89,7 @@ Wide:     DesktopSidebar + MultiColumnLayout(3 cols) + FloatingCreateButton
 ## 5. CSS Patterns Worth Keeping
 
 ### a. Safe-area support (notched phones)
+
 ```css
 @supports (padding-bottom: env(safe-area-inset-bottom)) {
   .pb-safe {
@@ -93,20 +99,22 @@ Wide:     DesktopSidebar + MultiColumnLayout(3 cols) + FloatingCreateButton
 ```
 
 ### b. Glass morphism (nav bars, modals)
+
 ```css
 .glass {
   background: rgba(18, 18, 18, 0.7);
   backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);   /* Safari */
+  -webkit-backdrop-filter: blur(20px); /* Safari */
 }
 ```
 
 ### c. Touch-friendly scroll snap (media galleries)
+
 ```css
 .swipe-container {
   scroll-snap-type: x mandatory;
   scroll-behavior: smooth;
-  -webkit-overflow-scrolling: touch;     /* iOS momentum */
+  -webkit-overflow-scrolling: touch; /* iOS momentum */
 }
 .swipe-item {
   scroll-snap-align: center;
@@ -115,27 +123,38 @@ Wide:     DesktopSidebar + MultiColumnLayout(3 cols) + FloatingCreateButton
 ```
 
 ### d. Hidden scrollbars
+
 ```css
 .scrollbar-hide {
   -ms-overflow-style: none;
   scrollbar-width: none;
 }
-.scrollbar-hide::-webkit-scrollbar { display: none; }
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
 ```
 
 ### e. CSS containment for rendering performance
+
 ```css
-.contain-layout { contain: layout; }
-.contain-paint  { contain: paint; }
-.contain-strict { contain: strict; }
+.contain-layout {
+  contain: layout;
+}
+.contain-paint {
+  contain: paint;
+}
+.contain-strict {
+  contain: strict;
+}
 ```
 
 ### f. Viewport meta (PWA-ready)
+
 ```tsx
 export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
-  maximumScale: 1,        // prevents pinch-zoom (intentional for app-like feel)
+  maximumScale: 1, // prevents pinch-zoom (intentional for app-like feel)
   userScalable: false,
   themeColor: '#0a0a0a',
   colorScheme: 'dark',
@@ -146,13 +165,13 @@ export const viewport: Viewport = {
 
 ## 6. Touch & Interaction Patterns
 
-| Pattern | Mobile | Desktop extension |
-|---------|--------|-------------------|
-| **Scroll-hide bottom nav** | `BottomNav` tracks scroll direction via `requestAnimationFrame`; hides on scroll-down, shows on scroll-up | Not needed — sidebar is always visible |
-| **Swipeable media gallery** | `MediaGallery` uses CSS snap scroll for horizontal swipe between images | Same component works with mouse drag / scroll wheel |
-| **Debounced search** | `MobileTopNav` uses a custom `useDebounce(300ms)` hook to throttle keystrokes | Reused in desktop search |
-| **Pull-to-refresh** | Standard mobile scroll behavior | N/A on desktop |
-| **Modal-aware nav** | `BottomNav` watches `document.body.classList` for `.modal-open` and hides itself | Desktop sidebar stays visible |
+| Pattern                     | Mobile                                                                                                    | Desktop extension                                   |
+| --------------------------- | --------------------------------------------------------------------------------------------------------- | --------------------------------------------------- |
+| **Scroll-hide bottom nav**  | `BottomNav` tracks scroll direction via `requestAnimationFrame`; hides on scroll-down, shows on scroll-up | Not needed — sidebar is always visible              |
+| **Swipeable media gallery** | `MediaGallery` uses CSS snap scroll for horizontal swipe between images                                   | Same component works with mouse drag / scroll wheel |
+| **Debounced search**        | `MobileTopNav` uses a custom `useDebounce(300ms)` hook to throttle keystrokes                             | Reused in desktop search                            |
+| **Pull-to-refresh**         | Standard mobile scroll behavior                                                                           | N/A on desktop                                      |
+| **Modal-aware nav**         | `BottomNav` watches `document.body.classList` for `.modal-open` and hides itself                          | Desktop sidebar stays visible                       |
 
 ---
 
@@ -212,28 +231,28 @@ schemas/           ← Zod validation schemas
 
 ## 10. Performance Notes
 
-| Technique | Where used | Why it matters on mobile |
-|-----------|-----------|--------------------------|
-| `startTransition` | Notification count updates, tab switches | Keeps UI responsive during state updates by deprioritizing non-urgent renders |
-| `requestAnimationFrame` | Scroll-hide nav | Prevents layout thrashing from high-frequency scroll events |
-| `AbortController` | Search API calls | Cancels in-flight requests when the user types a new character |
-| CSS `contain` | Feed items | Tells the browser a subtree won't affect siblings — speeds up paint & layout |
-| `useCallback` + `useRef` | Scroll handlers, fetch functions | Prevents unnecessary re-renders and stale closures |
-| Font `display: 'swap'` | Inter font loading | Shows fallback font instantly, swaps when the webfont loads |
+| Technique                | Where used                               | Why it matters on mobile                                                      |
+| ------------------------ | ---------------------------------------- | ----------------------------------------------------------------------------- |
+| `startTransition`        | Notification count updates, tab switches | Keeps UI responsive during state updates by deprioritizing non-urgent renders |
+| `requestAnimationFrame`  | Scroll-hide nav                          | Prevents layout thrashing from high-frequency scroll events                   |
+| `AbortController`        | Search API calls                         | Cancels in-flight requests when the user types a new character                |
+| CSS `contain`            | Feed items                               | Tells the browser a subtree won't affect siblings — speeds up paint & layout  |
+| `useCallback` + `useRef` | Scroll handlers, fetch functions         | Prevents unnecessary re-renders and stale closures                            |
+| Font `display: 'swap'`   | Inter font loading                       | Shows fallback font instantly, swaps when the webfont loads                   |
 
 ---
 
 ## 11. Quick Reference — Visibility by Breakpoint
 
-| Component | `< md` | `md` | `lg` | `xl` | `2xl` |
-|-----------|--------|------|------|------|-------|
-| `MobileTopNav` | ✅ | ✅ | ❌ | ❌ | ❌ |
-| `BottomNav` | ✅ | ✅ | ❌ | ❌ | ❌ |
-| `NavBar` | ❌ | ✅ | ✅ | ✅ | ✅ |
-| `DesktopSidebar` | ❌ | ❌ | ✅ | ✅ | ✅ |
-| `FloatingCreateButton` | ❌ | ❌ | ✅ | ✅ | ✅ |
-| `RightSidebar` | ❌ | ❌ | ❌ | ✅ | ✅ |
-| `MultiColumnLayout` | ❌ | ❌ | ❌ | ❌ | ✅ |
+| Component              | `< md` | `md` | `lg` | `xl` | `2xl` |
+| ---------------------- | ------ | ---- | ---- | ---- | ----- |
+| `MobileTopNav`         | ✅     | ✅   | ❌   | ❌   | ❌    |
+| `BottomNav`            | ✅     | ✅   | ❌   | ❌   | ❌    |
+| `NavBar`               | ❌     | ✅   | ✅   | ✅   | ✅    |
+| `DesktopSidebar`       | ❌     | ❌   | ✅   | ✅   | ✅    |
+| `FloatingCreateButton` | ❌     | ❌   | ✅   | ✅   | ✅    |
+| `RightSidebar`         | ❌     | ❌   | ❌   | ✅   | ✅    |
+| `MultiColumnLayout`    | ❌     | ❌   | ❌   | ❌   | ✅    |
 
 ---
 

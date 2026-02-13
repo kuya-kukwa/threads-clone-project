@@ -60,6 +60,7 @@ export function EditProfileForm({
     },
   });
 
+  // eslint-disable-next-line react-hooks/incompatible-library
   const bio = watch('bio') || '';
 
   /**

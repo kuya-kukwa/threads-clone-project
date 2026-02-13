@@ -68,6 +68,8 @@ const COLLECTIONS = {
       { key: 'authorId', type: 'string', size: 255, required: true },
       { key: 'content', type: 'string', size: 500, required: true },
       { key: 'imageUrl', type: 'string', size: 500, required: false, default: '' },
+      { key: 'topic', type: 'string', size: 50, required: false, default: '' },
+      { key: 'location', type: 'string', size: 100, required: false, default: '' },
       { key: 'parentThreadId', type: 'string', size: 255, required: false, default: '' },
       { key: 'replyToUsername', type: 'string', size: 50, required: false, default: '' },
       { key: 'replyCount', type: 'integer', required: false, default: 0 },
@@ -79,6 +81,8 @@ const COLLECTIONS = {
       { key: 'authorId_index', type: 'key', attributes: ['authorId'], orders: ['DESC'] },
       { key: 'createdAt_index', type: 'key', attributes: ['createdAt'], orders: ['DESC'] },
       { key: 'parentThreadId_index', type: 'key', attributes: ['parentThreadId'], orders: ['ASC'] },
+      { key: 'topic_index', type: 'key', attributes: ['topic'], orders: ['ASC'] },
+      { key: 'location_index', type: 'key', attributes: ['location'], orders: ['ASC'] },
     ],
   },
   likes: {

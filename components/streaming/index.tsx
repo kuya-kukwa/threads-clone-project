@@ -19,6 +19,9 @@ import {
   ProfileHeaderSkeleton,
   ReplyListSkeleton,
   ThreadCardSkeleton,
+  SearchListSkeleton,
+  ActivityListSkeleton,
+  InlineLoader,
 } from '@/components/skeletons';
 
 interface StreamingBoundaryProps {
@@ -105,6 +108,43 @@ export function ThreadCardStreamingBoundary({
 }) {
   return (
     <StreamingBoundary fallback={<ThreadCardSkeleton />}>
+      {children}
+    </StreamingBoundary>
+  );
+}
+
+/**
+ * Search results streaming boundary
+ */
+export function SearchStreamingBoundary({ children }: { children: ReactNode }) {
+  return (
+    <StreamingBoundary fallback={<SearchListSkeleton count={8} />}>
+      {children}
+    </StreamingBoundary>
+  );
+}
+
+/**
+ * Activity/Notifications streaming boundary
+ */
+export function ActivityStreamingBoundary({
+  children,
+}: {
+  children: ReactNode;
+}) {
+  return (
+    <StreamingBoundary fallback={<ActivityListSkeleton count={6} />}>
+      {children}
+    </StreamingBoundary>
+  );
+}
+
+/**
+ * Generic inline loading boundary
+ */
+export function InlineStreamingBoundary({ children }: { children: ReactNode }) {
+  return (
+    <StreamingBoundary fallback={<InlineLoader />}>
       {children}
     </StreamingBoundary>
   );

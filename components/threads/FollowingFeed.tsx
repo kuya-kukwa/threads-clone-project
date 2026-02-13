@@ -12,7 +12,7 @@
 
 import { useEffect, useState, useCallback, useRef } from 'react';
 import { ThreadCard, ThreadWithLikeStatus } from './ThreadCard';
-import { ThreadCardSkeleton } from '@/components/ui/skeletons';
+import { ThreadCardSkeleton, ThreadsSpinner } from '@/components/skeletons';
 import { getSessionToken } from '@/lib/appwriteClient';
 
 interface FollowingFeedResponse {
@@ -113,7 +113,7 @@ export function FollowingFeed({ refreshKey = 0 }: { refreshKey?: number }) {
   // Loading state
   if (isLoading) {
     return (
-      <div className="divide-y divide-border">
+      <div>
         {Array.from({ length: 5 }).map((_, i) => (
           <ThreadCardSkeleton key={i} />
         ))}
@@ -125,18 +125,18 @@ export function FollowingFeed({ refreshKey = 0 }: { refreshKey?: number }) {
   if (error) {
     return (
       <div className="flex flex-col items-center justify-center py-20 text-center px-4">
-        <div className="w-16 h-16 rounded-full bg-destructive/10 flex items-center justify-center mb-4">
-          <ErrorIcon className="w-8 h-8 text-destructive" />
+        <div className="w-16 h-16 rounded-full bg-red-500/10 flex items-center justify-center mb-4">
+          <ErrorIcon className="w-8 h-8 text-red-400" />
         </div>
         <h2 className="text-lg font-semibold mb-2">Something went wrong</h2>
-        <p className="text-muted-foreground text-sm mb-4">{error}</p>
+        <p className="text-[#777] text-sm mb-4">{error}</p>
         <button
           onClick={() => {
             setError(null);
             setIsLoading(true);
             fetchFeed().finally(() => setIsLoading(false));
           }}
-          className="text-sm text-primary hover:underline"
+          className="text-sm text-blue-400 hover:underline"
         >
           Try again
         </button>
@@ -148,11 +148,13 @@ export function FollowingFeed({ refreshKey = 0 }: { refreshKey?: number }) {
   if (followingCount === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-20 text-center px-4">
-        <div className="w-16 h-16 rounded-full bg-secondary flex items-center justify-center mb-4">
-          <UsersIcon className="w-8 h-8 text-muted-foreground" />
+        <div className="w-16 h-16 rounded-full bg-[#1e1e1e] flex items-center justify-center mb-4">
+          <UsersIcon className="w-8 h-8 text-[#777]" />
         </div>
-        <h2 className="text-lg font-semibold mb-2">Start following people</h2>
-        <p className="text-muted-foreground text-sm">
+        <h2 className="text-lg font-semibold mb-2 text-white">
+          Start following people
+        </h2>
+        <p className="text-[#777] text-sm">
           When you follow someone, their posts will show up here.
           <br />
           Find people to follow in the search or explore the For You feed.
@@ -165,11 +167,11 @@ export function FollowingFeed({ refreshKey = 0 }: { refreshKey?: number }) {
   if (threads.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-20 text-center px-4">
-        <div className="w-16 h-16 rounded-full bg-secondary flex items-center justify-center mb-4">
-          <EmptyIcon className="w-8 h-8 text-muted-foreground" />
+        <div className="w-16 h-16 rounded-full bg-[#1e1e1e] flex items-center justify-center mb-4">
+          <EmptyIcon className="w-8 h-8 text-[#777]" />
         </div>
-        <h2 className="text-lg font-semibold mb-2">No posts yet</h2>
-        <p className="text-muted-foreground text-sm">
+        <h2 className="text-lg font-semibold mb-2 text-white">No posts yet</h2>
+        <p className="text-[#777] text-sm">
           People you follow haven&apos;t posted anything yet.
           <br />
           Check back later!
@@ -179,7 +181,7 @@ export function FollowingFeed({ refreshKey = 0 }: { refreshKey?: number }) {
   }
 
   return (
-    <div className="divide-y divide-border">
+    <div>
       {threads.map((thread) => (
         <ThreadCard key={thread.$id} thread={thread} />
       ))}
@@ -188,11 +190,11 @@ export function FollowingFeed({ refreshKey = 0 }: { refreshKey?: number }) {
       <div ref={loadMoreRef} className="py-4">
         {isLoadingMore && (
           <div className="flex justify-center">
-            <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary" />
+            <ThreadsSpinner size="md" className="text-[#555]" />
           </div>
         )}
         {!hasMore && threads.length > 0 && (
-          <p className="text-center text-sm text-muted-foreground py-4">
+          <p className="text-center text-sm text-[#777] py-4">
             You&apos;re all caught up!
           </p>
         )}

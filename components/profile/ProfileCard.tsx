@@ -11,6 +11,7 @@ import { UserProfile } from '@/types/appwrite';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { EditProfileForm } from './EditProfileForm';
+import { FollowListModal } from './FollowListModal';
 import { getSessionToken } from '@/lib/appwriteClient';
 
 interface ProfileCardProps {
@@ -31,6 +32,8 @@ export function ProfileCard({
   const [followingCount, setFollowingCount] = useState(0);
   const [isFollowLoading, setIsFollowLoading] = useState(false);
   const [followStatusLoaded, setFollowStatusLoaded] = useState(false);
+  const [followModalOpen, setFollowModalOpen] = useState(false);
+  const [followModalTab, setFollowModalTab] = useState<'followers' | 'following'>('followers');
 
   const fetchFollowStatus = useCallback(async () => {
     try {
@@ -182,14 +185,14 @@ export function ProfileCard({
       <div className="flex items-start justify-between gap-4">
         {/* Left: Name and username */}
         <div className="flex-1 min-w-0">
-          <h1 className="text-2xl font-bold text-foreground truncate">
+          <h1 className="text-xl sm:text-2xl font-bold text-foreground truncate tracking-[-0.03em] leading-tight">
             {profile.displayName}
           </h1>
-          <p className="text-base text-muted-foreground">@{profile.username}</p>
+          <p className="text-[15px] text-muted-foreground leading-tight mt-0.5">@{profile.username}</p>
         </div>
 
         {/* Right: Avatar */}
-        <Avatar className="w-20 h-20 shrink-0 ring-2 ring-border">
+        <Avatar className="w-16 h-16 sm:w-20 sm:h-20 shrink-0 ring-2 ring-border">
           <AvatarImage
             src={profile.avatarUrl}
             alt={profile.displayName}
@@ -210,26 +213,38 @@ export function ProfileCard({
 
       {/* Bio */}
       {profile.bio && (
-        <p className="mt-3 text-sm text-foreground/90 leading-relaxed">
+        <p className="mt-3 text-[15px] text-foreground/90 leading-[1.45]">
           {profile.bio}
         </p>
       )}
 
-      {/* Followers/Following stats */}
+      {/* Followers/Following stats - clickable */}
       {followStatusLoaded && (
-        <div className="flex items-center gap-4 mt-3 text-sm text-muted-foreground">
-          <span>
+        <div className="flex items-center gap-4 mt-2 text-[15px] text-muted-foreground">
+          <button
+            onClick={() => {
+              setFollowModalTab('followers');
+              setFollowModalOpen(true);
+            }}
+            className="hover:underline transition-colors"
+          >
             <span className="font-semibold text-foreground">
               {followersCount}
             </span>{' '}
             followers
-          </span>
-          <span>
+          </button>
+          <button
+            onClick={() => {
+              setFollowModalTab('following');
+              setFollowModalOpen(true);
+            }}
+            className="hover:underline transition-colors"
+          >
             <span className="font-semibold text-foreground">
               {followingCount}
             </span>{' '}
             following
-          </span>
+          </button>
         </div>
       )}
 
@@ -238,7 +253,7 @@ export function ProfileCard({
         <Button
           onClick={() => setIsEditing(true)}
           variant="outline"
-          className="w-full mt-4 h-10 text-sm font-medium border-border hover:bg-secondary"
+          className="w-full mt-4 h-10 text-[15px] font-semibold border-border hover:bg-secondary tracking-[-0.01em]"
         >
           Edit profile
         </Button>
@@ -246,7 +261,7 @@ export function ProfileCard({
         <Button
           onClick={handleFollowClick}
           variant={isFollowing ? 'outline' : 'default'}
-          className={`w-full mt-4 h-10 text-sm font-medium ${
+          className={`w-full mt-4 h-10 text-[15px] font-semibold tracking-[-0.01em] ${
             isFollowing ? 'border-border hover:bg-secondary' : ''
           } ${isFollowLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
           disabled={isFollowLoading}
@@ -278,6 +293,16 @@ export function ProfileCard({
           )}
         </Button>
       )}
+
+      {/* Follow List Modal */}
+      <FollowListModal
+        isOpen={followModalOpen}
+        onClose={() => setFollowModalOpen(false)}
+        userId={profile.userId}
+        initialTab={followModalTab}
+        followersCount={followersCount}
+        followingCount={followingCount}
+      />
     </div>
   );
 }

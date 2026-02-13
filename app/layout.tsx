@@ -1,15 +1,10 @@
 import type { Metadata, Viewport } from 'next';
-import { Inter } from 'next/font/google';
 import './globals.css';
 import { BottomNav } from '@/components/layout/BottomNav';
 import { DesktopSidebar } from '@/components/layout/DesktopSidebar';
 import { FloatingCreateButton } from '@/components/layout/FloatingCreateButton';
-
-const inter = Inter({
-  variable: '--font-inter',
-  subsets: ['latin'],
-  display: 'swap',
-});
+import { MobileTopNav } from '@/components/layout/MobileTopNav';
+import { MultiColumnLayout } from '@/components/layout/MultiColumnLayout';
 
 export const metadata: Metadata = {
   title: 'Threads',
@@ -38,15 +33,25 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className="dark">
-      <body className={`${inter.variable} antialiased`}>
+      <body className="antialiased">
         {/* Desktop Left Sidebar - visible on lg+ */}
         <DesktopSidebar />
 
-        {/* Main Content Area */}
-        <main className="pb-20 lg:pb-0 lg:pl-19">{children}</main>
+        {/* Global Mobile Header - logo + menu, visible on mobile only */}
+        <MobileTopNav />
+
+        {/* Main Content Area - responsive padding for sidebar offsets */}
+        <main className="pb-20 lg:pb-0 lg:pl-[76px] lg:h-screen lg:overflow-hidden">
+          <MultiColumnLayout>{children}</MultiColumnLayout>
+        </main>
 
         {/* Floating Create Button - visible on lg+ */}
         <FloatingCreateButton />
+
+        {/* Desktop Bottom Bar — authentic Threads line at viewport bottom */}
+        <div className="hidden lg:block fixed bottom-0 left-[76px] right-0 z-40 pointer-events-none">
+          <div className="h-px bg-white/[0.06]" />
+        </div>
 
         {/* Mobile Bottom Navigation - hidden on lg+ */}
         <BottomNav />

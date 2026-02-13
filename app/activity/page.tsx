@@ -11,7 +11,7 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { AuthGuard } from '@/components/auth/AuthGuard';
-import { ActivityListSkeleton } from '@/components/ui/skeletons';
+import { ActivityListSkeleton } from '@/components/skeletons';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { formatDistanceToNow } from 'date-fns';
 import { NotificationWithActor, NotificationType } from '@/types/appwrite';
@@ -78,7 +78,9 @@ export default function ActivityPage() {
   const [activeTab, setActiveTab] = useState<TabType>('all');
   const [unreadCount, setUnreadCount] = useState(0);
   const [showDropdown, setShowDropdown] = useState(false);
+  const [showMobileDropdown, setShowMobileDropdown] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const mobileDropdownRef = useRef<HTMLDivElement>(null);
 
   const tabs: { id: TabType; label: string }[] = [
     { id: 'all', label: 'All' },
@@ -96,6 +98,12 @@ export default function ActivityPage() {
         !dropdownRef.current.contains(event.target as Node)
       ) {
         setShowDropdown(false);
+      }
+      if (
+        mobileDropdownRef.current &&
+        !mobileDropdownRef.current.contains(event.target as Node)
+      ) {
+        setShowMobileDropdown(false);
       }
     }
     document.addEventListener('mousedown', handleClickOutside);
@@ -118,11 +126,11 @@ export default function ActivityPage() {
 
   return (
     <AuthGuard>
-      <div className="min-h-screen bg-background pb-20 lg:pb-0">
+      <div className="min-h-screen bg-black pb-20 lg:pb-0">
         {/* Desktop Content Container - Fixed height with internal scroll */}
-        <div className="hidden lg:flex lg:flex-col max-w-160 mx-auto lg:pl-6 lg:pr-4 h-screen overflow-hidden">
+        <div className="hidden lg:flex lg:flex-col max-w-[640px] mx-auto h-screen overflow-hidden">
           {/* Fixed Header - Outside bordered area */}
-          <div className="shrink-0 bg-background pt-6 pb-2">
+          <div className="shrink-0 bg-black pt-6 pb-2">
             <div
               className="flex items-center justify-center h-12 px-4 relative"
               ref={dropdownRef}
@@ -133,26 +141,26 @@ export default function ActivityPage() {
                 className="flex items-center gap-1.5 text-[15px] font-medium hover:opacity-80 transition-opacity"
               >
                 {tabs.find((t) => t.id === activeTab)?.label || 'Activity'}
-                <ChevronDownIcon className="w-4 h-4 text-muted-foreground" />
+                <ChevronDownIcon className="w-4 h-4 text-[#777]" />
               </button>
 
               {/* More button */}
-              <button className="absolute right-4 p-2 rounded-full hover:bg-secondary/50 transition-colors -mr-2">
-                <MoreHorizontalIcon className="w-5 h-5 text-muted-foreground" />
+              <button className="absolute right-4 p-2 rounded-full hover:bg-white/[0.06] transition-colors -mr-2">
+                <MoreHorizontalIcon className="w-5 h-5 text-[#777]" />
               </button>
 
               {/* Dropdown Menu */}
               {showDropdown && (
-                <div className="absolute top-full left-1/2 -translate-x-1/2 mt-2 w-48 bg-[#181818] border border-border/50 rounded-2xl shadow-xl overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200 z-50">
+                <div className="absolute top-full left-1/2 -translate-x-1/2 mt-2 w-48 bg-[#181818] border border-white/[0.12] rounded-2xl shadow-xl overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200 z-50">
                   <div className="py-2">
                     {tabs.map((tab) => (
                       <button
                         key={tab.id}
                         onClick={() => handleTabChange(tab.id)}
-                        className="w-full flex items-center justify-between px-4 py-2.5 hover:bg-secondary/50 transition-colors"
+                        className="w-full flex items-center justify-between px-4 py-2.5 hover:bg-white/[0.06] transition-colors"
                       >
                         <span
-                          className={`text-[15px] ${activeTab === tab.id ? 'font-medium' : ''}`}
+                          className={`text-[15px] text-white ${activeTab === tab.id ? 'font-medium' : ''}`}
                         >
                           {tab.label}
                         </span>
@@ -168,9 +176,9 @@ export default function ActivityPage() {
           </div>
 
           {/* Content wrapper with border and rounded corners - scrollable area contained */}
-          <div className="border border-border/30 rounded-t-2xl flex-1 min-h-0 overflow-y-auto bg-[#181818] [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+          <div className="border border-white/[0.08] rounded-t-2xl flex-1 min-h-0 overflow-y-auto bg-[#181818] [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
             {/* Desktop Content */}
-            <div className="px-4 py-4">
+            <div className="px-2 py-1">
               <NotificationsList
                 key={activeTab}
                 type={
@@ -190,46 +198,61 @@ export default function ActivityPage() {
           </div>
         </div>
 
-        {/* Mobile Header with tabs */}
-        <div className="lg:hidden sticky top-0 z-40 bg-background border-b border-border/30">
-          <div className="max-w-160 mx-auto px-4">
-            {/* Title with mark all read */}
-            <div className="py-3 flex items-center justify-between">
-              <h1 className="text-lg font-semibold">Activity</h1>
+        {/* Mobile Header with dropdown */}
+        <div className="lg:hidden sticky top-14 z-30 bg-black border-b border-white/[0.08]">
+          <div className="max-w-[640px] mx-auto px-4" ref={mobileDropdownRef}>
+            <div className="py-3 flex items-center justify-center relative">
+              {/* Activity dropdown trigger */}
+              <button
+                onClick={() => setShowMobileDropdown(!showMobileDropdown)}
+                className="flex items-center gap-1.5 text-[15px] font-medium hover:opacity-80 transition-opacity"
+              >
+                {tabs.find((t) => t.id === activeTab)?.label || 'Activity'}
+                <ChevronDownIcon className="w-4 h-4 text-[#777]" />
+              </button>
+
+              {/* Mark all read */}
               {unreadCount > 0 && (
                 <button
                   onClick={handleMarkAllRead}
-                  className="text-sm text-primary hover:underline"
+                  className="absolute right-0 p-2 rounded-full hover:bg-white/[0.06] transition-colors"
                 >
-                  Mark all as read
+                  <MoreHorizontalIcon className="w-5 h-5 text-[#777]" />
                 </button>
               )}
-            </div>
 
-            {/* Tabs - scrollable on mobile */}
-            <div className="flex gap-1 overflow-x-auto no-scrollbar -mx-4 px-4">
-              {tabs.map((tab) => (
-                <button
-                  key={tab.id}
-                  onClick={() => setActiveTab(tab.id)}
-                  className={`shrink-0 py-3 px-4 text-sm font-medium transition-colors relative ${
-                    activeTab === tab.id
-                      ? 'text-foreground'
-                      : 'text-muted-foreground hover:text-foreground'
-                  }`}
-                >
-                  {tab.label}
-                  {activeTab === tab.id && (
-                    <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-foreground rounded-full" />
-                  )}
-                </button>
-              ))}
+              {/* Dropdown Menu */}
+              {showMobileDropdown && (
+                <div className="absolute top-full left-1/2 -translate-x-1/2 mt-2 w-48 bg-[#181818] border border-white/[0.12] rounded-2xl shadow-xl overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200 z-50">
+                  <div className="py-2">
+                    {tabs.map((tab) => (
+                      <button
+                        key={tab.id}
+                        onClick={() => {
+                          setActiveTab(tab.id);
+                          setShowMobileDropdown(false);
+                        }}
+                        className="w-full flex items-center justify-between px-4 py-2.5 hover:bg-white/[0.06] transition-colors"
+                      >
+                        <span
+                          className={`text-[15px] text-white ${activeTab === tab.id ? 'font-medium' : ''}`}
+                        >
+                          {tab.label}
+                        </span>
+                        {activeTab === tab.id && (
+                          <CheckIcon className="w-5 h-5" />
+                        )}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </div>
 
         {/* Mobile Content */}
-        <div className="lg:hidden max-w-160 mx-auto px-4 py-4">
+        <div className="lg:hidden max-w-[640px] mx-auto px-2 py-1">
           <NotificationsList
             key={`mobile-${activeTab}`}
             type={
@@ -354,14 +377,16 @@ function NotificationsList({
   if (error) {
     return (
       <div className="flex flex-col items-center justify-center py-16 text-center">
-        <div className="w-16 h-16 rounded-full bg-destructive/10 flex items-center justify-center mb-4">
-          <BellIcon className="w-8 h-8 text-destructive" />
+        <div className="w-16 h-16 rounded-full bg-red-500/10 flex items-center justify-center mb-4">
+          <BellIcon className="w-8 h-8 text-red-400" />
         </div>
-        <h3 className="text-lg font-medium mb-1">Error loading activity</h3>
-        <p className="text-sm text-muted-foreground mb-4">{error}</p>
+        <h3 className="text-lg font-medium mb-1 text-white">
+          Error loading activity
+        </h3>
+        <p className="text-sm text-[#777] mb-4">{error}</p>
         <button
           onClick={() => loadNotifications()}
-          className="px-4 py-2 text-sm font-medium rounded-lg bg-primary text-primary-foreground hover:bg-primary/90"
+          className="px-4 py-2 text-sm font-medium rounded-lg bg-white text-black hover:bg-white/90"
         >
           Try again
         </button>
@@ -372,11 +397,13 @@ function NotificationsList({
   if (notifications.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-16 text-center">
-        <div className="w-16 h-16 rounded-full bg-secondary flex items-center justify-center mb-4">
-          <BellIcon className="w-8 h-8 text-muted-foreground" />
+        <div className="w-16 h-16 rounded-full bg-[#1e1e1e] flex items-center justify-center mb-4">
+          <BellIcon className="w-8 h-8 text-[#777]" />
         </div>
-        <h3 className="text-lg font-medium mb-1">{getEmptyMessage()}</h3>
-        <p className="text-sm text-muted-foreground">
+        <h3 className="text-lg font-medium mb-1 text-white">
+          {getEmptyMessage()}
+        </h3>
+        <p className="text-sm text-[#777]">
           When there&apos;s activity, you&apos;ll see it here
         </p>
       </div>
@@ -384,13 +411,19 @@ function NotificationsList({
   }
 
   return (
-    <div className="space-y-1">
-      {notifications.map((notification) => (
-        <NotificationItem
-          key={notification.$id}
-          notification={notification}
-          onClick={() => handleNotificationClick(notification)}
-        />
+    <div>
+      {notifications.map((notification, index) => (
+        <div key={notification.$id}>
+          {index > 0 && (
+            <div className="mx-3">
+              <div className="border-t border-white/[0.08]" />
+            </div>
+          )}
+          <NotificationItem
+            notification={notification}
+            onClick={() => handleNotificationClick(notification)}
+          />
+        </div>
       ))}
 
       {hasMore && (
@@ -398,7 +431,7 @@ function NotificationsList({
           <button
             onClick={() => loadNotifications(nextCursor || undefined)}
             disabled={isLoadingMore}
-            className="px-6 py-2 text-sm font-medium rounded-lg bg-secondary hover:bg-secondary/80 transition-colors disabled:opacity-50"
+            className="px-6 py-2 text-sm font-medium rounded-lg bg-[#1e1e1e] hover:bg-[#252525] transition-colors disabled:opacity-50 text-white"
           >
             {isLoadingMore ? 'Loading...' : 'Load more'}
           </button>
@@ -436,20 +469,20 @@ function NotificationItem({ notification, onClick }: NotificationItemProps) {
   return (
     <button
       onClick={onClick}
-      className={`w-full flex items-start gap-3 p-3 rounded-xl hover:bg-secondary/50 transition-colors text-left ${
-        !notification.read ? 'bg-primary/5' : ''
+      className={`w-full flex items-start gap-3 p-3 rounded-xl hover:bg-white/[0.06] transition-colors text-left ${
+        !notification.read ? 'bg-blue-500/5' : ''
       }`}
     >
       {/* Avatar with type indicator */}
       <div className="relative shrink-0">
-        <Avatar className="w-11 h-11">
+        <Avatar className="w-9 h-9 sm:w-11 sm:h-11">
           <AvatarImage src={actor?.avatarUrl || undefined} alt={actorName} />
-          <AvatarFallback className="bg-linear-to-br from-primary to-accent text-white font-medium">
+          <AvatarFallback className="bg-linear-to-br from-primary to-accent text-white font-medium text-xs sm:text-sm">
             {actorInitial}
           </AvatarFallback>
         </Avatar>
         <div
-          className={`absolute -bottom-0.5 -right-0.5 w-5 h-5 rounded-full flex items-center justify-center ${getActivityIconBg(
+          className={`absolute -bottom-0.5 -right-0.5 w-4 h-4 sm:w-5 sm:h-5 rounded-full flex items-center justify-center ${getActivityIconBg(
             notification.type,
           )}`}
         >
@@ -457,33 +490,33 @@ function NotificationItem({ notification, onClick }: NotificationItemProps) {
         </div>
         {/* Unread indicator */}
         {!notification.read && (
-          <div className="absolute -top-0.5 -left-0.5 w-2.5 h-2.5 rounded-full bg-primary" />
+          <div className="absolute -top-0.5 -left-0.5 w-2.5 h-2.5 rounded-full bg-blue-500" />
         )}
       </div>
 
       {/* Content */}
       <div className="flex-1 min-w-0">
-        <p className="text-sm">
+        <p className="text-[15px] leading-tight">
           <Link
             href={`/profile/${notification.actorId}`}
             onClick={(e) => e.stopPropagation()}
-            className="font-semibold hover:underline"
+            className="font-semibold hover:underline tracking-[-0.02em]"
           >
             {actorName}
           </Link>{' '}
-          <span className="text-muted-foreground">{getActionText()}</span>
+          <span className="text-[#777]">{getActionText()}</span>
         </p>
         {notification.message && (
-          <p className="text-sm text-muted-foreground truncate mt-0.5">
+          <p className="text-[14px] text-[#777] truncate mt-0.5">
             {notification.message}
           </p>
         )}
         {notification.thread && (
-          <p className="text-sm text-muted-foreground truncate mt-0.5">
+          <p className="text-[14px] text-[#777] truncate mt-0.5">
             {notification.thread.content?.slice(0, 100)}
           </p>
         )}
-        <p className="text-xs text-muted-foreground mt-1">
+        <p className="text-[13px] text-[#555] mt-1">
           {formatDistanceToNow(new Date(notification.createdAt), {
             addSuffix: true,
           })}
@@ -495,7 +528,7 @@ function NotificationItem({ notification, onClick }: NotificationItemProps) {
         <Link
           href={`/profile/${notification.actorId}`}
           onClick={(e) => e.stopPropagation()}
-          className="shrink-0 px-4 py-1.5 text-sm font-medium rounded-lg bg-secondary hover:bg-secondary/80 transition-colors"
+          className="shrink-0 px-4 py-1.5 text-[14px] font-semibold rounded-lg bg-[#1e1e1e] hover:bg-[#252525] transition-colors text-white"
         >
           View
         </Link>
@@ -520,7 +553,7 @@ function getActivityIconBg(type: NotificationType) {
 }
 
 function getActivityIcon(type: NotificationType) {
-  const iconClass = 'w-3 h-3 text-white';
+  const iconClass = 'w-2.5 h-2.5 sm:w-3 sm:h-3 text-white';
   switch (type) {
     case 'like':
       return <HeartIcon className={iconClass} />;
@@ -670,13 +703,4 @@ function CheckIcon({ className }: { className?: string }) {
   );
 }
 
-function EmptyState({ message }: { message: string }) {
-  return (
-    <div className="flex flex-col items-center justify-center py-20 text-center">
-      <div className="w-16 h-16 rounded-full bg-secondary flex items-center justify-center mb-4">
-        <BellIcon className="w-8 h-8 text-muted-foreground" />
-      </div>
-      <p className="text-muted-foreground">{message}</p>
-    </div>
-  );
-}
+

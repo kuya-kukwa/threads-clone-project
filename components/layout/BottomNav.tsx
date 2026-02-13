@@ -26,6 +26,13 @@ import {
 } from 'react';
 import { logger } from '@/lib/logger/logger';
 import { getSessionToken } from '@/lib/appwriteClient';
+import {
+  HomeIcon,
+  SearchIcon,
+  CreateIcon,
+  ActivityIcon,
+  ProfileIcon,
+} from '@/components/icons/ThreadsIcons';
 
 interface NavItem {
   id: string;
@@ -43,10 +50,10 @@ const navItems: NavItem[] = [
     icon: HomeIcon,
   },
   {
-    id: 'messages',
-    label: 'Messages',
-    href: '/messages',
-    icon: MessagesIcon,
+    id: 'search',
+    label: 'Search',
+    href: '/search',
+    icon: SearchIcon,
   },
   {
     id: 'create',
@@ -138,7 +145,16 @@ export function BottomNav() {
   }, []);
 
   // Handle scroll to show/hide nav
+  // Keep nav always visible on /create to prevent gap with audience bar
+  const isCreatePage = pathname === '/create';
+
   useEffect(() => {
+    // On /create page, always keep nav visible — no scroll-based hiding
+    if (isCreatePage) {
+      setIsVisible(true);
+      return;
+    }
+
     const handleScroll = () => {
       if (!ticking.current) {
         window.requestAnimationFrame(() => {
@@ -163,7 +179,7 @@ export function BottomNav() {
 
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
+  }, [isCreatePage]);
 
   // Don't show on auth pages or while loading
   if (
@@ -194,8 +210,8 @@ export function BottomNav() {
     if (item.id === 'profile') {
       return pathname.startsWith('/profile');
     }
-    if (item.id === 'messages') {
-      return pathname.startsWith('/messages');
+    if (item.id === 'search') {
+      return pathname.startsWith('/search');
     }
     if (item.id === 'activity') {
       return pathname.startsWith('/activity');
@@ -209,8 +225,7 @@ export function BottomNav() {
         isVisible && !isModalOpen ? 'translate-y-0' : 'translate-y-full'
       }`}
     >
-      {/* Solid opaque background */}
-      <div className="bg-black border-t border-border/30">
+      <div className="bg-black/95 backdrop-blur-xl border-t border-white/[0.08]">
         <div
           className="flex items-center justify-around px-1"
           style={{ paddingBottom: 'max(0.5rem, env(safe-area-inset-bottom))' }}
@@ -220,16 +235,16 @@ export function BottomNav() {
             const href = getHref(item);
             const Icon = item.icon;
 
-            // Create button - Threads style (outlined square icon, same grey as others)
+            // Create button - subtle outlined square
             if (item.isCreate) {
               return (
                 <Link
                   key={item.id}
                   href={href}
-                  className="flex items-center justify-center min-w-14 py-3 px-2 rounded-xl transition-all duration-200 text-[#B8B8B8] hover:text-white"
+                  className="flex items-center justify-center min-w-[52px] py-2.5 px-2 rounded-xl transition-all duration-200 text-[#4d4d4d] active:scale-90"
                   aria-label="Create new post"
                 >
-                  <Icon className="w-7 h-7" />
+                  <Icon className="w-[26px] h-[26px]" />
                 </Link>
               );
             }
@@ -238,17 +253,16 @@ export function BottomNav() {
               <Link
                 key={item.id}
                 href={href}
-                className={`flex items-center justify-center min-w-14 py-3 px-2 rounded-xl transition-all duration-200 ${
-                  active ? 'text-white' : 'text-[#B8B8B8] hover:text-white'
+                className={`flex items-center justify-center min-w-[52px] py-2.5 px-2 rounded-xl transition-all duration-200 active:scale-90 ${
+                  active ? 'text-white' : 'text-[#4d4d4d]'
                 }`}
                 aria-label={item.label}
                 aria-current={active ? 'page' : undefined}
               >
                 <div className="relative">
-                  <Icon className="w-7 h-7" active={active} />
-                  {/* Notification badge for Activity tab */}
+                  <Icon className="w-[26px] h-[26px]" active={active} />
                   {item.id === 'activity' && unreadCount > 0 && (
-                    <span className="absolute -top-1 -right-1 min-w-4 h-4 px-1 flex items-center justify-center text-[10px] font-bold text-white bg-red-500 rounded-full">
+                    <span className="absolute -top-1 -right-1.5 min-w-[16px] h-[16px] px-1 flex items-center justify-center text-[9px] font-semibold text-white bg-[#ff3040] rounded-full">
                       {unreadCount > 99 ? '99+' : unreadCount}
                     </span>
                   )}
@@ -259,135 +273,5 @@ export function BottomNav() {
         </div>
       </div>
     </nav>
-  );
-}
-
-// Icon Components with active state support
-
-function HomeIcon({
-  className = '',
-  active = false,
-}: {
-  className?: string;
-  active?: boolean;
-}) {
-  return active ? (
-    <svg className={className} viewBox="0 0 24 24" fill="currentColor">
-      <path d="M9.005 16.545a2.997 2.997 0 0 1 2.997-2.997A2.997 2.997 0 0 1 15 16.545V22h7V11.543L12 2 2 11.543V22h7.005Z" />
-    </svg>
-  ) : (
-    <svg
-      className={className}
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth={1.75}
-    >
-      <path
-        d="M9.005 16.545a2.997 2.997 0 0 1 2.997-2.997A2.997 2.997 0 0 1 15 16.545V22h7V11.543L12 2 2 11.543V22h7.005Z"
-        strokeLinejoin="round"
-      />
-    </svg>
-  );
-}
-
-function MessagesIcon({
-  className = '',
-  active = false,
-}: {
-  className?: string;
-  active?: boolean;
-}) {
-  return active ? (
-    <svg className={className} viewBox="0 0 24 24" fill="currentColor">
-      <path d="M12.003 1.131a10.487 10.487 0 0 0-10.87 10.497 10.44 10.44 0 0 0 3.476 7.764l.474 6.467a.5.5 0 0 0 .81.362l3.109-2.59a10.3 10.3 0 0 0 3.001.44 10.487 10.487 0 0 0 10.87-10.498A10.487 10.487 0 0 0 12.003 1.13Z" />
-    </svg>
-  ) : (
-    <svg
-      className={className}
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth={1.75}
-    >
-      <path
-        d="M12.003 2.001a9.705 9.705 0 1 1 0 19.4 10.15 10.15 0 0 1-2.839-.401l-3.1 2.59a.502.502 0 0 1-.814-.362l-.474-6.467A9.66 9.66 0 0 1 2.298 11.7a9.705 9.705 0 0 1 9.705-9.7Z"
-        strokeLinejoin="round"
-      />
-    </svg>
-  );
-}
-
-function CreateIcon({
-  className = '',
-}: {
-  className?: string;
-  active?: boolean;
-}) {
-  return (
-    <svg
-      className={className}
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth={1.75}
-    >
-      <path d="M12 8v8m-4-4h8" strokeLinecap="round" />
-      <rect x="3" y="3" width="18" height="18" rx="5" strokeLinecap="round" />
-    </svg>
-  );
-}
-
-function ActivityIcon({
-  className = '',
-  active = false,
-}: {
-  className?: string;
-  active?: boolean;
-}) {
-  return active ? (
-    <svg className={className} viewBox="0 0 24 24" fill="currentColor">
-      <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
-    </svg>
-  ) : (
-    <svg
-      className={className}
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth={1.75}
-    >
-      <path
-        d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-  );
-}
-
-function ProfileIcon({
-  className = '',
-  active = false,
-}: {
-  className?: string;
-  active?: boolean;
-}) {
-  return active ? (
-    <svg className={className} viewBox="0 0 24 24" fill="currentColor">
-      <circle cx="12" cy="8" r="4.5" />
-      <path d="M20 21a8 8 0 1 0-16 0Z" />
-    </svg>
-  ) : (
-    <svg
-      className={className}
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth={1.75}
-    >
-      <circle cx="12" cy="8" r="4" />
-      <path d="M20 21a8 8 0 1 0-16 0" strokeLinecap="round" />
-    </svg>
   );
 }

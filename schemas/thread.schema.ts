@@ -38,15 +38,41 @@ export const threadCreateSchema = z.object({
     .string()
     .max(200, 'Alt text cannot exceed 200 characters')
     .optional(),
+
+  topic: z
+    .string()
+    .max(50, 'Topic cannot exceed 50 characters')
+    .optional(),
+
+  location: z
+    .string()
+    .max(100, 'Location cannot exceed 100 characters')
+    .optional(),
+
+  audience: z
+    .enum(['anyone', 'followers', 'mentioned'])
+    .optional()
+    .default('anyone'),
+
+  // Multi-media array (new format) — passthrough so refine can check it
+  media: z
+    .array(z.object({
+      id: z.string(),
+      url: z.string(),
+      type: z.enum(['image', 'video']),
+      altText: z.string().optional(),
+    }))
+    .optional(),
 }).refine(
   (data) => {
-    // At least one of content or imageId must be provided
+    // At least one of content, imageId, or media must be provided
     const hasContent = data.content && data.content.trim().length > 0;
     const hasImage = data.imageId && data.imageId.trim().length > 0;
-    return hasContent || hasImage;
+    const hasMedia = data.media && data.media.length > 0;
+    return hasContent || hasImage || hasMedia;
   },
   {
-    message: 'Thread must have either text content or an image',
+    message: 'Thread must have either text content or media',
     path: ['content'], // Associate error with content field
   }
 );

@@ -59,7 +59,10 @@ export async function createThread(
   authorId: string,
   content: string,
   imageId?: string,
-  altText?: string
+  altText?: string,
+  topic?: string,
+  location?: string,
+  audience?: string
 ): Promise<Thread> {
   try {
     // Validate input - schema now allows empty content if imageId is present
@@ -88,25 +91,55 @@ export async function createThread(
     // Generate image URL if imageId is provided and not empty
     const imageUrl = (imageId && imageId.trim()) ? getImagePreviewUrl(imageId) : '';
 
+    // Sanitize topic and location
+    const sanitizedTopic = topic ? sanitizeInput(topic, 50) : '';
+    const sanitizedLocation = location ? sanitizeInput(location, 100) : '';
+    const sanitizedAudience = audience && ['anyone', 'followers', 'mentioned'].includes(audience) ? audience : 'anyone';
+
     // Create thread document
     // Note: replyToUsername may not exist in older databases, so we don't include it for new threads
-    const thread = await serverDatabases.createDocument<Thread>(
-      APPWRITE_CONFIG.DATABASE_ID,
-      APPWRITE_CONFIG.COLLECTIONS.THREADS,
-      ID.unique(),
-      {
-        authorId,
-        content: sanitizedContent,
-        imageId: imageId || '',
-        imageUrl: imageUrl || '',
-        altText: sanitizedAltText || '',
-        parentThreadId: '', // For future reply feature
-        replyCount: 0,
-        likeCount: 0,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const docData: any = {
+      authorId,
+      content: sanitizedContent,
+      imageId: imageId || '',
+      imageUrl: imageUrl || '',
+      altText: sanitizedAltText || '',
+      topic: sanitizedTopic,
+      location: sanitizedLocation,
+      audience: sanitizedAudience,
+      parentThreadId: '', // For future reply feature
+      replyCount: 0,
+      likeCount: 0,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+
+    let thread: Thread;
+    try {
+      thread = await serverDatabases.createDocument<Thread>(
+        APPWRITE_CONFIG.DATABASE_ID,
+        APPWRITE_CONFIG.COLLECTIONS.THREADS,
+        ID.unique(),
+        docData
+      );
+    } catch (docError: unknown) {
+      // If the error is due to unknown 'audience' attribute (not yet migrated),
+      // retry without it. Run: node scripts/addAudienceAttribute.mjs
+      const errMsg = docError instanceof Error ? docError.message : String(docError);
+      if (errMsg.toLowerCase().includes('audience') || (docError && typeof docError === 'object' && 'code' in docError && (docError as { code: number }).code === 400)) {
+        logger.warn({ msg: 'Retrying thread creation without audience field (attribute may not exist)' });
+        const { audience: _, ...fallbackData } = docData;
+        thread = await serverDatabases.createDocument<Thread>(
+          APPWRITE_CONFIG.DATABASE_ID,
+          APPWRITE_CONFIG.COLLECTIONS.THREADS,
+          ID.unique(),
+          fallbackData
+        );
+      } else {
+        throw docError;
       }
-    );
+    }
 
     logger.info({
       msg: 'Thread created successfully',
@@ -141,7 +174,10 @@ export async function createThread(
 export async function createThreadWithMedia(
   authorId: string,
   content: string,
-  media?: MediaItem[]
+  media?: MediaItem[],
+  topic?: string,
+  location?: string,
+  audience?: string
 ): Promise<Thread> {
   try {
     // Determine if we have content or media
@@ -195,31 +231,63 @@ export async function createThreadWithMedia(
       }
     }
 
+    // Sanitize topic and location
+    const sanitizedTopic = topic ? sanitizeInput(topic, 50) : '';
+    const sanitizedLocation = location ? sanitizeInput(location, 100) : '';
+    const sanitizedAudience = audience && ['anyone', 'followers', 'mentioned'].includes(audience) ? audience : 'anyone';
+
     // Create thread document
-    const thread = await serverDatabases.createDocument<Thread>(
-      APPWRITE_CONFIG.DATABASE_ID,
-      APPWRITE_CONFIG.COLLECTIONS.THREADS,
-      ID.unique(),
-      {
-        authorId,
-        content: sanitizedContent,
-        // Legacy single image fields (backward compatibility)
-        imageId,
-        imageUrl,
-        altText,
-        // New multi-media fields (JSON strings)
-        mediaIds,
-        mediaUrls,
-        mediaTypes,
-        mediaAltTexts,
-        // Other fields
-        parentThreadId: '',
-        replyCount: 0,
-        likeCount: 0,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const docData: any = {
+      authorId,
+      content: sanitizedContent,
+      // Legacy single image fields (backward compatibility)
+      imageId,
+      imageUrl,
+      altText,
+      // New multi-media fields (JSON strings)
+      mediaIds,
+      mediaUrls,
+      mediaTypes,
+      mediaAltTexts,
+      // Topic & Location metadata
+      topic: sanitizedTopic,
+      location: sanitizedLocation,
+      // Audience / visibility
+      audience: sanitizedAudience,
+      // Other fields
+      parentThreadId: '',
+      replyCount: 0,
+      likeCount: 0,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+
+    let thread: Thread;
+    try {
+      thread = await serverDatabases.createDocument<Thread>(
+        APPWRITE_CONFIG.DATABASE_ID,
+        APPWRITE_CONFIG.COLLECTIONS.THREADS,
+        ID.unique(),
+        docData
+      );
+    } catch (docError: unknown) {
+      // If the error is due to unknown 'audience' attribute (not yet migrated),
+      // retry without it. Run: node scripts/addAudienceAttribute.mjs
+      const errMsg = docError instanceof Error ? docError.message : String(docError);
+      if (errMsg.toLowerCase().includes('audience') || (docError && typeof docError === 'object' && 'code' in docError && (docError as { code: number }).code === 400)) {
+        logger.warn({ msg: 'Retrying thread with media creation without audience field (attribute may not exist)' });
+        const { audience: _, ...fallbackData } = docData;
+        thread = await serverDatabases.createDocument<Thread>(
+          APPWRITE_CONFIG.DATABASE_ID,
+          APPWRITE_CONFIG.COLLECTIONS.THREADS,
+          ID.unique(),
+          fallbackData
+        );
+      } else {
+        throw docError;
       }
-    );
+    }
 
     logger.info({
       msg: 'Thread with media created successfully',

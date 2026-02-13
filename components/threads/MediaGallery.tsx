@@ -35,7 +35,7 @@ export function SwipeableMediaGallery({
   // Two items - show side by side with equal width
   if (items.length === 2) {
     return (
-      <div className="flex gap-1">
+      <div className="flex gap-1.5 sm:gap-2">
         {items.map((item, index) => (
           <div
             key={item.id || index}
@@ -56,14 +56,15 @@ export function SwipeableMediaGallery({
   return (
     <div className="relative -mr-4 sm:mr-0">
       {/* Horizontal scrollable container */}
-      <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] snap-x snap-mandatory">
+      <div className="flex gap-1.5 sm:gap-2 overflow-x-auto pb-1 scrollbar-hide [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] snap-x snap-mandatory">
         {items.map((item, index) => (
           <div
             key={item.id || index}
-            className="shrink-0 snap-start last:pr-4 sm:last:pr-0 rounded-xl overflow-hidden"
-            style={{
-              width: items.length === 3 ? 'calc(55% - 4px)' : 'calc(50% - 4px)',
-            }}
+            className={`shrink-0 snap-start last:pr-4 sm:last:pr-0 rounded-xl overflow-hidden ${
+              items.length === 3
+                ? 'w-[60%] sm:w-[calc(55%-4px)]'
+                : 'w-[55%] sm:w-[calc(50%-4px)]'
+            }`}
           >
             <SingleMediaItem
               item={item}

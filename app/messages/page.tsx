@@ -16,16 +16,25 @@ export default function MessagesPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [showSearch, setShowSearch] = useState(false);
 
-  const tabs: { id: TabType; label: string }[] = [
-    { id: 'inbox', label: 'Inbox' },
-    { id: 'requests', label: 'Requests' },
-  ];
+
 
   return (
     <AuthGuard>
       <div className="min-h-screen bg-background pb-20 lg:pb-0">
+        {/* Mobile: Messages not available message */}
+        <div className="lg:hidden flex flex-col items-center justify-center min-h-[60vh] px-6 text-center">
+          <div className="w-16 h-16 rounded-full bg-secondary flex items-center justify-center mb-4">
+            <MessageIcon className="w-8 h-8 text-muted-foreground" />
+          </div>
+          <h2 className="text-xl font-semibold mb-2">Messages</h2>
+          <p className="text-sm text-muted-foreground max-w-xs">
+            Messaging is available on larger screens. Switch to a tablet or
+            desktop to access your messages.
+          </p>
+        </div>
+
         {/* Desktop Content Container - Fixed height with internal scroll */}
-        <div className="hidden lg:flex lg:flex-col max-w-160 mx-auto lg:pl-6 lg:pr-4 h-screen overflow-hidden">
+        <div className="hidden lg:flex lg:flex-col max-w-[640px] mx-auto h-screen overflow-hidden">
           {/* Fixed Header - Outside bordered area */}
           <div className="shrink-0 bg-background pt-6 pb-2">
             <div className="flex items-center justify-center h-12 px-4 relative">
@@ -97,84 +106,6 @@ export default function MessagesPage() {
                 <RequestsContent searchQuery={searchQuery} />
               )}
             </div>
-          </div>
-        </div>
-
-        {/* Mobile Layout */}
-        <div className="lg:hidden max-w-160 mx-auto">
-          {/* Mobile Header with search and filter */}
-          <div className="sticky top-0 z-40 bg-background">
-            <div className="px-4">
-              {/* Title row with icons */}
-              <div className="flex items-center justify-between py-3">
-                <h1 className="text-lg font-semibold">Messages</h1>
-                <div className="flex items-center gap-2">
-                  <button
-                    onClick={() => setShowSearch(!showSearch)}
-                    className="p-2 rounded-lg hover:bg-secondary transition-colors"
-                    aria-label="Search messages"
-                  >
-                    <SearchIcon className="w-5 h-5 text-muted-foreground" />
-                  </button>
-                  <button
-                    className="p-2 rounded-lg hover:bg-secondary transition-colors"
-                    aria-label="Filter messages"
-                  >
-                    <FilterIcon className="w-5 h-5 text-muted-foreground" />
-                  </button>
-                </div>
-              </div>
-
-              {/* Search bar - collapsible */}
-              {showSearch && (
-                <div className="pb-3">
-                  <div className="relative">
-                    <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                    <input
-                      type="text"
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                      placeholder="Search messages..."
-                      className="w-full bg-secondary border-0 rounded-lg pl-9 pr-4 py-2 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary"
-                    />
-                  </div>
-                </div>
-              )}
-
-              {/* Tabs */}
-              <div className="flex gap-1 border-b border-border/50">
-                {tabs.map((tab) => (
-                  <button
-                    key={tab.id}
-                    onClick={() => setActiveTab(tab.id)}
-                    className={`flex-1 py-3 text-sm font-medium transition-colors relative ${
-                      activeTab === tab.id
-                        ? 'text-foreground'
-                        : 'text-muted-foreground hover:text-foreground'
-                    }`}
-                  >
-                    {tab.label}
-                    {tab.id === 'requests' && (
-                      <span className="ml-1.5 px-1.5 py-0.5 text-xs bg-primary/20 text-primary rounded-full">
-                        3
-                      </span>
-                    )}
-                    {activeTab === tab.id && (
-                      <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-foreground rounded-full" />
-                    )}
-                  </button>
-                ))}
-              </div>
-            </div>
-          </div>
-
-          {/* Mobile Content */}
-          <div className="px-4 py-4">
-            {activeTab === 'inbox' ? (
-              <InboxContent searchQuery={searchQuery} />
-            ) : (
-              <RequestsContent searchQuery={searchQuery} />
-            )}
           </div>
         </div>
       </div>

@@ -30,3 +30,7 @@ export {
   useOptimisticFollow,
   useOptimisticPost 
 } from './useOptimisticMutation';
+
+// Column layout hooks
+export { useColumns, COLUMN_OPTIONS, getPageKey } from './useColumns';
+export type { Column, ColumnType, PageKey } from './useColumns';

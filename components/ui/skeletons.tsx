@@ -11,14 +11,14 @@ import { Skeleton } from '@/components/ui/skeleton';
  * Thread Card Skeleton
  * Matches the ThreadCard component layout
  */
-export function ThreadCardSkeleton() {
+export function ThreadCardSkeleton({ withMedia = false }: { withMedia?: boolean } = {}) {
   return (
     <div className="p-4 border-b border-border/50">
       <div className="flex gap-3">
         {/* Avatar */}
-        <Skeleton className="w-10 h-10 rounded-full flex-shrink-0" />
+        <Skeleton className="w-9 h-9 sm:w-10 sm:h-10 rounded-full flex-shrink-0" />
 
-        <div className="flex-1 space-y-3">
+        <div className="flex-1 min-w-0 space-y-2">
           {/* Header - name and time */}
           <div className="flex items-center gap-2">
             <Skeleton className="h-4 w-24" />
@@ -26,19 +26,23 @@ export function ThreadCardSkeleton() {
           </div>
 
           {/* Content lines */}
-          <div className="space-y-2">
+          <div className="space-y-1.5">
             <Skeleton className="h-4 w-full" />
             <Skeleton className="h-4 w-4/5" />
+            <Skeleton className="h-4 w-2/3" />
           </div>
 
-          {/* Media placeholder (randomly show or not) */}
-          <Skeleton className="h-48 w-full rounded-xl" />
+          {/* Media placeholder - only when requested */}
+          {withMedia && (
+            <Skeleton className="w-full aspect-video rounded-xl mt-2" />
+          )}
 
           {/* Action buttons */}
-          <div className="flex gap-4 pt-2">
-            <Skeleton className="h-8 w-16 rounded-lg" />
-            <Skeleton className="h-8 w-16 rounded-lg" />
-            <Skeleton className="h-8 w-16 rounded-lg" />
+          <div className="flex items-center gap-4 sm:gap-6 pt-1">
+            <Skeleton className="h-8 w-12" />
+            <Skeleton className="h-8 w-12" />
+            <Skeleton className="h-8 w-8" />
+            <Skeleton className="h-8 w-8" />
           </div>
         </div>
       </div>
@@ -75,10 +79,10 @@ export function ProfileCardSkeleton() {
       {/* Profile header */}
       <div className="flex items-start justify-between">
         <div className="flex-1 space-y-2">
-          <Skeleton className="h-6 w-32" />
-          <Skeleton className="h-4 w-24" />
+          <Skeleton className="h-6 w-28 sm:w-32" />
+          <Skeleton className="h-4 w-20 sm:w-24" />
         </div>
-        <Skeleton className="w-20 h-20 rounded-full" />
+        <Skeleton className="w-16 h-16 sm:w-20 sm:h-20 rounded-full" />
       </div>
 
       {/* Bio */}
@@ -108,22 +112,22 @@ export function ActivityItemSkeleton() {
     <div className="flex items-start gap-3 p-3 rounded-xl">
       {/* Avatar with indicator */}
       <div className="relative flex-shrink-0">
-        <Skeleton className="w-11 h-11 rounded-full" />
-        <Skeleton className="absolute -bottom-0.5 -right-0.5 w-5 h-5 rounded-full" />
+        <Skeleton className="w-10 h-10 sm:w-11 sm:h-11 rounded-full" />
+        <Skeleton className="absolute -bottom-0.5 -right-0.5 w-4 h-4 sm:w-5 sm:h-5 rounded-full" />
       </div>
 
       {/* Content */}
-      <div className="flex-1 space-y-2">
+      <div className="flex-1 min-w-0 space-y-2">
         <div className="flex gap-2">
           <Skeleton className="h-4 w-20" />
-          <Skeleton className="h-4 w-32" />
+          <Skeleton className="h-4 w-24 sm:w-32" />
         </div>
         <Skeleton className="h-3 w-full" />
         <Skeleton className="h-3 w-16" />
       </div>
 
       {/* Action button */}
-      <Skeleton className="h-8 w-16 rounded-lg flex-shrink-0" />
+      <Skeleton className="h-8 w-16 rounded-lg flex-shrink-0 hidden sm:block" />
     </div>
   );
 }
@@ -150,10 +154,11 @@ export function SearchResultSkeleton() {
 /**
  * Media Grid Skeleton
  * For the media tab in profiles
+ * Responsive: 2 cols on mobile, 3 on sm+
  */
 export function MediaGridSkeleton() {
   return (
-    <div className="grid grid-cols-3 gap-1">
+    <div className="grid grid-cols-2 sm:grid-cols-3 gap-1">
       {[...Array(9)].map((_, i) => (
         <Skeleton key={i} className="aspect-square rounded-lg" />
       ))}
@@ -164,12 +169,13 @@ export function MediaGridSkeleton() {
 /**
  * Feed Skeleton
  * Multiple thread cards for initial feed loading
+ * Alternates between text-only and media posts for realistic feel
  */
-export function FeedSkeleton({ count = 3 }: { count?: number }) {
+export function FeedSkeleton({ count = 5 }: { count?: number }) {
   return (
     <div>
       {[...Array(count)].map((_, i) => (
-        <ThreadCardSkeleton key={i} />
+        <ThreadCardSkeleton key={i} withMedia={i % 3 === 0} />
       ))}
     </div>
   );

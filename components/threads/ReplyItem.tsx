@@ -73,7 +73,7 @@ export function ReplyItem({
 
   return (
     <div
-      className={`p-4 hover:bg-secondary/30 transition-colors ${isNested ? 'ml-6' : ''}`}
+      className={`px-4 py-3 hover:bg-secondary/30 transition-colors ${isNested ? 'pl-10' : ''}`}
     >
       <div className="flex gap-3">
         {/* Author Avatar - Smaller for replies */}
@@ -85,27 +85,27 @@ export function ReplyItem({
         {/* Reply Content */}
         <div className="flex-1 min-w-0">
           {/* Header - TikTok style: username > repliedTo */}
-          <div className="flex items-center gap-1.5 mb-1 flex-wrap">
-            <span className="font-semibold text-sm truncate">
+          <div className="flex items-center gap-1.5 mb-0.5 flex-wrap">
+            <span className="font-semibold text-[15px] leading-tight tracking-[-0.02em] truncate">
               {author.displayName}
             </span>
             {replyingTo && (
               <>
-                <span className="text-xs text-muted-foreground">›</span>
-                <span className="text-xs text-primary font-medium">
+                <span className="text-[13px] text-muted-foreground">›</span>
+                <span className="text-[13px] text-primary font-medium">
                   @{replyingTo}
                 </span>
               </>
             )}
-            <span className="text-xs text-muted-foreground shrink-0">·</span>
-            <span className="text-xs text-muted-foreground shrink-0">
+            <span className="text-[13px] text-muted-foreground shrink-0">·</span>
+            <span className="text-[13px] text-muted-foreground shrink-0">
               {timeAgo}
             </span>
           </div>
 
           {/* Content Text */}
           {content && (
-            <p className="text-sm whitespace-pre-wrap wrap-break-word mb-2">
+            <p className="text-[15px] whitespace-pre-wrap wrap-break-word mb-2 leading-[1.45]">
               {content}
             </p>
           )}
@@ -114,14 +114,14 @@ export function ReplyItem({
           {imageUrl && imageUrl.trim().length > 0 && (
             <button
               onClick={() => setImageOpen(true)}
-              className="block mt-2 rounded-xl overflow-hidden border border-border/50 hover:border-border transition-colors max-w-sm"
+              className="block mt-2 rounded-xl overflow-hidden border border-border/50 hover:border-border transition-colors max-w-[280px] sm:max-w-sm"
             >
               <Image
                 src={imageUrl}
                 alt={reply.altText || 'Reply image'}
                 width={400}
                 height={400}
-                className="w-full h-auto object-cover"
+                className="w-full h-auto max-h-[200px] sm:max-h-[280px] object-cover"
                 unoptimized
               />
             </button>
@@ -129,12 +129,12 @@ export function ReplyItem({
 
           {/* Actions - like and reply */}
           <div className="flex items-center gap-4 mt-2">
-            <button className="text-xs text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1">
+            <button className="text-[13px] text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1">
               <HeartIcon className="w-4 h-4" />
               <span>{reply.likeCount || 0}</span>
             </button>
             <button
-              className="text-xs text-muted-foreground hover:text-primary transition-colors flex items-center gap-1"
+              className="text-[13px] text-muted-foreground hover:text-primary transition-colors flex items-center gap-1"
               onClick={() =>
                 onReplyToComment?.(
                   author.username,
@@ -153,19 +153,19 @@ export function ReplyItem({
       {/* Image Lightbox */}
       {imageUrl && (
         <Dialog open={imageOpen} onOpenChange={setImageOpen}>
-          <DialogContent className="max-w-4xl p-0 bg-black/95 border-none">
+          <DialogContent className="max-w-[95vw] sm:max-w-4xl p-0 bg-black/95 border-none">
             <DialogTitle className="sr-only">Image</DialogTitle>
             <DialogDescription className="sr-only">
               Full size image viewer
             </DialogDescription>
             <button
               onClick={() => setImageOpen(false)}
-              className="absolute top-4 right-4 z-50 p-2 rounded-full bg-black/50 hover:bg-black/70 transition-colors"
+              className="absolute top-3 right-3 sm:top-4 sm:right-4 z-50 p-2 rounded-full bg-black/50 hover:bg-black/70 transition-colors"
               aria-label="Close"
             >
               <XIcon className="w-5 h-5 text-white" />
             </button>
-            <div className="relative w-full h-[90vh] flex items-center justify-center p-4">
+            <div className="relative w-full h-[80vh] sm:h-[90vh] flex items-center justify-center p-2 sm:p-4">
               <Image
                 src={imageUrl}
                 alt={reply.altText || 'Reply image'}

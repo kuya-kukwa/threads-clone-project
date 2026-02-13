@@ -15,6 +15,7 @@ export const dynamic = 'force-dynamic';
 /**
  * GET /api/profile/[id]/follow
  * Check if the current user is following the target user
+ * Supports ?list=followers or ?list=following to get user lists
  */
 export async function GET(
   request: NextRequest,
@@ -23,6 +24,54 @@ export async function GET(
   try {
     const params = await context.params;
     const targetUserId = params.id;
+    const { searchParams } = new URL(request.url);
+    const listType = searchParams.get('list');
+
+    // Handle list requests (followers/following)
+    if (listType === 'followers' || listType === 'following') {
+      const limit = Math.min(parseInt(searchParams.get('limit') || '50'), 100);
+      const offset = parseInt(searchParams.get('offset') || '0');
+
+      const result = listType === 'followers'
+        ? await FollowService.getFollowersList(targetUserId, limit, offset)
+        : await FollowService.getFollowingList(targetUserId, limit, offset);
+
+      // Check if current user follows each person — batch query instead of N+1
+      let currentUserId: string | null = null;
+      try {
+        const { account } = await createSessionClient(request);
+        const user = await account.get();
+        currentUserId = user.$id;
+      } catch {
+        // Not authenticated, no follow status
+      }
+
+      // Single batch: get all IDs the current user follows from this list
+      let followedSet = new Set<string>();
+      if (currentUserId) {
+        const userIds = result.users.map((u) => u.userId).filter((id) => id !== currentUserId);
+        if (userIds.length > 0) {
+          followedSet = await FollowService.getFollowingSetFor(currentUserId, userIds);
+        }
+      }
+
+      const usersWithFollowStatus = result.users.map((user) => ({
+        userId: user.userId,
+        username: user.username,
+        displayName: user.displayName,
+        avatarUrl: user.avatarUrl || null,
+        bio: user.bio || null,
+        isFollowedByMe: followedSet.has(user.userId),
+        isOwnProfile: currentUserId === user.userId,
+      }));
+
+      return NextResponse.json({
+        success: true,
+        users: usersWithFollowStatus,
+        total: result.total,
+        listType,
+      });
+    }
 
     // Get current user
     const { account } = await createSessionClient(request);

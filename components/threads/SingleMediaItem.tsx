@@ -19,10 +19,10 @@ interface SingleMediaItemProps {
 }
 
 const sizeClasses: Record<MediaSize, string> = {
-  small: 'max-h-[150px]',
-  medium: 'max-h-[200px]',
-  large: 'max-h-[400px]',
-  gallery: 'h-[280px] lg:h-[320px]',
+  small: 'max-h-[120px] sm:max-h-[150px]',
+  medium: 'max-h-[180px] sm:max-h-[220px]',
+  large: 'max-h-[300px] sm:max-h-[380px] lg:max-h-[420px]',
+  gallery: 'h-[240px] sm:h-[280px] lg:h-[320px]',
 };
 
 const objectFitClass: Record<MediaSize, string> = {
@@ -59,13 +59,19 @@ export function SingleMediaItem({ item, size, onClick }: SingleMediaItemProps) {
   if (item.type === 'video') {
     return (
       <div
-        className={`relative group cursor-pointer overflow-hidden ${size === 'gallery' ? 'h-full' : 'rounded-xl border border-border/30'}`}
+        className={`relative group cursor-pointer overflow-hidden ${
+          size === 'large'
+            ? 'rounded-xl border border-border/30 w-fit max-w-full'
+            : size === 'gallery'
+              ? 'h-full rounded-xl'
+              : 'rounded-xl border border-border/30'
+        }`}
         onClick={handleVideoClick}
       >
         <video
           ref={videoRef}
           src={item.url}
-          className={`w-full bg-card ${sizeClasses[size]} ${objectFitClass[size]} ${size === 'gallery' ? 'h-full' : ''} ${size === 'gallery' ? '' : 'rounded-xl'}`}
+          className={`bg-card ${sizeClasses[size]} ${objectFitClass[size]} ${size === 'large' ? 'w-auto max-w-full rounded-xl' : size === 'gallery' ? 'w-full h-full rounded-xl' : 'w-full rounded-xl'}`}
           preload="metadata"
           aria-label={item.altText || 'Video'}
           onEnded={handleVideoEnded}
@@ -120,7 +126,13 @@ export function SingleMediaItem({ item, size, onClick }: SingleMediaItemProps) {
 
   return (
     <div
-      className={`relative group cursor-pointer overflow-hidden ${size === 'gallery' ? 'h-full' : 'rounded-xl border border-border/30'}`}
+      className={`relative group cursor-pointer overflow-hidden ${
+        size === 'large'
+          ? 'rounded-xl border border-border/30 w-fit max-w-full'
+          : size === 'gallery'
+            ? 'h-full rounded-xl'
+            : 'rounded-xl border border-border/30'
+      }`}
       onClick={onClick}
     >
       <Image
@@ -128,7 +140,7 @@ export function SingleMediaItem({ item, size, onClick }: SingleMediaItemProps) {
         alt={item.altText || 'Thread image'}
         width={600}
         height={400}
-        className={`w-full bg-card ${sizeClasses[size]} ${objectFitClass[size]} transition-transform ${size === 'gallery' ? 'h-full' : ''} ${size === 'gallery' ? '' : 'rounded-xl'}`}
+        className={`bg-card ${sizeClasses[size]} ${objectFitClass[size]} transition-transform ${size === 'large' ? 'w-auto max-w-full rounded-xl' : size === 'gallery' ? 'w-full h-full rounded-xl' : 'w-full rounded-xl'}`}
         loading="lazy"
       />
 
