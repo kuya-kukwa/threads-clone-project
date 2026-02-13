@@ -33,7 +33,9 @@ export function ProfileCard({
   const [isFollowLoading, setIsFollowLoading] = useState(false);
   const [followStatusLoaded, setFollowStatusLoaded] = useState(false);
   const [followModalOpen, setFollowModalOpen] = useState(false);
-  const [followModalTab, setFollowModalTab] = useState<'followers' | 'following'>('followers');
+  const [followModalTab, setFollowModalTab] = useState<
+    'followers' | 'following'
+  >('followers');
 
   const fetchFollowStatus = useCallback(async () => {
     try {
@@ -188,7 +190,9 @@ export function ProfileCard({
           <h1 className="text-xl sm:text-2xl font-bold text-foreground truncate tracking-[-0.03em] leading-tight">
             {profile.displayName}
           </h1>
-          <p className="text-[15px] text-muted-foreground leading-tight mt-0.5">@{profile.username}</p>
+          <p className="text-[15px] text-muted-foreground leading-tight mt-0.5">
+            @{profile.username}
+          </p>
         </div>
 
         {/* Right: Avatar */}

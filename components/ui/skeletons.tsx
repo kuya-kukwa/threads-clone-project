@@ -11,7 +11,9 @@ import { Skeleton } from '@/components/ui/skeleton';
  * Thread Card Skeleton
  * Matches the ThreadCard component layout
  */
-export function ThreadCardSkeleton({ withMedia = false }: { withMedia?: boolean } = {}) {
+export function ThreadCardSkeleton({
+  withMedia = false,
+}: { withMedia?: boolean } = {}) {
   return (
     <div className="p-4 border-b border-border/50">
       <div className="flex gap-3">
