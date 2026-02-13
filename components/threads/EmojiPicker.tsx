@@ -397,7 +397,10 @@ export function EmojiPicker({ onEmojiSelect, className }: EmojiPickerProps) {
         const maxLeft = modalRect.right - dropdownW - 8;
         left = Math.max(minLeft, Math.min(rect.left, maxLeft));
       } else {
-        left = Math.max(8, Math.min(rect.left, window.innerWidth - dropdownW - 16));
+        left = Math.max(
+          8,
+          Math.min(rect.left, window.innerWidth - dropdownW - 16),
+        );
       }
 
       // In a modal the trigger is at the bottom, so always open above

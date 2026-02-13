@@ -73,7 +73,9 @@ function SearchContent() {
     [],
   );
   const [trendingTopics, setTrendingTopics] = useState<TrendingTopic[]>([]);
-  const [trendingLocations, setTrendingLocations] = useState<TrendingLocation[]>([]);
+  const [trendingLocations, setTrendingLocations] = useState<
+    TrendingLocation[]
+  >([]);
   const [isSearching, setIsSearching] = useState(false);
   const [isSearchingThreads, setIsSearchingThreads] = useState(false);
   const [loadingTrending, setLoadingTrending] = useState(true);

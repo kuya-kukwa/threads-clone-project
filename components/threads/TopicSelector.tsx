@@ -183,7 +183,10 @@ export function TopicSelector({
         const maxLeft = modalRect.right - dropdownW - 8;
         left = Math.max(minLeft, Math.min(rect.left, maxLeft));
       } else {
-        left = Math.max(8, Math.min(rect.left, window.innerWidth - dropdownW - 16));
+        left = Math.max(
+          8,
+          Math.min(rect.left, window.innerWidth - dropdownW - 16),
+        );
       }
 
       // In a modal the trigger is at the bottom, so always open above
@@ -365,7 +368,13 @@ export function TopicSelector({
 
       {/* Desktop: dropdown */}
       {isOpen && (
-        <div ref={dropdownRef} data-picker-dropdown className="hidden sm:block fixed w-[280px] bg-[#181818] border border-white/[0.12] rounded-2xl shadow-2xl overflow-hidden z-[60] animate-in fade-in slide-in-from-bottom-2 duration-150" style={dropdownStyle} onPointerDown={(e) => e.stopPropagation()}>
+        <div
+          ref={dropdownRef}
+          data-picker-dropdown
+          className="hidden sm:block fixed w-[280px] bg-[#181818] border border-white/[0.12] rounded-2xl shadow-2xl overflow-hidden z-[60] animate-in fade-in slide-in-from-bottom-2 duration-150"
+          style={dropdownStyle}
+          onPointerDown={(e) => e.stopPropagation()}
+        >
           {/* Search input */}
           <div className="p-2.5 border-b border-white/[0.08]">
             <div className="flex items-center gap-2 px-3 py-1.5 bg-white/[0.06] rounded-lg">

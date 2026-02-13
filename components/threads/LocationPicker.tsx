@@ -64,14 +64,22 @@ async function reverseGeocode(lat: number, lon: number): Promise<string> {
 
     // Build a nice location string: "City, State" or "City, Country"
     const city =
-      addr.city || addr.town || addr.village || addr.municipality || addr.county || '';
+      addr.city ||
+      addr.town ||
+      addr.village ||
+      addr.municipality ||
+      addr.county ||
+      '';
     const state = addr.state || '';
     const country = addr.country || '';
 
     if (city && state) return `${city}, ${state}`;
     if (city && country) return `${city}, ${country}`;
     if (state && country) return `${state}, ${country}`;
-    return data.display_name?.split(',').slice(0, 2).join(',').trim() || `${lat.toFixed(4)}, ${lon.toFixed(4)}`;
+    return (
+      data.display_name?.split(',').slice(0, 2).join(',').trim() ||
+      `${lat.toFixed(4)}, ${lon.toFixed(4)}`
+    );
   } catch {
     return `${lat.toFixed(4)}, ${lon.toFixed(4)}`;
   }
@@ -93,7 +101,8 @@ async function getNearbyLocations(lat: number, lon: number): Promise<string[]> {
     if (!addr) return [];
 
     const suburb = addr.suburb || addr.neighbourhood || addr.quarter || '';
-    const city = addr.city || addr.town || addr.village || addr.municipality || '';
+    const city =
+      addr.city || addr.town || addr.village || addr.municipality || '';
     const state = addr.state || '';
     const country = addr.country || '';
 
@@ -114,7 +123,9 @@ async function getNearbyLocations(lat: number, lon: number): Promise<string[]> {
  */
 async function getLocationByIP(): Promise<string | null> {
   try {
-    const res = await fetch('https://ipapi.co/json/', { signal: AbortSignal.timeout(8000) });
+    const res = await fetch('https://ipapi.co/json/', {
+      signal: AbortSignal.timeout(8000),
+    });
     if (!res.ok) throw new Error('IP geolocation failed');
     const data = await res.json();
     const city = data.city || '';
@@ -134,7 +145,9 @@ async function getLocationByIP(): Promise<string | null> {
  */
 async function getNearbyLocationsByIP(): Promise<string[]> {
   try {
-    const res = await fetch('https://ipapi.co/json/', { signal: AbortSignal.timeout(8000) });
+    const res = await fetch('https://ipapi.co/json/', {
+      signal: AbortSignal.timeout(8000),
+    });
     if (!res.ok) return [];
     const data = await res.json();
     const city = data.city || '';
@@ -142,7 +155,8 @@ async function getNearbyLocationsByIP(): Promise<string[]> {
     const country = data.country_name || '';
     const locations: string[] = [];
     if (city && region) locations.push(`${city}, ${region}`);
-    if (city && country && country !== region) locations.push(`${city}, ${country}`);
+    if (city && country && country !== region)
+      locations.push(`${city}, ${country}`);
     if (region && country) locations.push(`${region}, ${country}`);
     return [...new Set(locations)].slice(0, 3);
   } catch {
@@ -159,7 +173,9 @@ const MAX_RECENT = 5;
 function setHomeLocation(name: string) {
   try {
     localStorage.setItem(HOME_LOCATION_KEY, name);
-  } catch { /* ignore */ }
+  } catch {
+    /* ignore */
+  }
 }
 
 /** Get user's saved home location. */
@@ -175,7 +191,9 @@ function getHomeLocation(): string | null {
 function clearHomeLocation() {
   try {
     localStorage.removeItem(HOME_LOCATION_KEY);
-  } catch { /* ignore */ }
+  } catch {
+    /* ignore */
+  }
 }
 
 /** Save a location to recent history. */
@@ -188,7 +206,9 @@ function addRecentLocation(name: string) {
     recents.unshift(name);
     recents = recents.slice(0, MAX_RECENT);
     localStorage.setItem(RECENT_LOCATIONS_KEY, JSON.stringify(recents));
-  } catch { /* ignore */ }
+  } catch {
+    /* ignore */
+  }
 }
 
 /** Remove a single location from recent history. */
@@ -198,7 +218,9 @@ function removeRecentLocation(name: string) {
     let recents: string[] = raw ? JSON.parse(raw) : [];
     recents = recents.filter((r) => r.toLowerCase() !== name.toLowerCase());
     localStorage.setItem(RECENT_LOCATIONS_KEY, JSON.stringify(recents));
-  } catch { /* ignore */ }
+  } catch {
+    /* ignore */
+  }
 }
 
 /** Get recent locations. */
@@ -275,11 +297,14 @@ export function LocationPicker({
     );
 
   // Remove a single recent location
-  const handleRemoveRecent = useCallback((name: string, e: React.MouseEvent) => {
-    e.stopPropagation();
-    removeRecentLocation(name);
-    setRecentLocations(getRecentLocations());
-  }, []);
+  const handleRemoveRecent = useCallback(
+    (name: string, e: React.MouseEvent) => {
+      e.stopPropagation();
+      removeRecentLocation(name);
+      setRecentLocations(getRecentLocations());
+    },
+    [],
+  );
 
   // Close on outside click (desktop only)
   useEffect(() => {
@@ -338,7 +363,10 @@ export function LocationPicker({
         const maxLeft = modalRect.right - dropdownW - 8;
         left = Math.max(minLeft, Math.min(rect.left, maxLeft));
       } else {
-        left = Math.max(8, Math.min(rect.left, window.innerWidth - dropdownW - 16));
+        left = Math.max(
+          8,
+          Math.min(rect.left, window.innerWidth - dropdownW - 16),
+        );
       }
 
       // In a modal the trigger is at the bottom, so always open above
@@ -370,21 +398,32 @@ export function LocationPicker({
 
       if (navigator.geolocation && navigator.permissions?.query) {
         try {
-          const perm = await navigator.permissions.query({ name: 'geolocation' as PermissionName });
+          const perm = await navigator.permissions.query({
+            name: 'geolocation' as PermissionName,
+          });
           if (perm.state === 'granted') {
             locations = await new Promise((resolve) => {
               navigator.geolocation.getCurrentPosition(
                 async (pos) => {
-                  const nearby = await getNearbyLocations(pos.coords.latitude, pos.coords.longitude);
+                  const nearby = await getNearbyLocations(
+                    pos.coords.latitude,
+                    pos.coords.longitude,
+                  );
                   resolve(nearby);
                 },
                 () => resolve([]),
-                { enableHighAccuracy: false, timeout: 5000, maximumAge: 300000 },
+                {
+                  enableHighAccuracy: false,
+                  timeout: 5000,
+                  maximumAge: 300000,
+                },
               );
             });
             if (locations.length > 0) source = 'gps';
           }
-        } catch { /* ignore */ }
+        } catch {
+          /* ignore */
+        }
       }
 
       // Fall back to IP-based nearby locations
@@ -450,14 +489,20 @@ export function LocationPicker({
     // Try browser geolocation first, then fall back to IP-based
     const tryBrowserGeo = (): Promise<string | null> =>
       new Promise((resolve) => {
-        if (!navigator.geolocation || (typeof window !== 'undefined' && window.isSecureContext === false)) {
+        if (
+          !navigator.geolocation ||
+          (typeof window !== 'undefined' && window.isSecureContext === false)
+        ) {
           resolve(null);
           return;
         }
 
         const onSuccess = async (position: GeolocationPosition) => {
           try {
-            const name = await reverseGeocode(position.coords.latitude, position.coords.longitude);
+            const name = await reverseGeocode(
+              position.coords.latitude,
+              position.coords.longitude,
+            );
             resolve(name);
           } catch {
             resolve(null);
@@ -467,15 +512,20 @@ export function LocationPicker({
         const onError = (error: GeolocationPositionError) => {
           // Retry once with low accuracy
           if (
-            (error.code === error.POSITION_UNAVAILABLE || error.code === error.TIMEOUT) &&
+            (error.code === error.POSITION_UNAVAILABLE ||
+              error.code === error.TIMEOUT) &&
             !retried.current
           ) {
             retried.current = true;
-            navigator.geolocation.getCurrentPosition(onSuccess, () => resolve(null), {
-              enableHighAccuracy: false,
-              timeout: 10000,
-              maximumAge: 300000,
-            });
+            navigator.geolocation.getCurrentPosition(
+              onSuccess,
+              () => resolve(null),
+              {
+                enableHighAccuracy: false,
+                timeout: 10000,
+                maximumAge: 300000,
+              },
+            );
             return;
           }
           resolve(null);
@@ -519,7 +569,9 @@ export function LocationPicker({
       const ipResult = await getLocationByIP();
       if (ipResult) {
         setSearch(ipResult);
-        setGeoError('Approximate location via IP — edit if needed, then tap to use or press Enter');
+        setGeoError(
+          'Approximate location via IP — edit if needed, then tap to use or press Enter',
+        );
         setGeoLoading(false);
         return;
       }
@@ -578,10 +630,16 @@ export function LocationPicker({
 
             {/* Header */}
             <div className="flex items-center justify-between px-4 pb-2">
-              <button type="button" onClick={handleClose} className="text-[15px] text-[#999]">
+              <button
+                type="button"
+                onClick={handleClose}
+                className="text-[15px] text-[#999]"
+              >
                 Cancel
               </button>
-              <span className="text-[15px] font-semibold text-white">Location</span>
+              <span className="text-[15px] font-semibold text-white">
+                Location
+              </span>
               <div className="w-12" />
             </div>
 
@@ -604,7 +662,11 @@ export function LocationPicker({
                   }}
                 />
                 {search && (
-                  <button type="button" onClick={() => setSearch('')} className="text-[#666] hover:text-white">
+                  <button
+                    type="button"
+                    onClick={() => setSearch('')}
+                    className="text-[#666] hover:text-white"
+                  >
                     <XIcon className="w-4 h-4" />
                   </button>
                 )}
@@ -661,7 +723,9 @@ export function LocationPicker({
                       type="button"
                       onClick={() => setGeoError(null)}
                       className={`mx-4 mb-2 flex items-center justify-between gap-2 px-3 py-2 rounded-lg text-[12px] ${
-                        geoError.includes('Approximate') ? 'bg-amber-500/10 text-amber-400' : 'bg-red-500/10 text-red-400'
+                        geoError.includes('Approximate')
+                          ? 'bg-amber-500/10 text-amber-400'
+                          : 'bg-red-500/10 text-red-400'
                       }`}
                     >
                       <span>{geoError}</span>
@@ -681,8 +745,12 @@ export function LocationPicker({
                           <HomeIcon className="w-4 h-4 text-green-400" />
                         </div>
                         <div className="min-w-0">
-                          <p className="text-[15px] font-medium text-white truncate">{homeLocation}</p>
-                          <p className="text-[11px] text-[#555]">Your location</p>
+                          <p className="text-[15px] font-medium text-white truncate">
+                            {homeLocation}
+                          </p>
+                          <p className="text-[11px] text-[#555]">
+                            Your location
+                          </p>
                         </div>
                       </button>
                       <button
@@ -705,9 +773,12 @@ export function LocationPicker({
                   )}
 
                   {/* Recent */}
-                  {recentLocations.filter((r) => r !== homeLocation).length > 0 && (
+                  {recentLocations.filter((r) => r !== homeLocation).length >
+                    0 && (
                     <>
-                      <div className="px-4 pt-2 pb-1 text-[12px] text-[#555] font-medium">Recent</div>
+                      <div className="px-4 pt-2 pb-1 text-[12px] text-[#555] font-medium">
+                        Recent
+                      </div>
                       {recentLocations
                         .filter((r) => r !== homeLocation)
                         .slice(0, 3)
@@ -764,14 +835,18 @@ export function LocationPicker({
                   )}
 
                   {/* Popular */}
-                  <div className="px-4 pt-2 pb-1 text-[12px] text-[#555] font-medium">Popular</div>
+                  <div className="px-4 pt-2 pb-1 text-[12px] text-[#555] font-medium">
+                    Popular
+                  </div>
                 </>
               )}
 
               {/* Location results (filtered when searching, popular when not) */}
               {search.trim() ? (
                 filteredLocations.length === 0 && !isCustomLocation ? (
-                  <div className="px-4 py-6 text-[14px] text-[#555] text-center">No locations found</div>
+                  <div className="px-4 py-6 text-[14px] text-[#555] text-center">
+                    No locations found
+                  </div>
                 ) : (
                   filteredLocations.map((location) => (
                     <button
@@ -805,7 +880,13 @@ export function LocationPicker({
 
       {/* Desktop: dropdown */}
       {isOpen && (
-        <div ref={dropdownRef} data-picker-dropdown className="hidden sm:block fixed w-[280px] bg-[#181818] border border-white/[0.12] rounded-2xl shadow-2xl overflow-hidden z-[60] animate-in fade-in slide-in-from-bottom-2 duration-150" style={dropdownStyle} onPointerDown={(e) => e.stopPropagation()}>
+        <div
+          ref={dropdownRef}
+          data-picker-dropdown
+          className="hidden sm:block fixed w-[280px] bg-[#181818] border border-white/[0.12] rounded-2xl shadow-2xl overflow-hidden z-[60] animate-in fade-in slide-in-from-bottom-2 duration-150"
+          style={dropdownStyle}
+          onPointerDown={(e) => e.stopPropagation()}
+        >
           {/* Search */}
           <div className="p-2.5 border-b border-white/[0.06]">
             <div className="flex items-center gap-2 px-3 py-1.5 bg-white/[0.06] rounded-lg">
@@ -825,7 +906,11 @@ export function LocationPicker({
                 }}
               />
               {search && (
-                <button type="button" onClick={() => setSearch('')} className="text-[#666] hover:text-white">
+                <button
+                  type="button"
+                  onClick={() => setSearch('')}
+                  className="text-[#666] hover:text-white"
+                >
                   <XIcon className="w-3.5 h-3.5" />
                 </button>
               )}
@@ -871,7 +956,9 @@ export function LocationPicker({
                   ) : (
                     <NavigationIcon className="w-4 h-4 shrink-0 text-blue-400" />
                   )}
-                  <span>{geoLoading ? 'Detecting...' : 'Current location'}</span>
+                  <span>
+                    {geoLoading ? 'Detecting...' : 'Current location'}
+                  </span>
                 </button>
                 {geoError && (
                   <button
@@ -897,7 +984,9 @@ export function LocationPicker({
                       className="flex-1 flex items-center gap-2.5 text-left min-w-0"
                     >
                       <HomeIcon className="w-4 h-4 shrink-0 text-green-400" />
-                      <span className="text-[13px] font-medium text-white truncate">{homeLocation}</span>
+                      <span className="text-[13px] font-medium text-white truncate">
+                        {homeLocation}
+                      </span>
                     </button>
                     <button
                       type="button"
@@ -917,9 +1006,12 @@ export function LocationPicker({
                 <div className="mx-3 border-b border-white/[0.06] my-0.5" />
 
                 {/* Recent */}
-                {recentLocations.filter((r) => r !== homeLocation).length > 0 && (
+                {recentLocations.filter((r) => r !== homeLocation).length >
+                  0 && (
                   <>
-                    <div className="px-4 pt-1.5 pb-0.5 text-[10px] text-[#555] font-medium uppercase tracking-wider">Recent</div>
+                    <div className="px-4 pt-1.5 pb-0.5 text-[10px] text-[#555] font-medium uppercase tracking-wider">
+                      Recent
+                    </div>
                     {recentLocations
                       .filter((r) => r !== homeLocation)
                       .slice(0, 3)
@@ -976,14 +1068,18 @@ export function LocationPicker({
                 )}
 
                 {/* Popular */}
-                <div className="px-4 pt-1.5 pb-0.5 text-[10px] text-[#555] font-medium uppercase tracking-wider">Popular</div>
+                <div className="px-4 pt-1.5 pb-0.5 text-[10px] text-[#555] font-medium uppercase tracking-wider">
+                  Popular
+                </div>
               </>
             )}
 
             {/* Results */}
             {search.trim() ? (
               filteredLocations.length === 0 && !isCustomLocation ? (
-                <div className="px-4 py-4 text-[13px] text-[#555] text-center">No locations found</div>
+                <div className="px-4 py-4 text-[13px] text-[#555] text-center">
+                  No locations found
+                </div>
               ) : (
                 filteredLocations.map((location) => (
                   <button
@@ -1037,7 +1133,15 @@ function NavigationIcon({ className }: { className?: string }) {
 /** Home/pin icon for saved "Your location" */
 function HomeIcon({ className }: { className?: string }) {
   return (
-    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <svg
+      className={className}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
       <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
       <polyline points="9 22 9 12 15 12 15 22" />
     </svg>
@@ -1047,7 +1151,15 @@ function HomeIcon({ className }: { className?: string }) {
 /** Clock icon for recent locations */
 function ClockIcon({ className }: { className?: string }) {
   return (
-    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <svg
+      className={className}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
       <circle cx="12" cy="12" r="10" />
       <polyline points="12 6 12 12 16 14" />
     </svg>

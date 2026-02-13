@@ -300,7 +300,11 @@ export function ThreadsSpinner({
   const barCount = 12;
 
   return (
-    <div className={cn(sizes[size], 'relative', className)} role="status" aria-label="Loading">
+    <div
+      className={cn(sizes[size], 'relative', className)}
+      role="status"
+      aria-label="Loading"
+    >
       {Array.from({ length: barCount }).map((_, i) => {
         const rotation = i * (360 / barCount);
         const delay = -(1 - i / barCount);

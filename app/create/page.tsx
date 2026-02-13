@@ -878,7 +878,6 @@ export default function CreatePage() {
             </div>
           </div>
         )}
-
       </div>
     </AuthGuard>
   );

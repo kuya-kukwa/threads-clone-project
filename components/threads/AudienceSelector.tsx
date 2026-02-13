@@ -136,7 +136,10 @@ export function AudienceSelector({
         const maxLeft = modalRect.right - dropdownW - 8;
         left = Math.max(minLeft, Math.min(rect.left, maxLeft));
       } else {
-        left = Math.max(8, Math.min(rect.left, window.innerWidth - dropdownW - 16));
+        left = Math.max(
+          8,
+          Math.min(rect.left, window.innerWidth - dropdownW - 16),
+        );
       }
 
       // Always open above the trigger
